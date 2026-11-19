@@ -79,7 +79,11 @@ Future<void> main() async {
         ChangeNotifierProvider.value(value: settings),
         ChangeNotifierProvider.value(value: wallpaper),
         ChangeNotifierProvider.value(value: icons),
-        ChangeNotifierProvider(create: (_) => AccountStore()),
+        ChangeNotifierProvider(create: (_) {
+          final account = AccountStore();
+          handler.hasVipAccount = () => account.isLoggedIn && account.vipType > 0;
+          return account;
+        }),
         ChangeNotifierProvider.value(value: player),
       ],
       child: const KumoneApp(),

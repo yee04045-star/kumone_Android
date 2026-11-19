@@ -29,7 +29,7 @@ void main() {
     final requested = <String>[];
     dio.interceptors.add(InterceptorsWrapper(onRequest: (options, handler) {
       requested.add(options.uri.path);
-      expect(options.queryParameters['name'], 'Song');
+      expect(options.uri.queryParameters['name'], 'Song');
       expect(options.headers.containsKey('Cookie'), false);
       handler.resolve(Response(requestOptions: options, data: {
         'url': options.uri.path == '/1'

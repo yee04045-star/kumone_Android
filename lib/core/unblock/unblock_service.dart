@@ -246,10 +246,12 @@ class UnblockService {
     final sources = await CustomSourceStore.readSources();
     for (final source in sources.where((e) => e.enabled)) {
       try {
-        final response = await (client ?? _dio).get(source.endpoint, queryParameters: {
-          'id': track.id, 'name': track.name, 'artist': track.artistNames,
-          'album': track.album.name, 'durationMs': track.durationMs,
-        });
+        final endpoint = Uri.parse(source.endpoint);
+        final response = await (client ?? _dio).getUri(endpoint.replace(queryParameters: {
+          ...endpoint.queryParameters,
+          'id': '${track.id}', 'name': track.name, 'artist': track.artistNames,
+          'album': track.album.name, 'durationMs': '${track.durationMs}',
+        }));
         final body = response.data is String ? jsonDecode(response.data) : response.data;
         if (body is! Map || body['url'] is! String) continue;
         final url = Uri.tryParse(body['url'] as String);

@@ -306,7 +306,13 @@ class KumoneAudioHandler extends BaseAudioHandler
 
   bool _isThirdPartySource(String source) => source != 'NetEase';
 
+  bool Function()? hasVipAccount;
+
   Future<ResolvedAudio?> _resolveAudio(Track track) async {
+    final membershipTrack = track.fee == 1 || track.privilege?.fee == 1;
+    if (unblock && membershipTrack && !(hasVipAccount?.call() ?? false)) {
+      return UnblockService.resolve(track);
+    }
     ResolvedAudio? resolved;
     SongUrlData? official;
     try {

@@ -150,7 +150,7 @@ class SettingsPage extends StatelessWidget {
                             }),
                         if (wallpaper.enabled || wallpaper.landscapePath != null) ...[
                           ListTile(
-                              title: const Text('背景磨砂程度'),
+                              title: const Text('背景模糊'),
                               trailing: Text('${wallpaper.blur.round()}')),
                           KumoneGlassSlider(
                               value: wallpaper.blur,

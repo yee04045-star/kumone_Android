@@ -55,7 +55,7 @@ class WallpaperScope extends StatelessWidget {
       extend: extend,
       stripColor: statusTint,
       child: Stack(fit: StackFit.expand, children: [
-        const Positioned.fill(child: KumoneWallpaperBackdrop()),
+        const Positioned.fill(child: RepaintBoundary(child: KumoneWallpaperBackdrop())),
         if (!extend)
           Positioned(
               top: 0,
@@ -98,7 +98,9 @@ class KumoneWallpaperBackdrop extends StatelessWidget {
       child: path != null ? Stack(fit: StackFit.expand, children: [
         ImageFiltered(
           imageFilter: ImageFilter.blur(
-              sigmaX: wallpaper.blur, sigmaY: wallpaper.blur),
+              sigmaX: wallpaper.blur, sigmaY: wallpaper.blur,
+              tileMode: TileMode.clamp),
+          enabled: wallpaper.blur > 0,
           child: Image.file(File(path), fit: BoxFit.cover,
             gaplessPlayback: true,
             errorBuilder: (_, __, ___) => const SizedBox.expand()),
@@ -128,7 +130,7 @@ class KumoneWallpaperRouteSurface extends StatelessWidget {
         : Color.alphaBlend((dark ? Colors.black : Colors.white)
             .withValues(alpha: .24), sampled);
     return ClipRect(child: Stack(fit: StackFit.expand, children: [
-      const Positioned.fill(child: KumoneWallpaperBackdrop()),
+      const Positioned.fill(child: RepaintBoundary(child: KumoneWallpaperBackdrop())),
       if (settings?.backgroundExtend == false)
         Positioned(top: 0, left: 0, right: 0,
           height: MediaQuery.paddingOf(context).top,
