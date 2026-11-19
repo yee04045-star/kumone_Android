@@ -1,209 +1,145 @@
 > [!IMPORTANT]
-> This repository has no affiliation with NetEase Cloud Music, and contains none of its domains or API addresses.
-
-<div align="right">
-
-**English** | [简体中文](README_CN.md)
-
-</div>
+> 本项目是 Kumone 的非官方 Android 派生版本，与网易云音乐及其他音乐平台无隶属、授权或背书关系。以非商业的学习交流为项目定位，不提供歌曲下载、评论或私信等社交功能。音乐、封面、歌词等内容的权利归各自权利人及来源平台所有。
 
 <div align="center">
 
-<img src="docs/icon.png" width="140" alt="Kumone" />
+<img src="assets/icons/frost.png" width="140" alt="Kumone Android" />
 
-# Kumone
+# Kumone Android
 
-**雲の音 — A native music player for macOS and iOS**
+**雲の音 — 以 Flutter 重构的 Android 音乐播放器**
 
-Built with SwiftUI · No third-party server · Sparkle auto-updates
+源自 Kumone · 液态玻璃界面 · 沉浸歌词 · 手机与平板自适应
 
-[![Platform](https://img.shields.io/badge/platform-macOS%2015%2B-blue?logo=apple)](#building)
-[![Swift](https://img.shields.io/badge/Swift-6.2-F05138?logo=swift&logoColor=white)](Package.swift)
+[![Platform](https://img.shields.io/badge/platform-Android-3DDC84?logo=android&logoColor=white)](#构建)
+[![Flutter](https://img.shields.io/badge/Flutter-3.47.2-02569B?logo=flutter&logoColor=white)](pubspec.yaml)
 [![License](https://img.shields.io/badge/license-LGPL--3.0--only-orange)](LICENSE)
 
-<table>
-  <tr>
-    <td><img src="docs/screenshot-home.png" alt="Home" /></td>
-    <td><img src="docs/screenshot-nowplaying.png" alt="Now Playing" /></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshot-daily.png" alt="Daily Recommendations" /></td>
-    <td><img src="docs/screenshot-lyrics.png" alt="Lyrics Panel" /></td>
-  </tr>
-</table>
+[原版 Kumone](https://github.com/missuo/kumone) · [自定义音源](docs/CUSTOM_SOURCES.md) · [第三方归属](THIRD_PARTY_NOTICES.md)
 
 </div>
 
-## About the Name
+## 界面展示
 
-**Kumone** comes from the Japanese **雲の音** (*kumo no ne*, "the sound of clouds"), contracted into one word — **雲音** (くもね, *kumone*). The music drifting down to you from the cloud.
+<p align="center">
+  <img src="docs/screenshots/phone-player.jpg" width="300" alt="手机竖屏沉浸播放页" />
+</p>
 
-## Features
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/tablet-home.jpg" alt="平板推荐页与浮动导航" /><br />平板推荐页 · 浮动导航</td>
+    <td align="center"><img src="docs/screenshots/tablet-player.jpg" alt="平板双栏播放页与同步歌词" /><br />双栏播放页 · 同步歌词</td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="docs/screenshots/tablet-settings.jpg" width="800" alt="平板设置分类与 mini 播放器" /><br />设置分类 · mini 播放器</td>
+  </tr>
+</table>
 
-- 🔐 **QR code login** — scan with the official app; cookies are persisted locally and auto-refreshed
-- 🏠 **Home** — daily recommendations, Personal FM, Heartbeat Mode, recommended playlists, radar playlists (Personal Radar family, personalized per account), charts, new albums, recommended artists
-- 🧭 **Explore** — category playlists (curated / official / charts / mood) with infinite scrolling
-- 🎵 **Playback** — AVPlayer engine, Standard to Hi-Res quality (lossless with 黑胶 VIP, automatic fallback), shuffle / repeat one / repeat all, play-next queue, gray track detection
-- 🚗 **CarPlay (iOS, opt-in)** — Now Playing, tabbed library, queue, and search templates ship in the binary; activation requires an [Apple CarPlay audio entitlement](https://developer.apple.com/contact/carplay/), which is not granted to most accounts. Build defaults to disabled so the source tree stays open-source-friendly; see [Enabling CarPlay](#enabling-carplay-ios) below
-- 🔓 **Gray track unblocking** — native implementation of the common unblock sources (pyncmd / Kuwo / Kugou); unavailable or trial-only tracks automatically resolve from third-party sources
-- 🖼 **Immersive now-playing page** — artwork-tinted gradient backdrop, large artwork, big synced lyrics (click the player-bar artwork to open, Esc to close)
-- 📻 **Personal FM** — immersive roaming page with trash / skip
-- 📝 **Lyrics** — glass side panel with line-synced lyrics + translation, click to seek
-- 🪟 **Desktop lyrics** — LyricsX-style floating always-on-top lyric line with translation; draggable, persisted position, visible across Spaces and full-screen apps
-- 📚 **Library** — liked songs, created / subscribed playlists, saved albums, followed artists, recently played, cloud disk
-- ✏️ **Playlist management** — create / delete / subscribe playlists, add / remove tracks, heart songs
-- 🔍 **Search** — aggregate / songs / artists / albums / playlists, trending keyword placeholder
-- ⌨️ **System integration** — media keys / Control Center (Now Playing), scrobbling, playback queue restored across launches
-- ☁️ **iCloud Sync** — hand off playback progress and queues between Mac and iPhone, sync preferences, and share sign-in sessions; works via iCloud Drive shared folders and natively supports sideloaded builds without central servers (see [documentation](docs/icloud-sync/icloud-sync.md))
-- 🌐 **Localization** — English and Simplified Chinese, following the system language; bilingual release notes in Sparkle updates
+<sub>截图仅用于展示应用界面，所示音乐、歌词及封面权利归各自权利人所有。</sub>
 
-## Installation
+## 关于项目
 
-Requires macOS 15+ (Universal: Apple Silicon and Intel).
+**Kumone** 源于日语「雲の音」——云端传来的声音。名称及原始项目来自 [missuo/kumone](https://github.com/missuo/kumone)。
 
-### Homebrew
+本项目是原版 Swift Kumone 的 **Flutter / Android 行为级迁移**：不是将 Swift 文件机械地逐个翻译为 Dart，而是迁移原工程的 API、数据模型、播放行为与 UI 信息架构，并围绕 Android 的后台播放、系统媒体会话、触控操作和多尺寸窗口重新实现。
 
-```bash
-brew install owo-network/brew/kumone --cask
-```
+界面使用 [liquid_glass_easy](https://github.com/AhmeedGamil/liquid_glass_easy) 构建玻璃视觉与交互。Android 版独立维护，不代表原作者的官方 Android 发布。
 
-### Manual download
+## 功能
 
-Download the latest `Kumone-x.y.z.zip` from
-[Releases](https://github.com/missuo/kumone/releases/latest), unzip, and drag
-it into Applications.
+- 🔐 **账号登录** — 扫码及手机号登录，本机安全存储登录凭据。
+- 🏠 **发现音乐** — 每日推荐、私人漫游、推荐歌单、榜单、新专辑和歌手。
+- 🧭 **精选与搜索** — 分类歌单，以及歌曲、专辑、歌手、歌单的分类与综合搜索。
+- 🎵 **音乐播放** — 基于 `just_audio` 与 `audio_service`，支持后台播放、系统媒体控制、顺序播放、随机播放、单曲循环及下一首播放。
+- 🖼 **沉浸播放页** — 封面取色氛围背景、歌曲信息滚动、进度与音量控制；手机横屏和平板采用封面／控制与歌词双栏布局。
+- 📝 **歌词** — 同步歌词、逐词高亮、翻译、日文读音、模糊与字号调节。
+- 📚 **音乐库** — 喜欢的音乐、创建及收藏歌单、收藏专辑、关注歌手、最近播放和音乐云盘。
+- ✏️ **歌单管理** — 创建、删除与收藏歌单，添加和移除歌曲；列表中的当前播放歌曲以主题色加粗标记。
+- 🫧 **玻璃界面** — 浮动 mini 播放器、玻璃导航与菜单、渐变模糊顶栏、横屏浮动功能栏。
+- 🎨 **个性化** — 明暗外观、四种主题强调色、横竖屏独立壁纸及裁切、九款桌面图标与绑定启动屏。
+- ⚙️ **用户音源配置** — 最多七个自定义解析服务，支持单独启停、编辑、删除和顺序调整；不内置第三方音源服务。
 
-The app is signed with a Developer ID certificate and notarized by Apple, with
-built-in Sparkle automatic updates (menu bar: Kumone → Check for Updates…).
+> 部分功能依赖账号权限、接口可用性及设备支持。原版的 CarPlay、iCloud 同步、macOS 桌面歌词和 Sparkle 更新等 Apple 平台能力不属于本 Android 版功能。
 
-### iOS / iPadOS (sideload)
+## 音源说明
 
-Every release ships an **unsigned** `Kumone-iOS-x.y.z.ipa` (iOS 16+). Kumone
-is an unofficial client and will not be on the App Store or TestFlight, so
-install it with a sideloading tool that signs the IPA with your own Apple ID —
-[AltStore](https://altstore.io), [SideStore](https://sidestore.io),
-[Sideloadly](https://sideloadly.io) or Xcode all work. On iOS 26+ the tab bar is the system’s native Liquid Glass; on iOS 16–25 it falls back to a simulated glass bar.
+唯一内置音乐来源为**网易云自身接口**。这里的“官方音源”不代表本应用获得网易云官方授权。应用直接发起请求，无需另行部署网易云 API 中转服务器；本工程确实包含相应接口地址，不能套用上游“无域名或 API 地址”的声明。
 
-Updating: iOS apps can't replace themselves. Settings → About → **Check for
-Updates** tells you when a newer release exists and links to it; download the
-new IPA and reinstall with the same tool — sign-in state and settings are kept.
-AltStore / SideStore can also track the release automatically: add the source
-<https://github.com/missuo/kumone/releases/latest/download/altstore.json> and
-new versions show up in their update list on their own.
+本发行版不附带第三方平台解析器、补源服务地址或预置音源列表。官方完整音频不可用时，用户可选择按顺序调用自己配置并启用的 HTTPS 解析服务；无效则继续后续服务。未配置服务时，不会调用预置第三方音源。
 
-#### In-app auto-update (TrollStore only)
+自定义服务**仅用于播放，不提供歌曲下载功能**。播放所需的预加载与缓存不作为下载管理功能。用户必须自行确认服务及内容的使用权限；配置自定义服务不改变官方账号权限，也不授予内容版权。
 
-On a device with **[TrollStore](https://github.com/opa334/TrollStore)** (巨魔),
-Kumone updates itself: Settings → About → **Check for Updates** (it also checks
-on launch) downloads the new IPA with a progress ring and hands it to TrollStore
-via `apple-magnifier://install?url=…` for a one-tap, fully automatic install —
-the same mechanism Dopamine uses. This works **only under TrollStore**: a plain
-AltStore/SideStore sideload is signed with a personal certificate and has no way
-to install an IPA on-device, so there it degrades to opening the release page
-for a manual re-sideload.
+配置入口、请求参数及 JSON 返回格式见 [自定义音源配置](docs/CUSTOM_SOURCES.md)。
 
-### Enabling CarPlay (iOS)
+## 安装
 
-CarPlay support is fully implemented in `Sources/Kumone/Core/CarPlay/`, but the
-**default build ships none of it**: no `com.apple.developer.carplay-audio`
-entitlement, no `UISupportsCarPlay`, and no CarPlay scene declaration. Apple
-only grants that entitlement after you submit a CarPlay audio app
-[application](https://developer.apple.com/contact/carplay/), and building with
-it unapproved fails to sign with:
+项目面向 Android。可自行从源码构建 APK，或在维护者实际发布构建后获取对应版本。
 
-> Entitlement com.apple.developer.carplay-audio not found and could not be
-> included in profile.
+当前 GitHub Actions 工作流会生成 release APK 并上传至该次运行的 **Artifacts**，不等同于已发布到 GitHub Releases，也不表示应用已上架应用商店。请核实构建来源，不安装来历不明的修改包。
 
-So CarPlay is a one-command opt-in instead:
+## 构建
+
+当前工作流使用 **Flutter 3.47.2、Java 17**，需要 Android SDK 与可用的依赖下载网络。Android 工程通过脚本生成，原生配置与音频补丁以仓库脚本为准。
 
 ```bash
-make configure-carplay   # enable
-make configure           # back to the default, CarPlay-free build
+# 在本仓库根目录执行
+bash scripts/prepare_android.sh
+flutter pub get
+bash scripts/patch_just_audio_usb.sh
+
+# 分析与测试
+dart analyze lib test packages
+flutter test --no-pub
+
+# 构建 APK
+flutter build apk --release
 ```
 
-`make configure-carplay` derives a CarPlay copy of `Config/Info.plist` and
-`Config/KumoneIOS.entitlements` into `ios/Config/Generated/`, then writes
-`ios/Config/CarPlay.local.xcconfig` to point the build at them. All three files
-are untracked, and the Xcode project itself is never modified — so enabling
-CarPlay leaves `git status` clean and produces nothing to review.
+APK 输出：`build/app/outputs/flutter-apk/app-release.apk`。
 
-Once your developer account has the entitlement approved:
+自动构建配置见 [.github/workflows/android-apk.yml](.github/workflows/android-apk.yml)。USB 独占输出等设备相关功能需在实际 Android 设备与 DAC 上验证，自动测试不能替代实机兼容性验证。
 
-1. Apply for and obtain the **CarPlay (Audio)** capability for your App ID in
-   [Apple Developer → Identifiers](https://developer.apple.com/account/resources/identifiers/list).
-2. Regenerate the provisioning profile so it carries the new capability.
-3. Run `make configure-carplay`.
-4. `Cmd + Shift + K` and rebuild on a device.
+## 架构
 
-To test without a car, use the CarPlay Simulator: Xcode ▸ Open Developer Tool ▸
-Simulator, then I/O ▸ External Displays ▸ CarPlay.
+```text
+lib/
+├── core/
+│   ├── api/          # 网易云请求、加密、Cookie 与 API 数据访问
+│   ├── models/       # 歌曲、歌单、专辑、歌手及歌词模型
+│   ├── player/       # 播放、媒体会话、队列、预加载与交叉淡入淡出
+│   ├── storage/      # 账号、外观、壁纸、图标及自定义音源配置
+│   └── unblock/      # 用户配置的 HTTPS 解析服务与播放缓存
+└── ui/
+    ├── pages/        # 发现、搜索、音乐库、详情、设置及播放页
+    ├── theme/        # 基础主题、强调色与播放页弹层明暗
+    └── widgets/      # 玻璃导航、mini 播放器、歌词及通用组件
 
-### TestFlight (iOS)
-
-The sideload build updates itself from GitHub releases (TrollStore hand-off or
-an IPA download), which App Review does not allow. Builds for App Store Connect
-therefore use the `TestFlight` configuration: Release plus
-`ios/Config/TestFlight.xcconfig`, which writes `KumoneDistribution = testflight`
-into Info.plist. `DistributionChannel` reads it at launch and hides the
-in-app updater; everything else is the same binary. Debug and Release are
-untouched, so CI and contributors keep the sideload build.
-
-```bash
-export KUMONE_TEAM_ID=XXXXXXXXXX          # or DEVELOPMENT_TEAM in ios/Config/TestFlight.local.xcconfig
-make testflight                           # archive + export .build/testflight/export/KumoneIOS.ipa
-make testflight UPLOAD=1                  # archive + upload to App Store Connect
-make testflight UPLOAD=1 CARPLAY=1        # once the carplay-audio entitlement is approved
+packages/liquid_glass_easy/  # 本地集成的玻璃组件库
+scripts/                    # Android 准备、音频补丁、图标资源生成
+tooling/                    # Android 原生覆盖文件与 USB 音频适配
+test/                       # 单元及组件测试
 ```
 
-The version comes from the latest `v*` tag and the build number from the commit
-count, the same as the release workflow; override with
-`Scripts/testflight.sh --version 0.4.0 --build 1234`. Set `ASC_KEY_ID`,
-`ASC_ISSUER_ID` and `ASC_KEY_PATH` to an App Store Connect API key for
-unattended provisioning and upload; without them Xcode's signed-in account is
-used. `CARPLAY=1` goes through the same `make configure-carplay` overlay as a
-device build, so it fails to sign until the App ID has the capability.
+## 致谢
 
+- **[Kumone](https://github.com/missuo/kumone)** — 原始 Swift 工程，API、模型、播放行为与 UI 信息架构的迁移依据；LGPL-3.0-only。
+- **[liquid_glass_easy](https://github.com/AhmeedGamil/liquid_glass_easy)** — 玻璃视觉与交互组件；MIT，© Ahmed Gamil。
+- **[miniaudio_player](https://github.com/chomusuke-mk/miniaudio_player)** — 交叉淡入淡出曲线及双播放器生命周期参考；MIT。未集成其 miniaudio 引擎。
+- **[decent-player](https://github.com/Ma145/decent-player)** — USB 音频相关参考／派生实现，已针对 Flutter / just_audio 的 Android 集成进行适配；MIT，© Marcelo Silva。
+- Flutter、Dart、just_audio、audio_service 及其他依赖的维护者。
 
-## Building
+详细归属、许可全文位置与已知来源记录见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。独立第三方组件保留其原有许可证。
 
-Requires macOS 15+ and Xcode 26+.
+## 隐私与反馈
 
-```bash
-swift build                    # compile
-Scripts/build-app.sh           # package the .app (outputs .build/app/Kumone.app)
-Scripts/compile_and_run.sh     # kill → repackage → relaunch
-```
+账号登录凭据由本机安全存储管理。用户添加的解析服务会收到歌曲查询元数据，解析器不会自动附带网易云登录 Cookie。请仅使用可信服务，切勿公开提交账号凭据、验证码、私人音源地址、请求令牌、签名私钥或音乐文件。
 
-## Architecture
+反馈问题时，请提供设备型号、Android 版本、应用版本、复现步骤和脱敏日志。自定义服务的内容授权及运营责任不由本项目代为承担。
 
-```
-Sources/Kumone/
-├── Core/
-│   ├── API/            # RequestCrypto (weapi/eapi encryption), MusicClient (transport + cookies), MusicAPI (~50 endpoints)
-│   ├── Models/         # unified Track model (tolerates both JSON shapes), lyrics parser
-│   ├── Player/         # PlayerService (queue / shuffle / repeat / FM / URL resolution), UnblockService, NowPlayingManager
-│   ├── Storage/        # AccountStore, SettingsManager, two-tier image cache
-│   └── Sync/           # SyncService (cross-device playback handoff, preferences & login sync via iCloud Drive)
-├── DesignSystem/       # design tokens, button styles (hover scale / row highlight / chips), skeletons, cards, marquee, artwork palette
-└── Features/           # pages + player bar + immersive now-playing + lyrics/queue panels
-```
+## 许可证
 
-No third-party API server involved: weapi (double AES-CBC + RSA) and eapi
-(AES-ECB + MD5 digest) encryption are implemented natively in Swift.
+本项目保留原版 Kumone 的 **[LGPL-3.0-only](LICENSE)** 许可基线，附带其引用的 **[GPL-3.0 正文](COPYING)**。Flutter 迁移不意味着与上游无派生关系，Fork 或独立上传也不改变适用的许可义务。
 
-## Credits
+学习交流、非商业是本项目的维护定位，不作为对 LGPL 或第三方标准许可证的额外限制。代码许可证不授权使用音乐、歌词、封面、商标或平台接口，也不保证外部服务持续可用。
 
-Kumone is written from scratch in Swift. No code was copied from the projects
-below, but their design and implementation ideas were referenced extensively:
-
-- [YesPlayMusic](https://github.com/qier222/YesPlayMusic) (MIT, © qier222) — feature design, and a reference for their API design conventions
-- [kaset](https://github.com/sozercan/kaset) (MIT, © sozercan) — UI design system, motion, and SwiftPM packaging approach
-- The open-source gray-track unblock server project (LGPL-3.0-only) — a reference for their API design conventions and source matching strategy (`UnblockService.swift` is an independent Swift reimplementation)
-- [LyricsX](https://github.com/ddddxxx/LyricsX) (MPL-2.0, © ddddxxx) — desktop lyrics window design reference (window configuration, screen-factor positioning; `DesktopLyrics.swift` is an independent SwiftUI implementation)
-
-## License
-
-Licensed under [LGPL-3.0-only](LICENSE) (the [GPL-3.0](COPYING) text is
-included alongside). For learning and personal use only — all music data and
-rights belong to their respective owners and source platforms. No
-downloading, no social features.
+公开发布前请核实素材授权、实际分发依赖通知及对应源码等要求，参见 [发布前检查](docs/RELEASE_COMPLIANCE.md)。

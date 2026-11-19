@@ -1,0 +1,215 @@
+import '../widgets/track_title.dart';
+import '../widgets/glass_refresh.dart';
+import '../widgets/glass_controls.dart';
+import '../widgets/liquid_surface.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../core/models/models.dart';
+import '../../core/api/netease_client.dart';
+import '../../core/player/player_controller.dart';
+import '../../core/storage/account_store.dart';
+import '../widgets/common.dart';
+import '../theme/app_theme.dart';
+import 'details_page.dart';
+
+class LikedSongsPage extends StatefulWidget {
+  const LikedSongsPage({super.key});
+
+  @override
+  State<LikedSongsPage> createState() => _LikedSongsPageState();
+}
+
+class _LikedSongsPageState extends State<LikedSongsPage> {
+  bool loading = true;
+  String? error;
+  List<Track> tracks = const [];
+  String _query = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final account = context.read<AccountStore>();
+    try {
+      if (!account.isLoggedIn) throw const NeteaseException('请先登录');
+      final loaded = await account
+          .likedTracks(limit: 1000)
+          .timeout(const Duration(seconds: 20));
+      if (!mounted) return;
+      setState(() {
+        tracks = loaded;
+        loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        loading = false;
+        error = '$e';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final player = context.read<PlayerController>();
+    final cs = Theme.of(context).colorScheme;
+    final query = _query.trim().toLowerCase();
+    final visible = tracks
+        .where((track) =>
+            query.isEmpty ||
+            '${track.name} ${track.artistNames} ${track.album.name}'
+                .toLowerCase()
+                .contains(query))
+        .toList();
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: KumoneGlassAppBar(title: const Text('我喜欢的音乐')),
+      body: KumoneGlassRefresh.adaptive(
+        onRefresh: _load,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics()),
+          slivers: [
+            SliverToBoxAdapter(child: SizedBox(height: kumoneToolbarInset(context))),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 18, 24, 22),
+                child: Row(
+                  children: [
+                    Artwork(
+                      url: tracks.isEmpty ? null : tracks.first.album.picUrl,
+                      size: 128,
+                      radius: 14,
+                      shadow: true,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('我喜欢的音乐',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.w800)),
+                          const SizedBox(height: 8),
+                          Text(
+                            loading ? '正在加载喜欢的歌曲…' : '${tracks.length} 首歌曲',
+                            style: TextStyle(
+                                color: cs.onSurfaceVariant, fontSize: 13),
+                          ),
+                          const SizedBox(height: 14),
+                          FilledButton.icon(
+                            onPressed: tracks.isEmpty
+                                ? null
+                                : () => player.playTracks(tracks),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            icon: const Icon(Icons.play_arrow_rounded),
+                            label: const Text('播放全部'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+                child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: KumoneGlassSearchField(
+                onChanged: (value) => setState(() => _query = value),
+                decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search), hintText: '搜索此歌单的歌曲、歌手或专辑'),
+              ),
+            )),
+            if (loading)
+              const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: CircularProgressIndicator()))
+            else if (visible.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: _LikedEmpty(
+                    message: error ?? (query.isEmpty ? '暂无喜欢的歌曲' : '没有匹配的歌曲'),
+                    retry: _load),
+              )
+            else
+              SliverList.builder(
+                itemCount: visible.length,
+                itemBuilder: (_, i) {
+                  final track = visible[i];
+                  return TrackActionMenu(
+                    track: track,
+                    showButton: false,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 2),
+                      leading: Artwork(
+                          url: track.album.picUrl,
+                          size: 48,
+                          radius: 8,
+                          shadow: false),
+                      title: KumoneTrackTitle(trackId: track.id, title: track.name,
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      subtitle: Text(
+                        '${track.artistNames.isEmpty ? '未知歌手' : track.artistNames}${track.album.name.isEmpty ? '' : ' · ${track.album.name}'}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: Text(
+                        formatDuration(track.duration),
+                        style:
+                            TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
+                      ),
+                      onTap: () => player.playTracks(tracks, start: track),
+                    ),
+                    onOpenAlbum: (album) => Navigator.of(context).push(
+                      kumonePageRoute(AlbumPage(id: album.id)),
+                    ),
+                    onOpenArtist: (artist) => Navigator.of(context).push(
+                      kumonePageRoute(ArtistPage(id: artist.id)),
+                    ),
+                  );
+                },
+              ),
+            SliverPadding(
+                padding: EdgeInsets.only(
+                    bottom: KumoneBottomOverlayInset.of(context) + 24)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LikedEmpty extends StatelessWidget {
+  final String message;
+  final VoidCallback retry;
+  const _LikedEmpty({required this.message, required this.retry});
+  @override
+  Widget build(BuildContext context) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.favorite_border_rounded, size: 42),
+          const SizedBox(height: 10),
+          Text(message),
+          const SizedBox(height: 12),
+          KumoneLiquidSurface(
+              radius: 24,
+              child: TextButton.icon(
+                  onPressed: retry,
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text('重试'))),
+        ],
+      );
+}

@@ -1,0 +1,47 @@
+<resources>
+    <style name="LaunchFrost" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_frost</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+    <style name="LaunchCrystal" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_crystal</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+    <style name="LaunchPastel" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_pastel</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+    <style name="LaunchPink" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_pink</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+    <style name="LaunchEmerald" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_emerald</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+    <style name="LaunchClearblue" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_clearblue</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+    <style name="LaunchCrystalblue" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_crystalblue</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+    <style name="LaunchRedpink" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_redpink</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+    <style name="LaunchClearredpink" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_clearredpink</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+    </style>
+</resources>
