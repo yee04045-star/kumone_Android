@@ -293,7 +293,6 @@ class _KumoneGlassSideNavigationState extends State<KumoneGlassSideNavigation> {
                       hint: expanded ? '长按一秒后拖动功能栏位置' : '按住零点二秒展开，继续滑动选择',
                       child: IconButton(
                           key: const ValueKey('floating-search'),
-                          tooltip: '搜索',
                           style: IconButton.styleFrom(
                               fixedSize: Size.square(size),
                               padding: EdgeInsets.zero,

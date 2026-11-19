@@ -154,6 +154,8 @@ class _PlaylistPageState extends State<PlaylistPage>
   Widget build(BuildContext context) {
     final player = context.read<PlayerController>();
     final account = context.watch<AccountStore>();
+    final currentTrackId = context.select<PlayerController, int?>(
+      (player) => player.currentTrack?.id);
     final cs = Theme.of(context).colorScheme;
 
     if (loading) {
@@ -334,7 +336,7 @@ class _PlaylistPageState extends State<PlaylistPage>
               itemCount: visibleTracks.length,
               itemBuilder: (_, i) {
                 final track = visibleTracks[i];
-                final active = player.currentTrack?.id == track.id;
+                final active = currentTrackId == track.id;
                 return TrackActionMenu(
                   track: track,
                   showButton: false,

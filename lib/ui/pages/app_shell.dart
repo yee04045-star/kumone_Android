@@ -1,6 +1,7 @@
 import '../widgets/glass_side_navigation.dart';
 import '../widgets/wallpaper_scope.dart';
 import '../widgets/shell_chrome_transition.dart';
+import '../widgets/first_launch_notice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart';
@@ -117,7 +118,11 @@ class _AppShellState extends State<AppShell> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _bootstrap());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      FirstLaunchNotice.showIfNeeded(context);
+      _bootstrap();
+    });
   }
 
   Future<void> _bootstrap() async {
