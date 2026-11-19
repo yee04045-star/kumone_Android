@@ -109,7 +109,7 @@ flutter build apk --release --split-per-abi
 
 APK 按架构输出至 `build/app/outputs/flutter-apk/`：`app-arm64-v8a-release.apk`（多数现代设备）、`app-armeabi-v7a-release.apk` 和 `app-x86_64-release.apk`。请选择与设备匹配的版本。
 
-设置 → 背景与外观提供「转场冻结离场页面（实验性）」开关，默认关闭；开启后被覆盖页面使用整页快照，返回后恢复实时绘制。如有玻璃闪烁请关闭。静态壁纸模糊结果自动缓存，拖动模糊滑条时仍实时预览。
+设置 → 背景与外观提供「转场冻结离场页面（实验性）」开关，默认开启；开启后被覆盖页面使用整页快照，返回后恢复实时绘制。如有玻璃闪烁请关闭。静态壁纸模糊结果自动缓存，拖动模糊滑条时仍实时预览。
 
 自动构建配置见 [.github/workflows/android-apk.yml](.github/workflows/android-apk.yml)。USB 独占输出等设备相关功能需在实际 Android 设备与 DAC 上验证，自动测试不能替代实机兼容性验证。
 

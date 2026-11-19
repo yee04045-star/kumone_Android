@@ -11,7 +11,7 @@ void main() {
   setUp(() { SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty(); });
   test('outgoing snapshot is opt-in and persists', () async {
     final store = SettingsStore();
-    expect(store.freezeOutgoingPage, false);
+    expect(store.freezeOutgoingPage, true);
     await store.setFreezeOutgoingPage(true);
     final restored = SettingsStore();
     await restored.load();
@@ -19,7 +19,7 @@ void main() {
     store.dispose(); restored.dispose();
   });
   testWidgets('covered page snapshots only with switch enabled and restores on return', (tester) async {
-    final store = SettingsStore();
+    final store = SettingsStore()..freezeOutgoingPage = false;
     final animation = AnimationController(vsync: tester, duration: const Duration(milliseconds: 100));
     await tester.pumpWidget(ChangeNotifierProvider.value(value: store,
       child: MaterialApp(home: KumoneRouteSnapshot(covered: animation,

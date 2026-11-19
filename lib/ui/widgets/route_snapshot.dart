@@ -1,14 +1,19 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import '../../core/storage/settings_store.dart';
 
 class KumoneSnapshotPageRoute<T> extends CupertinoPageRoute<T> {
-  KumoneSnapshotPageRoute({required super.builder});
+  final ValueListenable<int>? identity;
+  KumoneSnapshotPageRoute({required super.builder, this.identity});
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation, Widget child) =>
     super.buildTransitions(context, animation, secondaryAnimation,
-      KumoneRouteSnapshot(covered: secondaryAnimation, child: child));
+      identity == null ? KumoneRouteSnapshot(covered: secondaryAnimation, child: child)
+          : ValueListenableBuilder<int>(valueListenable: identity!,
+              builder: (_, value, __) => KumoneRouteSnapshot(key: ValueKey(value),
+                covered: secondaryAnimation, child: child)));
 }
 
 class KumoneRouteSnapshot extends StatefulWidget {

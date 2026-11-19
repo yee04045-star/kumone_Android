@@ -205,6 +205,13 @@ class SettingsPage extends StatelessWidget {
                       )),
               const Divider(height: 24),
               const _SettingsHeader('外观'),
+              ListTile(title: const Text('mini 播放器与 Tab 间距'),
+                subtitle: const Text('按 1206px 参考截图比例：24～36px'),
+                trailing: Text('${settings.miniTabGap.round()}px')),
+              KumoneGlassSlider(value: settings.miniTabGap, min: 24, max: 36,
+                onChanged: settings.previewMiniTabGap,
+                onChangeEnd: settings.saveMiniTabGap),
+
               ListTile(title: const Text('底栏与 mini 播放器 · 纵向位置'),
                 subtitle: const Text('向左上移，向右下移；下移最多 6，保留系统导航安全间距'),
                 trailing: Text(settings.bottomChromeOffset.toStringAsFixed(0))),
@@ -215,7 +222,7 @@ class SettingsPage extends StatelessWidget {
               KumoneGlassSwitchTile(value: settings.freezeOutgoingPage,
                 onChanged: settings.setFreezeOutgoingPage,
                 title: const Text('转场冻结离场页面（实验性）'),
-                subtitle: const Text('使用整页快照暂停被覆盖页面的玻璃与动画；如有闪烁请关闭，默认关闭')),
+                subtitle: const Text('使用整页快照暂停被覆盖页面的玻璃与动画；如有闪烁请关闭，默认开启')),
 
               const ListTile(title: Text('主题强调色')),
               for (final accent in AppAccent.values)

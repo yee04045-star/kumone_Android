@@ -1,7 +1,7 @@
+import 'package:flutter/cupertino.dart';
+import '../widgets/tab_snapshot_host.dart';
 import '../widgets/glass_side_navigation.dart';
-import '../widgets/wallpaper_scope.dart';
 import '../widgets/shell_chrome_transition.dart';
-import '../widgets/route_snapshot.dart';
 import '../widgets/first_launch_notice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -148,15 +148,13 @@ class _AppShellState extends State<AppShell> {
 
   void _setTab(int index) {
     final navigator = _contentNavigatorKey.currentState;
-    // Bottom navigation is the highest-priority navigation surface: any
-    // detail page pushed inside the content navigator is dismissed first.
-    navigator?.popUntil((route) => route.isFirst);
-    if (tab == index) {
-      _tabNotifier.value = index;
-      return;
-    }
-    setState(() => tab = index);
+    // Update the root content before dismissing details. Its snapshot is
+    // keyed by tab so an old tab's frozen texture cannot cover the new tab.
+    if (tab != index) setState(() => tab = index);
     _tabNotifier.value = index;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) navigator?.popUntil((route) => route.isFirst);
+    });
   }
 
   @override
@@ -327,7 +325,12 @@ class _AppShellState extends State<AppShell> {
     return Transform.translate(offset: Offset(0, offset), child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _miniPlayer(context),
+        // Existing layout contributes 10 logical pixels; match the
+        // reference's 1206px-wide screenshot at the current window width.
+        Transform.translate(
+          offset: Offset(0, 10 - context.watch<SettingsStore>().miniTabGap *
+              MediaQuery.sizeOf(context).width / 1206),
+          child: _miniPlayer(context)),
         _transparentBottomNavigation(context),
       ],
     ));
@@ -378,14 +381,9 @@ class _AppShellState extends State<AppShell> {
                     child: Navigator(
                       key: _contentNavigatorKey,
                       observers: [_contentObserver],
-                      onGenerateRoute: (_) => KumoneSnapshotPageRoute<void>(
-                        builder: (_) => KumoneWallpaperRouteSurface(
-                          child: ValueListenableBuilder<int>(
-                            valueListenable: _tabNotifier,
-                            builder: (_, index, __) => IndexedStack(
-                              index: index, children: _pages),
-                          ),
-                        ),
+                      onGenerateRoute: (_) => CupertinoPageRoute<void>(
+                        builder: (_) => KumoneTabSnapshotHost(
+                          selected: _tabNotifier, pages: _pages),
                       ),
                     ),
                   ),

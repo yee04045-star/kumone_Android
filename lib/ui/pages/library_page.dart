@@ -102,7 +102,6 @@ class LibraryPage extends StatelessWidget {
               ),
             ),
           ),
-          SliverToBoxAdapter(child: SectionHeader(title: '快捷入口')),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),

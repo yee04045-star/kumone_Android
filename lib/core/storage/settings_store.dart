@@ -21,7 +21,7 @@ class SettingsStore extends ChangeNotifier {
   LyricsAnnotationMode annotation = LyricsAnnotationMode.off;
   bool unblock = true;
   bool ambient = true;
-  bool freezeOutgoingPage = false;
+  bool freezeOutgoingPage = true;
   bool usbExclusive = false;
   double ambientIntensity = 1.0;
   double menuBackingOpacity = .50;
@@ -36,6 +36,15 @@ class SettingsStore extends ChangeNotifier {
   bool backgroundExtend = true;
   double chromeBlur = 5;
   double bottomChromeOffset = 6;
+  double miniTabGap = 24;
+  void previewMiniTabGap(double value) {
+    miniTabGap = value.clamp(24, 36).toDouble();
+    notifyListeners();
+  }
+  Future<void> saveMiniTabGap(double value) async {
+    previewMiniTabGap(value);
+    await prefs.setDouble('miniTabGap', miniTabGap);
+  }
   double topBlurDistribution = 1.30;
   double topBlurExtent = 1.60;
   double songMenuBlur = 3;
@@ -63,8 +72,9 @@ class SettingsStore extends ChangeNotifier {
   }
 
   Future<void> load() async {
+    miniTabGap = (await prefs.getDouble('miniTabGap') ?? 24).clamp(24, 36).toDouble();
     bottomChromeOffset = (await prefs.getDouble('bottomChromeOffset') ?? 6).clamp(-24, 6).toDouble();
-    freezeOutgoingPage = await prefs.getBool('freezeOutgoingPage') ?? false;
+    freezeOutgoingPage = await prefs.getBool('freezeOutgoingPage') ?? true;
     final accentName = await prefs.getString('appAccent');
     accent = AppAccent.values.firstWhere((e) => e.name == accentName,
       orElse: () => AppAccent.appleBlue);
