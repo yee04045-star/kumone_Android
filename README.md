@@ -56,7 +56,7 @@
 - 📚 **音乐库** — 喜欢的音乐、创建及收藏歌单、收藏专辑、关注歌手、最近播放和音乐云盘。
 - ✏️ **歌单管理** — 创建、删除与收藏歌单，添加和移除歌曲；列表中的当前播放歌曲以主题色加粗标记。
 - 🫧 **玻璃界面** — 浮动 mini 播放器、玻璃导航与菜单、渐变模糊顶栏、横屏浮动功能栏。
-- 🎨 **个性化** — 明暗外观、四种主题强调色、横竖屏独立壁纸及裁切、九款桌面图标与绑定启动屏。
+- 🎨 **个性化** — 明暗外观、五种主题强调色、横竖屏独立壁纸及裁切、九款桌面图标与绑定启动屏。
 - ⚙️ **用户音源配置** — 最多七个自定义解析服务，支持单独启停、编辑、删除和顺序调整；不内置第三方音源服务。
 
 > 部分功能依赖账号权限、接口可用性及设备支持。原版的 CarPlay、iCloud 同步、macOS 桌面歌词和 Sparkle 更新等 Apple 平台能力不属于本 Android 版功能。
@@ -104,10 +104,12 @@ dart analyze lib test packages
 flutter test --no-pub
 
 # 构建 APK
-flutter build apk --release
+flutter build apk --release --split-per-abi
 ```
 
-APK 输出：`build/app/outputs/flutter-apk/app-release.apk`。
+APK 按架构输出至 `build/app/outputs/flutter-apk/`：`app-arm64-v8a-release.apk`（多数现代设备）、`app-armeabi-v7a-release.apk` 和 `app-x86_64-release.apk`。请选择与设备匹配的版本。CI 另上传 ARM64 体积分析 JSON，供 DevTools 检查。
+
+设置 → 背景与外观提供「转场冻结离场页面（实验性）」开关，默认关闭；开启后被覆盖页面使用整页快照，返回后恢复实时绘制。如有玻璃闪烁请关闭。静态壁纸模糊结果自动缓存，拖动模糊滑条时仍实时预览。
 
 自动构建配置见 [.github/workflows/android-apk.yml](.github/workflows/android-apk.yml)。USB 独占输出等设备相关功能需在实际 Android 设备与 DAC 上验证，自动测试不能替代实机兼容性验证。
 

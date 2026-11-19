@@ -83,50 +83,18 @@ class _RecentPageState extends State<RecentPage> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 14, 20, 12),
-                child: KumoneLiquidSurface(
-                  radius: 22,
+                child: Padding(
                   padding: const EdgeInsets.all(4),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(children: [
-                            GlassCategoryChip(
-                              label: '所有时间', selected: !week,
-                              onTap: () {
-                                if (!week) return;
-                                setState(() => week = false);
-                                _load();
-                              },
-                            ),
-                            const SizedBox(width: 8),
-                            GlassCategoryChip(
-                              label: '最近一周', selected: week,
-                              onTap: () {
-                                if (week) return;
-                                setState(() => week = true);
-                                _load();
-                              },
-                            ),
-                          ]),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      FilledButton.icon(
-                        onPressed: tracks.isEmpty ? null : () => player.playTracks(tracks),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        icon: const Icon(Icons.play_arrow_rounded),
-                        label: const Text('播放全部'),
-                      ),
-                    ],
-                  ),
+                  child: Row(children: [
+                    Expanded(child: GlassCategoryChip(label: '所有时间', selected: !week,
+                      onTap: () { if (week) { setState(() => week = false); _load(); } })),
+                    const SizedBox(width: 8),
+                    Expanded(child: GlassCategoryChip(label: '最近一周', selected: week,
+                      onTap: () { if (!week) { setState(() => week = true); _load(); } })),
+                    const SizedBox(width: 8),
+                    Expanded(child: GlassCategoryChip(label: '播放全部', selected: false,
+                      onTap: () { if (tracks.isNotEmpty) player.playTracks(tracks); })),
+                  ]),
                 ),
               ),
             ),

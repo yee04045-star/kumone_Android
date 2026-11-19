@@ -11,6 +11,9 @@ class WallpaperStore extends ChangeNotifier {
   String? path;
   bool dark = false;
   double blur = 12;
+  bool previewingBlur = false;
+  double displayBlur({bool settingsPage = false}) =>
+      settingsPage && !previewingBlur && blur < 20 ? 20 : blur;
   ui.Color? statusColor;
   String? landscapePath;
   bool landscapeDark = false;
@@ -121,12 +124,15 @@ class WallpaperStore extends ChangeNotifier {
   }
 
   void previewBlur(double value) {
+    previewingBlur = true;
     blur = value.clamp(0, 40).toDouble();
     notifyListeners();
   }
 
   Future<void> saveBlur(double value) async {
-    previewBlur(value);
+    blur = value.clamp(0, 40).toDouble();
+    previewingBlur = false;
+    notifyListeners();
     await _prefs.setDouble('wallpaperBlur', blur);
   }
 

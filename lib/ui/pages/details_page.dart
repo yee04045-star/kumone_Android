@@ -160,13 +160,13 @@ class _PlaylistPageState extends State<PlaylistPage>
 
     if (loading) {
       return Scaffold(
-        appBar: KumoneGlassAppBar(title: const Text('歌单')),
+        appBar: KumoneGlassAppBar(title: const SizedBox.shrink()),
         body: const _PlaylistLoading(),
       );
     }
     if (detail == null) {
       return Scaffold(
-        appBar: KumoneGlassAppBar(title: const Text('歌单')),
+        appBar: KumoneGlassAppBar(title: const SizedBox.shrink()),
         body: _DetailError(message: error ?? '歌单数据为空', onRetry: _load),
       );
     }
@@ -181,11 +181,7 @@ class _PlaylistPageState extends State<PlaylistPage>
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: KumoneGlassAppBar(
-        title: Text(
-          playlist.name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        title: const SizedBox.shrink(),
         actions: const [],
       ),
       body: KumoneGlassRefresh.adaptive(
@@ -211,7 +207,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                     padding: const EdgeInsets.fromLTRB(24, 18, 24, 20),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
-                        final coverSize = constraints.maxWidth < 400 ? 148.0 : 192.0;
+                        final coverSize = constraints.maxWidth < 400 ? 112.0 : 140.0;
                         final description = (playlist.description ?? '').trim();
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,8 +256,8 @@ class _PlaylistPageState extends State<PlaylistPage>
                                       backgroundColor: Theme.of(context).colorScheme.primary,
                                       disabledBackgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: .28),
                                       foregroundColor: Colors.white,
-                                      minimumSize: const Size.fromHeight(46),
-                                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                                      minimumSize: const Size.fromHeight(44),
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(23),
                                       ),
@@ -445,7 +441,7 @@ class _PlaylistHeaderInfo extends StatelessWidget {
           playlist.name,
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w800,
                 letterSpacing: -.5,
               ),
@@ -628,7 +624,7 @@ class _AlbumPageState extends State<AlbumPage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         minimumSize: const Size(0, 44),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         textStyle: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
       );
@@ -639,7 +635,7 @@ class _AlbumPageState extends State<AlbumPage> {
     final cs = Theme.of(context).colorScheme;
     if (data == null) {
       return Scaffold(
-        appBar: const KumoneGlassAppBar(title: Text('专辑')),
+        appBar: const KumoneGlassAppBar(title: SizedBox.shrink()),
         body: Center(
           child: error == null ? const CircularProgressIndicator() : Text(error!),
         ),
@@ -654,7 +650,7 @@ class _AlbumPageState extends State<AlbumPage> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: const KumoneGlassAppBar(title: Text('专辑')),
+      appBar: const KumoneGlassAppBar(title: SizedBox.shrink()),
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(
@@ -667,7 +663,7 @@ class _AlbumPageState extends State<AlbumPage> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Artwork(url: album.picUrl, size: 156, radius: 16, shadow: true),
+                    Artwork(url: album.picUrl, size: 112, radius: 14, shadow: true),
                     const SizedBox(width: 18),
                     Expanded(
                       child: Column(
@@ -677,7 +673,7 @@ class _AlbumPageState extends State<AlbumPage> {
                             album.name,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w900,
                                   height: 1.08,
                                 ),
@@ -689,7 +685,7 @@ class _AlbumPageState extends State<AlbumPage> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,
-                              fontSize: 15,
+                              fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -862,7 +858,7 @@ class _ArtistPageState extends State<ArtistPage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         minimumSize: const Size.fromHeight(44),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         textStyle: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
       );
@@ -873,7 +869,7 @@ class _ArtistPageState extends State<ArtistPage> {
     final cs = Theme.of(context).colorScheme;
     if (data == null) {
       return Scaffold(
-        appBar: const KumoneGlassAppBar(title: Text('歌手')),
+        appBar: const KumoneGlassAppBar(title: SizedBox.shrink()),
         body: Center(
           child: error == null
               ? const CircularProgressIndicator()
@@ -890,7 +886,7 @@ class _ArtistPageState extends State<ArtistPage> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: KumoneGlassAppBar(title: Text(artist.name)),
+      appBar: KumoneGlassAppBar(title: const SizedBox.shrink()),
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: ListView(
@@ -904,7 +900,7 @@ class _ArtistPageState extends State<ArtistPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Artwork(url: artist.picUrl, size: 128, radius: 64, circle: true, shadow: true),
+                  Artwork(url: artist.picUrl, size: 112, radius: 56, circle: true, shadow: true),
                   const SizedBox(width: 18),
                   Expanded(
                     child: Column(
@@ -914,7 +910,7 @@ class _ArtistPageState extends State<ArtistPage> {
                           artist.name,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w900,
                                 height: 1.08,
                               ),

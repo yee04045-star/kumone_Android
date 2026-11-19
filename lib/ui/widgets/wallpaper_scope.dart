@@ -1,3 +1,4 @@
+import 'cached_wallpaper.dart';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -83,7 +84,8 @@ class WallpaperScope extends StatelessWidget {
 // Each moving route needs a real painted background, not just an opaque-route
 // flag. Otherwise transparent Scaffolds reveal the outgoing page during a push.
 class KumoneWallpaperBackdrop extends StatelessWidget {
-  const KumoneWallpaperBackdrop({super.key});
+  final bool settingsPage;
+  const KumoneWallpaperBackdrop({super.key, this.settingsPage = false});
 
   @override
   Widget build(BuildContext context) {
@@ -96,11 +98,15 @@ class KumoneWallpaperBackdrop extends StatelessWidget {
     return ColoredBox(
       color: base.scaffoldBackgroundColor,
       child: path != null ? Stack(fit: StackFit.expand, children: [
+        if (!wallpaper.previewingBlur)
+          CachedWallpaper(path: path, sigma: wallpaper.displayBlur(settingsPage: settingsPage))
+        else
         ImageFiltered(
           imageFilter: ImageFilter.blur(
-              sigmaX: wallpaper.blur, sigmaY: wallpaper.blur,
+              sigmaX: wallpaper.displayBlur(settingsPage: settingsPage),
+              sigmaY: wallpaper.displayBlur(settingsPage: settingsPage),
               tileMode: TileMode.clamp),
-          enabled: wallpaper.blur > 0,
+          enabled: wallpaper.displayBlur(settingsPage: settingsPage) > 0,
           child: Image.file(File(path), fit: BoxFit.cover,
             gaplessPlayback: true,
             errorBuilder: (_, __, ___) => const SizedBox.expand()),
@@ -114,7 +120,8 @@ class KumoneWallpaperBackdrop extends StatelessWidget {
 
 class KumoneWallpaperRouteSurface extends StatelessWidget {
   final Widget child;
-  const KumoneWallpaperRouteSurface({super.key, required this.child});
+  final bool settingsPage;
+  const KumoneWallpaperRouteSurface({super.key, required this.child, this.settingsPage = false});
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +137,7 @@ class KumoneWallpaperRouteSurface extends StatelessWidget {
         : Color.alphaBlend((dark ? Colors.black : Colors.white)
             .withValues(alpha: .24), sampled);
     return ClipRect(child: Stack(fit: StackFit.expand, children: [
-      const Positioned.fill(child: RepaintBoundary(child: KumoneWallpaperBackdrop())),
+      Positioned.fill(child: RepaintBoundary(child: KumoneWallpaperBackdrop(settingsPage: settingsPage))),
       if (settings?.backgroundExtend == false)
         Positioned(top: 0, left: 0, right: 0,
           height: MediaQuery.paddingOf(context).top,

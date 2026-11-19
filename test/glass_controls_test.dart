@@ -165,11 +165,11 @@ void main() {
         InMemorySharedPreferencesAsync.empty();
   });
 
-  test('independent blur and floating navigation settings persist', () async {
+  test('shared blur and floating navigation settings persist', () async {
     final settings = SettingsStore();
     final opacity = settings.menuBackingOpacity;
     await settings.saveChromeBlur(37.5);
-    expect(settings.lyricFontScale, 1);
+    expect(settings.lyricFontScale, 1.1);
     await settings.saveLyricFontScale(1.23);
     await settings.saveSongMenuBlur(23);
     await settings.saveQuickEntryBlur(4);
@@ -200,7 +200,7 @@ void main() {
     restored.dispose();
   });
 
-  testWidgets('menu and quick-entry blur stay independent of opacity',
+  testWidgets('menu and quick-entry blur are independent of each other and opacity',
       (tester) async {
     final settings = SettingsStore();
     await tester.pumpWidget(ChangeNotifierProvider.value(
@@ -225,8 +225,8 @@ void main() {
     final surfaces = tester
         .widgetList<LiquidGlassLens>(find.byType(LiquidGlassLens))
         .toList();
-    expect(surfaces[0].style.blur, 14);
-    expect(surfaces[1].style.blur, 14);
+    expect(surfaces[0].style.blur, 3);
+    expect(surfaces[1].style.blur, 3);
     expect(surfaces[0].style.color.a, closeTo(.72, .01));
     settings.previewSongMenuBlur(31);
     settings.previewQuickEntryBlur(2);
@@ -237,7 +237,7 @@ void main() {
     expect(changed[0].style.blur, 31);
     expect(changed[1].style.blur, 2);
     expect(changed[0].style.color, surfaces[0].style.color);
-    expect(settings.chromeBlur, 6);
+    expect(settings.chromeBlur, 5);
     await tester.pumpWidget(const SizedBox());
     settings.dispose();
   });

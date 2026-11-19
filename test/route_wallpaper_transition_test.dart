@@ -1,3 +1,4 @@
+import 'package:kumone_flutter/ui/widgets/cached_wallpaper.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -12,6 +13,8 @@ import 'package:kumone_flutter/ui/widgets/common.dart';
 import 'package:kumone_flutter/ui/widgets/shell_chrome_transition.dart';
 
 void main() {
+  setUp(() => CachedWallpaper.cacheEnabled = false);
+  tearDown(() => CachedWallpaper.cacheEnabled = true);
   setUp(() {
     SharedPreferencesAsyncPlatform.instance =
         InMemorySharedPreferencesAsync.empty();
@@ -78,7 +81,8 @@ void main() {
     settings.dispose();
     await tester.runAsync(() async {
       await FileImage(file).evict();
-      await root.delete(recursive: true);
+      await CachedWallpaper.settlePending();
+    await root.delete(recursive: true);
     });
   });
 

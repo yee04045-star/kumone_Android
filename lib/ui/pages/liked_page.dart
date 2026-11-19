@@ -66,7 +66,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
         .toList();
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: KumoneGlassAppBar(title: const Text('我喜欢的音乐')),
+      appBar: KumoneGlassAppBar(title: const SizedBox.shrink()),
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(
@@ -81,7 +81,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                   children: [
                     Artwork(
                       url: tracks.isEmpty ? null : tracks.first.album.picUrl,
-                      size: 128,
+                      size: 112,
                       radius: 14,
                       shadow: true,
                     ),
@@ -93,7 +93,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                           Text('我喜欢的音乐',
                               style: Theme.of(context)
                                   .textTheme
-                                  .titleLarge
+                                  .titleMedium
                                   ?.copyWith(fontWeight: FontWeight.w800)),
                           const SizedBox(height: 8),
                           Text(
@@ -107,6 +107,8 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                                 ? null
                                 : () => player.playTracks(tracks),
                             style: FilledButton.styleFrom(
+                              fixedSize: const Size.fromHeight(44),
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
                               backgroundColor: Theme.of(context).colorScheme.primary,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(

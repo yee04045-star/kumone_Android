@@ -1,3 +1,5 @@
+import 'package:provider/provider.dart';
+import '../../core/storage/settings_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
@@ -92,6 +94,8 @@ class KumoneGlassIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => KumoneLiquidSurface(
       radius: 24,
+      backingOpacity: context.watch<SettingsStore?>()?.menuBackingOpacity ?? .20,
+      blur: context.watch<SettingsStore?>()?.songMenuBlur ?? 14,
       child: IconButton(
           tooltip: tooltip,
           onPressed: onPressed,
@@ -108,6 +112,8 @@ class KumoneGlassSearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) => KumoneLiquidSurface(
       radius: 26,
+      backingOpacity: context.watch<SettingsStore?>()?.menuBackingOpacity ?? .20,
+      blur: context.watch<SettingsStore?>()?.songMenuBlur ?? 14,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: TextField(
           onChanged: onChanged,
@@ -115,9 +121,9 @@ class KumoneGlassSearchField extends StatelessWidget {
           textAlignVertical: TextAlignVertical.center,
           decoration: (decoration ?? const InputDecoration()).copyWith(
               isDense: true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 16),
+              contentPadding: const EdgeInsets.symmetric(vertical: 11),
               prefixIconConstraints:
-                  const BoxConstraints(minWidth: 48, minHeight: 52),
+                  const BoxConstraints(minWidth: 44, minHeight: 44),
               filled: false,
               border: InputBorder.none,
               enabledBorder: InputBorder.none,

@@ -21,31 +21,50 @@ class SettingsStore extends ChangeNotifier {
   LyricsAnnotationMode annotation = LyricsAnnotationMode.off;
   bool unblock = true;
   bool ambient = true;
+  bool freezeOutgoingPage = false;
   bool usbExclusive = false;
   double ambientIntensity = 1.0;
-  double menuBackingOpacity = .72;
+  double menuBackingOpacity = .50;
   bool landscapeDualPane = true;
-  double lyricBlur = 3;
-  double lyricFontScale = 1;
+  double lyricBlur = 5;
+  double lyricFontScale = 1.1;
   bool cjkGlow = true;
   int crossfadeSeconds = 0;
   // Whether the app background (including a custom wallpaper) is allowed to
   // run behind the status bar. The now-playing page ignores this and always
   // uses its own ambient system-bar treatment.
   bool backgroundExtend = true;
-  double chromeBlur = 6;
+  double chromeBlur = 5;
+  double bottomChromeOffset = 6;
   double topBlurDistribution = 1.30;
   double topBlurExtent = 1.60;
-  double songMenuBlur = 14;
+  double songMenuBlur = 3;
   bool songMenuFocus = true;
-  double quickEntryBlur = 14;
+  double quickEntryBlur = 3;
   double sideNavigationScale = 1;
   double sideNavigationPosition = .8;
   double sideNavigationExpandedPosition = .8;
   bool sideNavigationOnLeft = false;
   List<int> sideNavigationOrder = [3, 1, 0];
 
+  Future<void> setFreezeOutgoingPage(bool value) async {
+    freezeOutgoingPage = value;
+    notifyListeners();
+    await prefs.setBool('freezeOutgoingPage', value);
+  }
+
+  void previewBottomChromeOffset(double value) {
+    bottomChromeOffset = value.clamp(-24, 6).toDouble();
+    notifyListeners();
+  }
+  Future<void> saveBottomChromeOffset(double value) async {
+    previewBottomChromeOffset(value);
+    await prefs.setDouble('bottomChromeOffset', bottomChromeOffset);
+  }
+
   Future<void> load() async {
+    bottomChromeOffset = (await prefs.getDouble('bottomChromeOffset') ?? 6).clamp(-24, 6).toDouble();
+    freezeOutgoingPage = await prefs.getBool('freezeOutgoingPage') ?? false;
     final accentName = await prefs.getString('appAccent');
     accent = AppAccent.values.firstWhere((e) => e.name == accentName,
       orElse: () => AppAccent.appleBlue);
@@ -71,28 +90,28 @@ class SettingsStore extends ChangeNotifier {
     ambient = await prefs.getBool('ambient') ?? true;
     usbExclusive = await prefs.getBool('usbExclusive') ?? false;
     ambientIntensity = await prefs.getDouble('ambientIntensity') ?? 1.0;
-    menuBackingOpacity = ((await prefs.getDouble('menuBackingOpacity')) ?? .72)
+    menuBackingOpacity = ((await prefs.getDouble('menuBackingOpacity')) ?? .50)
         .clamp(0.0, 1.0)
         .toDouble();
     landscapeDualPane = await prefs.getBool('landscapeDualPane') ?? true;
     lyricBlur =
-        (await prefs.getDouble('lyricBlur') ?? 3).clamp(0, 8).toDouble();
-    lyricFontScale = (await prefs.getDouble('lyricFontScale') ?? 1)
+        (await prefs.getDouble('lyricBlur') ?? 5).clamp(0, 8).toDouble();
+    lyricFontScale = (await prefs.getDouble('lyricFontScale') ?? 1.1)
         .clamp(.8, 1.8).toDouble();
     cjkGlow = await prefs.getBool('cjkGlow') ?? true;
     crossfadeSeconds = (await prefs.getInt('crossfadeSeconds') ?? 0).clamp(0, 12);
     backgroundExtend = await prefs.getBool('backgroundExtend') ?? true;
     chromeBlur =
-        (await prefs.getDouble('chromeBlur') ?? 6).clamp(0, 40).toDouble();
+        (await prefs.getDouble('chromeBlur') ?? 5).clamp(0, 40).toDouble();
     topBlurExtent = (await prefs.getDouble('topBlurExtent') ?? 1.60)
         .clamp(.75, 3).toDouble();
     topBlurDistribution =
         (await prefs.getDouble('topBlurDistribution') ?? 1.30).clamp(.5, 6).toDouble();
     songMenuFocus = await prefs.getBool('songMenuFocus') ?? true;
-    songMenuBlur = (await prefs.getDouble('songMenuBlur') ?? 14)
+    quickEntryBlur = (await prefs.getDouble('quickEntryBlur') ?? 3).clamp(0, 40).toDouble();
+    songMenuBlur = (await prefs.getDouble('songMenuBlur') ?? 3)
         .clamp(0, 40).toDouble();
-    quickEntryBlur = (await prefs.getDouble('quickEntryBlur') ?? 14)
-        .clamp(0, 40).toDouble();
+
     sideNavigationScale = (await prefs.getDouble('sideNavigationScale') ?? 1)
         .clamp(.8, 1.4).toDouble();
     sideNavigationPosition = (await prefs.getDouble('sideNavigationPosition') ?? .8)
@@ -210,11 +229,11 @@ class SettingsStore extends ChangeNotifier {
     quickEntryBlur = value.clamp(0, 40).toDouble();
     notifyListeners();
   }
-
   Future<void> saveQuickEntryBlur(double value) async {
     previewQuickEntryBlur(value);
     await prefs.setDouble('quickEntryBlur', quickEntryBlur);
   }
+
 
   void previewSideNavigationScale(double value) {
     sideNavigationScale = value.clamp(.8, 1.4).toDouble();

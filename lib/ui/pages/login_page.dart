@@ -1,3 +1,4 @@
+import '../widgets/glass_category_chip.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -229,15 +230,13 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900),
                 ),
                 const SizedBox(height: 18),
-                SegmentedButton<bool>(
-                  segments: const [
-                    ButtonSegment(value: false, label: Text('扫码登录')),
-                    ButtonSegment(value: true, label: Text('手机号')),
-                  ],
-                  selected: {_sms},
-                  onSelectionChanged: (selected) =>
-                      setState(() => _sms = selected.first),
-                ),
+                Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  GlassCategoryChip(label: '扫码登录', selected: !_sms,
+                    onTap: () => setState(() => _sms = false)),
+                  const SizedBox(width: 10),
+                  GlassCategoryChip(label: '手机号', selected: _sms,
+                    onTap: () => setState(() => _sms = true)),
+                ]),
                 const SizedBox(height: 22),
                 if (!_sms)
                   QrLoginPanel(

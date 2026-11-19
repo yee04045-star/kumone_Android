@@ -1,3 +1,4 @@
+import 'route_snapshot.dart';
 import 'dart:math' as math;
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:flutter/material.dart';
@@ -196,14 +197,16 @@ Route<T> kumonePageRoute<T>(Widget page, {RouteSettings? settings}) =>
 class _KumonePageRoute<T> extends CupertinoPageRoute<T> {
   _KumonePageRoute({required Widget page, super.settings})
       : super(builder: (_) => settings?.name == '/now-playing'
-              ? page : KumoneWallpaperRouteSurface(child: page),
+              ? page : KumoneWallpaperRouteSurface(
+                  settingsPage: settings?.name == '/settings', child: page),
           fullscreenDialog: settings?.name == '/now-playing');
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation, Widget child) {
     if (MediaQuery.disableAnimationsOf(context)) return child;
-    return super.buildTransitions(context, animation, secondaryAnimation, child);
+    return super.buildTransitions(context, animation, secondaryAnimation,
+        KumoneRouteSnapshot(covered: secondaryAnimation, child: child));
   }
 }
 
@@ -352,7 +355,10 @@ class Artwork extends StatefulWidget {
   State<Artwork> createState() => _ArtworkState();
 }
 
-class _ArtworkState extends State<Artwork> {
+class _ArtworkState extends State<Artwork> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   int _candidate = 0;
   bool _advancing = false;
   bool _resolving = false;
@@ -463,6 +469,7 @@ class _ArtworkState extends State<Artwork> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final urls = _candidates();
     if (_lastUrl != widget.url) {
       _lastUrl = widget.url;
@@ -488,14 +495,16 @@ class _ArtworkState extends State<Artwork> {
     if (urls.isNotEmpty) {
       child = CachedNetworkImage(
         imageUrl: urls[_candidate],
+        memCacheWidth: (widget.size * MediaQuery.devicePixelRatioOf(context)).ceil().clamp(64, 768),
+        useOldImageOnUrlChange: true,
         httpHeaders: const {
           'Referer': 'https://music.163.com/',
           'User-Agent':
               'Mozilla/5.0 (Android) AppleWebKit/537.36 Chrome/125.0 Mobile Safari/537.36',
         },
         fit: BoxFit.cover,
-        fadeInDuration: const Duration(milliseconds: 180),
-        fadeOutDuration: const Duration(milliseconds: 100),
+        fadeInDuration: Duration.zero,
+        fadeOutDuration: Duration.zero,
         placeholder: (_, __) => fallback,
         errorWidget: (_, __, ___) {
           _advance();
@@ -818,15 +827,15 @@ class GlassMiniPlayer extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: KumoneLiquidSurface(
-        radius: 24,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        radius: 999,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
         child: Row(
           children: [
             InkWell(
               borderRadius: BorderRadius.circular(8),
               onTap: onOpen,
               child: Artwork(
-                  url: track.album.picUrl, size: 42, radius: 8, shadow: false),
+                  url: track.album.picUrl, size: 34, radius: 7, shadow: false),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -841,12 +850,12 @@ class GlassMiniPlayer extends StatelessWidget {
                     children: [
                       MarqueeText(
                         track.name,
-                        style: const TextStyle(fontWeight: FontWeight.w700),
+                        style: const TextStyle(fontSize: 13, height: 1.15, fontWeight: FontWeight.w700),
                       ),
                       MarqueeText(
                         track.artistNames,
                         style:
-                            TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
+                            TextStyle(fontSize: 10, height: 1.15, color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -974,10 +983,7 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
   }
 
   int get _glassMenuItemCount {
-    var count = 4; // next, like, add, copy
-    if (context.read<AccountStore>().isLoggedIn) {
-      count += 1 + widget.track.artists.take(3).length;
-    }
+    var count = 3; // next, like, add
     if (widget.onOpenAlbum != null) count += 1;
     count += widget.track.artists.take(3).length;
     if (widget.allowRemoveFromPlaylist) count += 1;
@@ -991,7 +997,7 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
     // item height is fixed at 48, so the value matches the actual panel size
     // unless the list hits its 500px max-height.
     const itemHeight = 48.0;
-    const panelChrome = 23.0;
+    const panelChrome = 16.0;
     return math.min(500.0, _glassMenuItemCount * itemHeight + panelChrome);
   }
 
@@ -1092,13 +1098,6 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
       'like',
     );
     add(CupertinoIcons.music_note_list, '添加到歌单', 'add');
-    if (context.read<AccountStore>().isLoggedIn) {
-      add(CupertinoIcons.nosign, '屏蔽这首歌', 'blacklist:song');
-      for (final artist in widget.track.artists.take(3)) {
-        add(CupertinoIcons.nosign, '屏蔽歌手：${artist.name}',
-            'blacklist:artist:${artist.id}');
-      }
-    }
     if (widget.onOpenAlbum != null) {
       add(CupertinoIcons.music_albums, '查看专辑', 'album');
     }
@@ -1117,11 +1116,6 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
     if (widget.onRecommendationReduced != null) {
       add(CupertinoIcons.minus_circle, '减少推荐', 'reduce');
     }
-    actions.add(const Padding(
-      padding: EdgeInsets.symmetric(vertical: 3),
-      child: Divider(height: 1),
-    ));
-    add(CupertinoIcons.link, '复制歌曲链接', 'copy');
 
     return Theme(data: theme, child: Consumer<SettingsStore>(
       builder: (context, settings, _) => TweenAnimationBuilder<double>(

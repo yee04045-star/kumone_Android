@@ -53,7 +53,7 @@ void main() {
                 home: recent ? const RecentPage() : const CollectionsPage(),
               )));
           await tester.pumpAndSettle();
-          expect(find.byType(GlassCategoryChip), findsNWidgets(2));
+          expect(find.byType(GlassCategoryChip), findsNWidgets(recent ? 3 : 2));
           expect(find.byType(SegmentedButton<int>), findsNothing);
           expect(find.byType(SegmentedButton<bool>), findsNothing);
           expect(find.byIcon(Icons.check), findsNothing);
@@ -69,7 +69,7 @@ void main() {
               .widgetList<GlassCategoryChip>(find.byType(GlassCategoryChip))
               .toList();
           expect(chips.first.selected, false);
-          expect(chips.last.selected, true);
+          expect(chips[1].selected, true);
           await tester.tap(find.text(first));
           await tester.pumpAndSettle();
           expect(

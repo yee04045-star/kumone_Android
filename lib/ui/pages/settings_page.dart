@@ -205,6 +205,18 @@ class SettingsPage extends StatelessWidget {
                       )),
               const Divider(height: 24),
               const _SettingsHeader('外观'),
+              ListTile(title: const Text('底栏与 mini 播放器 · 纵向位置'),
+                subtitle: const Text('向左上移，向右下移；下移最多 6，保留系统导航安全间距'),
+                trailing: Text(settings.bottomChromeOffset.toStringAsFixed(0))),
+              KumoneGlassSlider(value: settings.bottomChromeOffset, min: -24, max: 6,
+                onChanged: settings.previewBottomChromeOffset,
+                onChangeEnd: settings.saveBottomChromeOffset),
+
+              KumoneGlassSwitchTile(value: settings.freezeOutgoingPage,
+                onChanged: settings.setFreezeOutgoingPage,
+                title: const Text('转场冻结离场页面（实验性）'),
+                subtitle: const Text('使用整页快照暂停被覆盖页面的玻璃与动画；如有闪烁请关闭，默认关闭')),
+
               const ListTile(title: Text('主题强调色')),
               for (final accent in AppAccent.values)
                 _CheckChoice(selected: settings.accent == accent,
@@ -260,7 +272,7 @@ class SettingsPage extends StatelessWidget {
                 subtitle: const Text('保留当前歌曲和菜单的亮度，其他区域轻微变暗')),
               ListTile(
                 title: const Text('二级菜单与快捷入口底色不透明度'),
-                subtitle: const Text('菜单和我的快捷入口共用；不影响底栏与 mini 播放器'),
+                subtitle: const Text('菜单、快捷入口、搜索框及收藏关注按钮共用；不影响底栏与 mini 播放器'),
                 trailing:
                     Text('${(settings.menuBackingOpacity * 100).round()}%'),
               ),
@@ -281,17 +293,15 @@ class SettingsPage extends StatelessWidget {
                   onChanged: settings.previewChromeBlur,
                   onChangeEnd: settings.saveChromeBlur),
               ListTile(
-                title: const Text('歌曲长按菜单 · 模糊强度'),
+                title: const Text('菜单与控件 · 模糊强度'),
                 trailing: Text(settings.songMenuBlur.toStringAsFixed(1)),
               ),
               KumoneGlassSlider(value: settings.songMenuBlur, max: 40,
                 onChanged: settings.previewSongMenuBlur,
                 onChangeEnd: settings.saveSongMenuBlur),
-              ListTile(
-                title: const Text('我的快捷入口 · 模糊强度'),
-                subtitle: const Text('独立调节，不改变底色不透明度'),
-                trailing: Text(settings.quickEntryBlur.toStringAsFixed(1)),
-              ),
+              ListTile(title: const Text('我的快捷入口 · 模糊强度'),
+                subtitle: const Text('独立调节；底色不透明度仍与菜单共用'),
+                trailing: Text(settings.quickEntryBlur.toStringAsFixed(1))),
               KumoneGlassSlider(value: settings.quickEntryBlur, max: 40,
                 onChanged: settings.previewQuickEntryBlur,
                 onChangeEnd: settings.saveQuickEntryBlur),
@@ -453,8 +463,8 @@ class SettingsPage extends StatelessWidget {
                 onChanged: settings.setTranslation,
                 title: const Text('显示歌词翻译'),
               ),
-              _CheckChoice(title: '逐词歌词高亮', selected: settings.verbatim,
-                onTap: () => settings.setVerbatim(!settings.verbatim)),
+              KumoneGlassSwitchTile(title: const Text('逐词歌词高亮'),
+                value: settings.verbatim, onChanged: settings.setVerbatim),
               RadioGroup<LyricsAnnotationMode>(
                 groupValue: settings.annotation,
                 onChanged: (value) {
@@ -479,7 +489,7 @@ class SettingsPage extends StatelessWidget {
               ListTile(leading: const Icon(Icons.settings_input_component),
                 title: const Text('音源配置'), subtitle: const Text('添加、启停及排序 · 最多 7 个自定义音源'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(kumonePageRoute(const SourceSettingsPage()))),
+                onTap: () => Navigator.of(context).push(kumonePageRoute(const SourceSettingsPage(), settings: const RouteSettings(name: '/settings')))),
               KumoneGlassSwitchTile(
                 value: settings.unblock,
                 onChanged: (value) {
@@ -528,7 +538,7 @@ class SettingsPage extends StatelessWidget {
     if (category != null) return sections[category] ?? [];
     return [for (final name in sections.keys) ListTile(
       title: Text(name), trailing: const Icon(Icons.chevron_right),
-      onTap: () => Navigator.of(context).push(kumonePageRoute(SettingsPage(category: name))),
+      onTap: () => Navigator.of(context).push(kumonePageRoute(SettingsPage(category: name), settings: const RouteSettings(name: '/settings'))),
     )];
   }
 

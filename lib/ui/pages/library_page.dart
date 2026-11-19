@@ -25,7 +25,7 @@ class LibraryPage extends StatelessWidget {
         appBar: KumoneGlassAppBar(title: const Text('我的'), actions: [
           IconButton(
               onPressed: () => Navigator.of(context)
-                  .push(kumonePageRoute(const SettingsPage())),
+                  .push(kumonePageRoute(const SettingsPage(), settings: const RouteSettings(name: '/settings'))),
               icon: const Icon(Icons.settings_outlined)),
         ]),
         body: ListView(children: [
@@ -54,7 +54,7 @@ class LibraryPage extends StatelessWidget {
               IconButton(
                 tooltip: '设置',
                 onPressed: () => Navigator.of(context).push(
-                  kumonePageRoute(const SettingsPage()),
+                  kumonePageRoute(const SettingsPage(), settings: const RouteSettings(name: '/settings')),
                 ),
                 icon: const Icon(Icons.settings_outlined),
               ),

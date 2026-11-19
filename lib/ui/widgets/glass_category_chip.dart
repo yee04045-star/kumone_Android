@@ -47,12 +47,12 @@ class GlassCategoryChip extends StatelessWidget {
                           : Colors.transparent),
                 ),
                 alignment: Alignment.center,
-                child: Text(label,
+                child: FittedBox(fit: BoxFit.scaleDown, child: Text(label,
                     style: TextStyle(
                         fontSize: 12,
                         fontWeight:
                             selected ? FontWeight.w800 : FontWeight.w500,
-                        color: foreground)),
+                        color: foreground))),
               ),
             ),
           ),

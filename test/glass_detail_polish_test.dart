@@ -35,7 +35,7 @@ void main() {
             line: line, current: true, settings: settings, playbackMs: 500),
       ))),
     ));
-    expect(tester.widget<Text>(find.text('歌声')).style!.fontSize, 26);
+    expect(tester.widget<Text>(find.text('歌声')).style!.fontSize, 28.6);
     settings.previewLyricFontScale(1.8);
     await tester.pump();
     expect(tester.widget<Text>(find.text('歌声')).style!.fontSize,

@@ -71,11 +71,21 @@ jobs:
         run: flutter test
 
       - name: Build release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --split-per-abi
+
+      - name: Analyze ARM64 size
+        run: flutter build apk --release --target-platform android-arm64 --analyze-size
+
+      - name: Upload size analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: kumone-size-analysis
+          path: ~/.flutter-devtools/apk-code-size-analysis_*.json
+          if-no-files-found: error
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: kumone-android-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-*-release.apk
           if-no-files-found: error

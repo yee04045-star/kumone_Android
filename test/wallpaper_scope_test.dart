@@ -1,3 +1,4 @@
+import 'package:kumone_flutter/ui/widgets/cached_wallpaper.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -14,6 +15,8 @@ import 'package:kumone_flutter/ui/widgets/original_player_theme.dart';
 import 'package:kumone_flutter/ui/theme/app_theme.dart';
 
 void main() {
+  setUp(() => CachedWallpaper.cacheEnabled = false);
+  tearDown(() => CachedWallpaper.cacheEnabled = true);
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory root;
   setUp(() async {
@@ -73,6 +76,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('player:light'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
+    await tester.runAsync(CachedWallpaper.settlePending);
     wallpaper.dispose();
     settings.dispose();
   });
@@ -122,6 +126,7 @@ void main() {
         isNot(KumoneTheme.light().scaffoldBackgroundColor));
 
     await tester.pumpWidget(const SizedBox());
+    await tester.runAsync(CachedWallpaper.settlePending);
     wallpaper.dispose();
     settings.dispose();
   });

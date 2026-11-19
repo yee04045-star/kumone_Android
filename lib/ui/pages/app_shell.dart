@@ -1,10 +1,10 @@
 import '../widgets/glass_side_navigation.dart';
 import '../widgets/wallpaper_scope.dart';
 import '../widgets/shell_chrome_transition.dart';
+import '../widgets/route_snapshot.dart';
 import '../widgets/first_launch_notice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -31,12 +31,14 @@ class _ContentNavigatorObserver extends NavigatorObserver {
 
   bool _isFullscreen(Route<dynamic>? route) =>
       route?.settings.name == '/now-playing' ||
-      route?.settings.name == '/wallpaper-crop';
+      route?.settings.name == '/wallpaper-crop' ||
+      route?.settings.name == '/settings';
 
   void _sync() {
     // Popups above the player must not bring the mini player back prematurely.
     final page = _routes.whereType<PageRoute<dynamic>>().lastOrNull;
-    onFullscreenChanged(_isFullscreen(page));
+    onFullscreenChanged(_isFullscreen(page) ||
+        _routes.any((route) => route.settings.name == '/settings'));
   }
 
   @override
@@ -282,14 +284,14 @@ class _AppShellState extends State<AppShell> {
         child: SizedBox(
           // Original layout footprint: preserve both chrome positions and
           // their gap. The full-width shader view retains horizontal headroom.
-          height: 74,
+          height: 64,
           child: LayoutBuilder(builder: (context, constraints) {
             return MediaQuery.removePadding(
               context: context,
               removeBottom: true, // SafeArea above already owns this inset.
-              child: LiquidGlassTabBar(
+              child: Align(alignment: Alignment.bottomCenter, child: LiquidGlassTabBar(
                 width: constraints.maxWidth - 28,
-                height: 68,
+                height: 60,
                 swell: const LiquidGlassTabBarSwell(),
                 margin: EdgeInsets.zero,
                 style: barStyle.copyWith(
@@ -299,8 +301,8 @@ class _AppShellState extends State<AppShell> {
                 itemStyle: LiquidGlassTabItemStyle(
                   selectedColor: scheme.primary,
                   unselectedColor: scheme.onSurface,
-                  iconSize: 22,
-                  underGlassIconSize: 24,
+                  iconSize: 28,
+                  underGlassIconSize: 30,
                 ),
                 items: [
                   for (var i = 0; i < _labels.length; i++)
@@ -310,7 +312,7 @@ class _AppShellState extends State<AppShell> {
                       label: _labels[i],
                     ),
                 ],
-              ),
+              )),
             );
           }),
         ),
@@ -319,13 +321,16 @@ class _AppShellState extends State<AppShell> {
   }
 
   Widget _compactBottomLayer(BuildContext context) {
-    return Column(
+    final requested = context.watch<SettingsStore>().bottomChromeOffset;
+    // The tab owns a 10px bottom margin; keep at least 4px above system UI.
+    final offset = requested.clamp(-24.0, 6.0).toDouble();
+    return Transform.translate(offset: Offset(0, offset), child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         _miniPlayer(context),
         _transparentBottomNavigation(context),
       ],
-    );
+    ));
   }
 
   @override
@@ -373,7 +378,7 @@ class _AppShellState extends State<AppShell> {
                     child: Navigator(
                       key: _contentNavigatorKey,
                       observers: [_contentObserver],
-                      onGenerateRoute: (_) => CupertinoPageRoute<void>(
+                      onGenerateRoute: (_) => KumoneSnapshotPageRoute<void>(
                         builder: (_) => KumoneWallpaperRouteSurface(
                           child: ValueListenableBuilder<int>(
                             valueListenable: _tabNotifier,

@@ -16,7 +16,7 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({});
   });
 
-  test('all four accents survive settings reload and apply to both themes',
+  test('all five accents survive settings reload and apply to both themes',
       () async {
     for (final accent in AppAccent.values) {
       final settings = SettingsStore();
@@ -46,7 +46,7 @@ void main() {
     expect(AppAccent.neteaseRed.color.toARGB32(), 0xFFC3473B);
     expect(AppAccent.spotifyGreen.color.toARGB32(), 0xFF65D46E);
     expect(AppAccent.appleBlue.color, KumoneTheme.systemBlue);
-    expect(AppAccent.values.map((e) => e.color).toSet().length, 4);
+    expect(AppAccent.values.map((e) => e.color).toSet().length, 5);
   });
 
   test(
