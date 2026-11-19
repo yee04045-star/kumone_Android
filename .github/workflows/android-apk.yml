@@ -2,6 +2,16 @@ name: Android APK (Release)
 
 on:
   workflow_dispatch:
+    inputs:
+      architecture:
+        description: '选择 APK 架构（大多数现代手机选 ARM64）'
+        required: true
+        default: ARM64
+        type: choice
+        options:
+          - ARM64
+          - ARMV7
+          - X86_64
 
 jobs:
   build:
@@ -70,22 +80,23 @@ jobs:
       - name: Unit tests
         run: flutter test
 
-      - name: Build release APK
-        run: flutter build apk --release --split-per-abi
-
-      - name: Analyze ARM64 size
-        run: flutter build apk --release --target-platform android-arm64 --analyze-size
-
-      - name: Upload size analysis
-        uses: actions/upload-artifact@v4
-        with:
-          name: kumone-size-analysis
-          path: ~/.flutter-devtools/apk-code-size-analysis_*.json
-          if-no-files-found: error
+      - name: Build selected architecture
+        env:
+          APK_ARCH: ${{ inputs.architecture }}
+        run: |
+          case "$APK_ARCH" in
+            ARM64) target=android-arm64; abi=arm64-v8a ;;
+            ARMV7) target=android-arm; abi=armeabi-v7a ;;
+            X86_64) target=android-x64; abi=x86_64 ;;
+            *) echo "Unsupported architecture: $APK_ARCH" >&2; exit 1 ;;
+          esac
+          flutter build apk --release --target-platform "$target" --split-per-abi
+          mkdir -p dist
+          cp "build/app/outputs/flutter-apk/app-${abi}-release.apk" "dist/kumone-${abi}-release.apk"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: kumone-android-release
-          path: build/app/outputs/flutter-apk/app-*-release.apk
+          name: kumone-android-${{ inputs.architecture }}
+          path: dist/*.apk
           if-no-files-found: error

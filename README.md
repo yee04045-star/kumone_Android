@@ -87,7 +87,7 @@
 
 项目面向 Android。可自行从源码构建 APK，或在维护者实际发布构建后获取对应版本。
 
-当前 GitHub Actions 工作流会生成 release APK 并上传至该次运行的 **Artifacts**，不等同于已发布到 GitHub Releases，也不表示应用已上架应用商店。请核实构建来源，不安装来历不明的修改包。
+在 GitHub Actions → Android APK (Release) → Run workflow 中选择 **ARM64、ARMV7 或 X86_64**（默认 ARM64），每次仅构建所选架构，生成 release APK 并上传至该次运行的 **Artifacts**，不等同于已发布到 GitHub Releases，也不表示应用已上架应用商店。请核实构建来源，不安装来历不明的修改包。
 
 ## 构建
 
@@ -107,7 +107,7 @@ flutter test --no-pub
 flutter build apk --release --split-per-abi
 ```
 
-APK 按架构输出至 `build/app/outputs/flutter-apk/`：`app-arm64-v8a-release.apk`（多数现代设备）、`app-armeabi-v7a-release.apk` 和 `app-x86_64-release.apk`。请选择与设备匹配的版本。CI 另上传 ARM64 体积分析 JSON，供 DevTools 检查。
+APK 按架构输出至 `build/app/outputs/flutter-apk/`：`app-arm64-v8a-release.apk`（多数现代设备）、`app-armeabi-v7a-release.apk` 和 `app-x86_64-release.apk`。请选择与设备匹配的版本。
 
 设置 → 背景与外观提供「转场冻结离场页面（实验性）」开关，默认关闭；开启后被覆盖页面使用整页快照，返回后恢复实时绘制。如有玻璃闪烁请关闭。静态壁纸模糊结果自动缓存，拖动模糊滑条时仍实时预览。
 
