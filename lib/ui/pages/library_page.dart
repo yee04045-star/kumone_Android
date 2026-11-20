@@ -1,3 +1,5 @@
+import '../../core/player/player_controller.dart';
+import '../widgets/glass_playlist_dialog.dart';
 import '../widgets/glass_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -291,7 +293,7 @@ class _PlaylistListPageState extends State<_PlaylistListPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: KumoneGlassAppBar(
-        title: Text(widget.subscribed ? '收藏的歌单' : '创建的歌单'),
+        title: const SizedBox.shrink(),
         actions: [
           if (!widget.subscribed)
             IconButton(
@@ -421,15 +423,11 @@ Future<void> _createPlaylistFromList(
     if (id == null) throw const FormatException('创建歌单失败');
     await account.refreshLibrary();
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('歌单创建成功')),
-      );
+      context.read<PlayerController>().showNotice('歌单创建成功');
     }
   } catch (e) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
+      context.read<PlayerController>().showNotice('$e');
     }
   }
 }
@@ -442,7 +440,7 @@ Future<void> _deletePlaylistFromList(
 ) async {
   final confirmed = await kumoneDialog<bool>(
     context: context,
-    builder: (dialogContext) => AlertDialog(
+    builder: (dialogContext) => KumoneGlassPlaylistDialog(
       title: const Text('删除歌单？'),
       content: Text('将删除「$name」，此操作不可撤销。'),
       actions: [
@@ -462,15 +460,11 @@ Future<void> _deletePlaylistFromList(
     await account.api.deletePlaylist(id);
     await account.refreshLibrary();
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('歌单已删除')),
-      );
+      context.read<PlayerController>().showNotice('歌单已删除');
     }
   } catch (e) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$e')),
-      );
+      context.read<PlayerController>().showNotice('$e');
     }
   }
 }

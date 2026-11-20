@@ -53,7 +53,14 @@ void main() {
                 home: recent ? const RecentPage() : const CollectionsPage(),
               )));
           await tester.pumpAndSettle();
-          expect(find.byType(GlassCategoryChip), findsNWidgets(recent ? 3 : 2));
+          expect(find.byType(GlassCategoryChip), findsNWidgets(2));
+          expect(tester.widgetList<GlassCategoryChip>(find.byType(GlassCategoryChip))
+              .every((chip) => chip.menuOptics), isTrue);
+          if (recent) {
+            expect(find.widgetWithText(FilledButton, '播放全部'), findsOneWidget);
+            final button = tester.getSize(find.widgetWithText(FilledButton, '播放全部'));
+            expect(button.height, 38);
+          }
           expect(find.byType(SegmentedButton<int>), findsNothing);
           expect(find.byType(SegmentedButton<bool>), findsNothing);
           expect(find.byIcon(Icons.check), findsNothing);

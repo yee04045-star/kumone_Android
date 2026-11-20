@@ -406,7 +406,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                             Artwork(url: track.album.picUrl, size: cover,
                               radius: spacious ? 24 : 18, shadow: false),
                             SizedBox(height: spacious ? 24 : 10),
-                            _ImmersiveMetadata(track: track,
+                            _ImmersiveMetadata(track: track, centered: true,
                               onOpenArtist: _openArtist, onOpenAlbum: _openAlbum),
                             SizedBox(height: spacious ? 18 : 6),
                             _PlaybackControls(track: track, player: player,
@@ -965,17 +965,18 @@ class _ImmersiveArtworkMode extends StatelessWidget {
                 behavior: HitTestBehavior.opaque,
                 onTap: onShowLyrics,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 12),
                     const Spacer(),
-                    Artwork(
+                    Center(child: Artwork(
                       url: track.album.picUrl,
                       size: artworkSize,
                       radius: 22,
                       shadow: true,
                       border: false,
                       scale: 1.0,
-                    ),
+                    )),
                     const Spacer(),
                     const SizedBox(height: 9),
                     Transform.translate(
@@ -1077,7 +1078,10 @@ class _ImmersiveMetadata extends StatelessWidget {
   final ValueChanged<ArtistRef> onOpenArtist;
   final ValueChanged<AlbumRef> onOpenAlbum;
 
+  final bool centered;
+
   const _ImmersiveMetadata({
+    this.centered = false,
     required this.track,
     required this.onOpenArtist,
     required this.onOpenAlbum,
@@ -1090,6 +1094,7 @@ class _ImmersiveMetadata extends StatelessWidget {
       children: [
         MarqueeText(
           track.name,
+          textAlign: centered ? TextAlign.center : TextAlign.start,
           style: const TextStyle(
             color: Colors.white,
             fontSize: titleFontSize,
@@ -1102,6 +1107,7 @@ class _ImmersiveMetadata extends StatelessWidget {
         SizedBox(
           height: 22,
           child: AutoScrollMetadata(
+            centered: centered,
             identity: '${track.id}:${track.artistNames}:${track.album.name}',
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -1183,7 +1189,7 @@ class _ThreeLineLyricPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final parsed = lyrics;
     if (parsed == null || parsed.lines.isEmpty) {
-      return const SizedBox(height: 76);
+      return const SizedBox(height: 82, width: double.infinity);
     }
 
     final active = parsed
@@ -2250,12 +2256,7 @@ class _LyricsSideState extends State<_LyricsSide> {
                   margin: const EdgeInsets.symmetric(vertical: 4),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                  decoration: BoxDecoration(
-                    color: i == active
-                        ? Colors.white.withValues(alpha: .08)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+
                   child: LyricDistanceBlur(
                     radius: lyricBlurRadius(
                         i, active, settings.lyricBlur, _userScrolling),

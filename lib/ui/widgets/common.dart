@@ -828,6 +828,8 @@ class GlassMiniPlayer extends StatelessWidget {
       color: Colors.transparent,
       child: KumoneLiquidSurface(
         radius: 999,
+        backingOpacity: context.watch<SettingsStore>().chromeBackingOpacity,
+        blur: context.watch<SettingsStore>().chromeBlur,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
         child: Row(
           children: [
@@ -1248,13 +1250,14 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
   }
 
   Future<void> _like(BuildContext context) async {
+    final account = context.read<AccountStore>();
+    final player = context.read<PlayerController>();
+    final wasLiked = account.liked(widget.track.id);
     try {
-      await context.read<AccountStore>().toggleLike(widget.track.id);
+      await account.toggleLike(widget.track.id);
+      player.showNotice(wasLiked ? '已取消喜欢' : '已加入喜欢');
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$e')));
-      }
+      player.showNotice('$e');
     }
   }
 
@@ -1448,16 +1451,26 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
 Future<void> showAddToPlaylistSheet(BuildContext context, Track track) async {
   final account = context.read<AccountStore>();
   if (!account.isLoggedIn) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('请先登录后再添加到歌单')));
+    context.read<PlayerController>().showNotice('请先登录后再添加到歌单');
     return;
   }
   await showModalBottomSheet<void>(
     context: context,
     useRootNavigator: true,
-    showDragHandle: true,
+    showDragHandle: false,
+    backgroundColor: Colors.transparent,
     isScrollControlled: true,
-    builder: (_) => _AddToPlaylistSheet(track: track),
+    builder: (context) {
+      final settings = context.watch<SettingsStore>();
+      return KumoneLiquidSurface(radius: 28, interactive: false,
+        backingOpacity: settings.menuBackingOpacity, blur: settings.songMenuBlur,
+        child: Padding(padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const SizedBox(height: 16),
+            Container(width: 32, height: 4, decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.onSurfaceVariant, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 16), _AddToPlaylistSheet(track: track)])));
+    },
   );
 }
 
@@ -1482,7 +1495,7 @@ class _AddToPlaylistSheetState extends State<_AddToPlaylistSheet> {
   Future<void> _createAndAdd() async {
     final name = nameController.text.trim();
     if (name.isEmpty || creating) return;
-    final messenger = ScaffoldMessenger.maybeOf(context);
+    final player = context.read<PlayerController>();
     final navigator = Navigator.of(context);
     setState(() => creating = true);
     try {
@@ -1493,10 +1506,10 @@ class _AddToPlaylistSheetState extends State<_AddToPlaylistSheet> {
       await account.refreshLibrary();
       if (!mounted) return;
       navigator.pop();
-      messenger?.showSnackBar(const SnackBar(content: Text('已创建歌单并添加歌曲')));
+      player.showNotice('已创建歌单并添加歌曲');
     } catch (e) {
       if (mounted) {
-        messenger?.showSnackBar(SnackBar(content: Text('$e')));
+        player.showNotice('$e');
       }
     } finally {
       if (mounted) setState(() => creating = false);
@@ -1504,7 +1517,7 @@ class _AddToPlaylistSheetState extends State<_AddToPlaylistSheet> {
   }
 
   Future<void> _add(int playlistId, String name) async {
-    final messenger = ScaffoldMessenger.maybeOf(context);
+    final player = context.read<PlayerController>();
     final navigator = Navigator.of(context);
     try {
       final account = context.read<AccountStore>();
@@ -1512,10 +1525,10 @@ class _AddToPlaylistSheetState extends State<_AddToPlaylistSheet> {
       await account.refreshLibrary();
       if (!mounted) return;
       navigator.pop();
-      messenger?.showSnackBar(SnackBar(content: Text('已添加到「$name」')));
+      player.showNotice('已添加到「$name」');
     } catch (e) {
       if (mounted) {
-        messenger?.showSnackBar(SnackBar(content: Text('$e')));
+        player.showNotice('$e');
       }
     }
   }

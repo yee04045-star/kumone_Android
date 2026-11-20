@@ -41,7 +41,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
     final account = context.watch<AccountStore>();
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: const KumoneGlassAppBar(title: Text('我的收藏')),
+      appBar: const KumoneGlassAppBar(title: SizedBox.shrink()),
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(
@@ -52,12 +52,12 @@ class _CollectionsPageState extends State<CollectionsPage> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
                 child: Row(children: [
-                  Expanded(child: GlassCategoryChip(
+                  Expanded(child: GlassCategoryChip(menuOptics: true,
                     label: '专辑', selected: tab == 0,
                     onTap: () => setState(() => tab = 0),
                   )),
                   const SizedBox(width: 8),
-                  Expanded(child: GlassCategoryChip(
+                  Expanded(child: GlassCategoryChip(menuOptics: true,
                     label: '歌手', selected: tab == 1,
                     onTap: () => setState(() => tab = 1),
                   )),
@@ -91,7 +91,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
           maxCrossAxisExtent: 190,
           mainAxisSpacing: 18,
           crossAxisSpacing: 14,
-          childAspectRatio: .76,
+          childAspectRatio: .70,
         ),
         itemCount: albums.length,
         itemBuilder: (_, i) {
@@ -102,9 +102,9 @@ class _CollectionsPageState extends State<CollectionsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: Artwork(url: album.picUrl, radius: 14, shadow: false, size: 190)),
+                AspectRatio(aspectRatio: 1.08, child: Artwork(url: album.picUrl, radius: 14, shadow: false, size: 190)),
                 const SizedBox(height: 8),
-                Text(album.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
+                Expanded(child: Text(album.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700))),
                 if (album.artistName.isNotEmpty)
                   Text(album.artistName, maxLines: 1, overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),

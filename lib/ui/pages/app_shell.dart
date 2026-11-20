@@ -293,6 +293,9 @@ class _AppShellState extends State<AppShell> {
                 swell: const LiquidGlassTabBarSwell(),
                 margin: EdgeInsets.zero,
                 style: barStyle.copyWith(
+                    color: (brightness == Brightness.dark ? Colors.black : Colors.white)
+                        .withValues(alpha: context.watch<SettingsStore>().chromeBackingOpacity ??
+                            KumoneGlassOptics.backingOpacity(brightness)),
                     blur: context.watch<SettingsStore>().chromeBlur),
                 selectedIndex: tab,
                 onChanged: _setTab,
@@ -365,6 +368,7 @@ class _AppShellState extends State<AppShell> {
             SystemNavigator.pop();
           },
           child: Scaffold(
+            resizeToAvoidBottomInset: false,
             body: NotificationListener<UserScrollNotification>(
               onNotification: (notification) {
                 if (wide && !_isNowPlayingFullscreen && _navigationExpanded &&

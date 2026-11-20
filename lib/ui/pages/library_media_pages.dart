@@ -71,7 +71,7 @@ class _RecentPageState extends State<RecentPage> {
     final tracks = records.map((e) => e.song).toList();
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: KumoneGlassAppBar(title: const Text('最近播放')),
+      appBar: KumoneGlassAppBar(title: const SizedBox.shrink()),
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(
@@ -86,14 +86,19 @@ class _RecentPageState extends State<RecentPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(4),
                   child: Row(children: [
-                    Expanded(child: GlassCategoryChip(label: '所有时间', selected: !week,
+                    Expanded(child: GlassCategoryChip(menuOptics: true, label: '所有时间', selected: !week,
                       onTap: () { if (week) { setState(() => week = false); _load(); } })),
                     const SizedBox(width: 8),
-                    Expanded(child: GlassCategoryChip(label: '最近一周', selected: week,
+                    Expanded(child: GlassCategoryChip(menuOptics: true, label: '最近一周', selected: week,
                       onTap: () { if (!week) { setState(() => week = true); _load(); } })),
                     const SizedBox(width: 8),
-                    Expanded(child: GlassCategoryChip(label: '播放全部', selected: false,
-                      onTap: () { if (tracks.isNotEmpty) player.playTracks(tracks); })),
+                    Expanded(child: SizedBox(height: 38, child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+                      onPressed: () { if (tracks.isNotEmpty) player.playTracks(tracks); },
+                      child: const FittedBox(fit: BoxFit.scaleDown,
+                        child: Text('播放全部', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500)))))),
                   ]),
                 ),
               ),
@@ -221,7 +226,7 @@ class _CloudPageState extends State<CloudPage> {
     }
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: const KumoneGlassAppBar(title: Text('音乐云盘')),
+      appBar: const KumoneGlassAppBar(title: SizedBox.shrink()),
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(

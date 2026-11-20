@@ -56,7 +56,9 @@ class WallpaperScope extends StatelessWidget {
       extend: extend,
       stripColor: statusTint,
       child: Stack(fit: StackFit.expand, children: [
-        const Positioned.fill(child: RepaintBoundary(child: KumoneWallpaperBackdrop())),
+        Positioned(top: 0, left: 0, right: 0,
+          height: MediaQuery.sizeOf(context).height,
+          child: const RepaintBoundary(child: KumoneWallpaperBackdrop())),
         if (!extend)
           Positioned(
               top: 0,
@@ -127,7 +129,12 @@ class KumoneWallpaperRouteSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     final wallpaper = context.watch<WallpaperStore?>();
     final landscape = MediaQuery.sizeOf(context).aspectRatio > 1;
-    if (wallpaper?.pathFor(landscape) == null) return child;
+    if (wallpaper?.pathFor(landscape) == null) {
+      // A snapshot must include an opaque backdrop. Otherwise glass in a
+      // transparent subtree samples transparent black during capture.
+      return ColoredBox(color: Theme.of(context).scaffoldBackgroundColor,
+          child: child);
+    }
     final settings = context.watch<SettingsStore?>();
     final dark = wallpaper!.darkFor(landscape);
     final color = settings?.accent.color ?? KumoneTheme.systemBlue;

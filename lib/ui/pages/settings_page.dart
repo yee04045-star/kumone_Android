@@ -1,3 +1,4 @@
+import '../widgets/liquid_surface.dart';
 import 'package:flutter/material.dart';
 import 'wallpaper_crop_page.dart';
 import 'source_settings_page.dart';
@@ -299,6 +300,11 @@ class SettingsPage extends StatelessWidget {
                   max: 40,
                   onChanged: settings.previewChromeBlur,
                   onChangeEnd: settings.saveChromeBlur),
+              ListTile(title: const Text('Tab 栏与 mini 播放器 · 底色不透明度'),
+                trailing: Text('${((settings.chromeBackingOpacity ?? KumoneGlassOptics.backingOpacity(Theme.of(context).brightness)) * 100).round()}%')),
+              KumoneGlassSlider(value: settings.chromeBackingOpacity ?? KumoneGlassOptics.backingOpacity(Theme.of(context).brightness),
+                min: 0, max: 1, onChanged: settings.previewChromeBackingOpacity,
+                onChangeEnd: settings.saveChromeBackingOpacity),
               ListTile(
                 title: const Text('菜单与控件 · 模糊强度'),
                 trailing: Text(settings.songMenuBlur.toStringAsFixed(1)),

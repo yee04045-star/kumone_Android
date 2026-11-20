@@ -35,6 +35,15 @@ class SettingsStore extends ChangeNotifier {
   // uses its own ambient system-bar treatment.
   bool backgroundExtend = true;
   double chromeBlur = 5;
+  double? chromeBackingOpacity;
+  void previewChromeBackingOpacity(double value) {
+    chromeBackingOpacity = value.clamp(0, 1).toDouble();
+    notifyListeners();
+  }
+  Future<void> saveChromeBackingOpacity(double value) async {
+    previewChromeBackingOpacity(value);
+    await prefs.setDouble('chromeBackingOpacity', chromeBackingOpacity!);
+  }
   double bottomChromeOffset = 6;
   double miniTabGap = 24;
   void previewMiniTabGap(double value) {
@@ -72,6 +81,9 @@ class SettingsStore extends ChangeNotifier {
   }
 
   Future<void> load() async {
+    chromeBackingOpacity = (await prefs.getDouble('chromeBackingOpacity') ??
+        await prefs.getDouble('tabBackingOpacity') ??
+        await prefs.getDouble('miniBackingOpacity'))?.clamp(0, 1).toDouble();
     miniTabGap = (await prefs.getDouble('miniTabGap') ?? 24).clamp(24, 36).toDouble();
     bottomChromeOffset = (await prefs.getDouble('bottomChromeOffset') ?? 6).clamp(-24, 6).toDouble();
     freezeOutgoingPage = await prefs.getBool('freezeOutgoingPage') ?? true;

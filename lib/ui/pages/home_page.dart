@@ -321,31 +321,9 @@ class _HomePageState extends State<HomePage> {
     }
 
     final slivers = <Widget>[
-      SliverToBoxAdapter(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16,
-              18 + MediaQuery.paddingOf(context).top, 16, 18),
-          child: Row(
-            children: [
-              const Text(
-                '推荐',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, letterSpacing: -.7),
-              ),
-              const Spacer(),
-              if (account.isLoggedIn)
-                Artwork(
-                  url: account.profile?.avatarUrl,
-                resolveUrl: account.profile == null
-                    ? null
-                    : () => NeteaseApi.instance.userAvatar(account.profile!.userId),
-                size: 34,
-                  radius: 17,
-                  circle: true,
-                  shadow: false,
-                ),
-            ],
-          ),
-        ),
+      const KumoneGlassSliverAppBar(
+        pinned: true,
+        title: Text('推荐', style: TextStyle(fontWeight: FontWeight.w800)),
       ),
     ];
 

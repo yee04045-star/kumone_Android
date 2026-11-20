@@ -95,7 +95,7 @@ class _SearchPageState extends State<SearchPage> {
         KumoneGlassSliverAppBar(
           pinned: true,
           automaticallyImplyLeading: false,
-          toolbarHeight: 62,
+          toolbarHeight: kToolbarHeight,
           titleSpacing: 8,
           title: SearchBar(
             controller: controller,
@@ -115,19 +115,19 @@ class _SearchPageState extends State<SearchPage> {
             onChanged: (_) => _scheduleSearch(),
           ),
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(54),
+            preferredSize: const Size.fromHeight(50),
             child: SizedBox(
-              height: 54,
+              height: 50,
               child: ListView.separated(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    const EdgeInsets.fromLTRB(16, 6, 16, 10),
                 scrollDirection: Axis.horizontal,
                 itemCount: SearchType.values.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 7),
                 itemBuilder: (_, i) {
                   final value = SearchType.values[i];
                   final selected = value == type;
-                  return GlassCategoryChip(
+                  return GlassCategoryChip(menuOptics: true, height: 34,
                     label: switch (value) {
                       SearchType.all => '综合',
                       SearchType.songs => '单曲',

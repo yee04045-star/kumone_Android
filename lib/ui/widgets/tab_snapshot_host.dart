@@ -30,6 +30,7 @@ class _KumoneTabSnapshotHostState extends State<KumoneTabSnapshotHost> {
   int? warming;
   bool enabled = false;
   bool started = false;
+  final startupClock = Stopwatch()..start();
   int epoch = 0;
   Object? environment;
   bool get frozen =>
@@ -81,8 +82,12 @@ class _KumoneTabSnapshotHostState extends State<KumoneTabSnapshotHost> {
   }
 
   Future<void> warm(int token) async {
-    for (final index in const [1, 2, 3]) {
-      await Future<void>.delayed(const Duration(milliseconds: 240));
+    for (final index in const [2, 1, 3]) {
+      final due = index == 2 ? 240 : 2000;
+      final wait = due - startupClock.elapsedMilliseconds;
+      if (wait > 0) await Future<void>.delayed(Duration(milliseconds: wait));
+      // Stagger the two heavier pages rather than capturing both in one frame.
+      if (index == 3) await Future<void>.delayed(const Duration(milliseconds: 240));
       if (!mounted || token != epoch || !enabled) return;
       // Never compete with a route transition. Defer until the root is visible.
       while (frozen && mounted && token == epoch) {
@@ -110,7 +115,7 @@ class _KumoneTabSnapshotHostState extends State<KumoneTabSnapshotHost> {
       final ratio = math.min(MediaQuery.devicePixelRatioOf(context),
           1600 / boundary.size.longestSide);
       final result = await boundary.toImage(pixelRatio: ratio);
-      if (!mounted || token != epoch || !enabled) {
+      if (!mounted || token != epoch || !enabled || visited.contains(index)) {
         result.dispose();
         return;
       }
@@ -123,8 +128,8 @@ class _KumoneTabSnapshotHostState extends State<KumoneTabSnapshotHost> {
 
   void select() {
     if (!mounted) return;
+    visited.add(widget.selected.value);
     if (!frozen) {
-      visited.add(widget.selected.value);
       images.remove(widget.selected.value)?.dispose();
     }
     setState(() {});

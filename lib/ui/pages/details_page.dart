@@ -1145,7 +1145,7 @@ class _DailyPageState extends State<DailyPage> {
     final player = context.read<PlayerController>();
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: KumoneGlassAppBar(title: const Text('每日推荐')),
+      appBar: KumoneGlassAppBar(title: const SizedBox.shrink()),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : songs.isEmpty

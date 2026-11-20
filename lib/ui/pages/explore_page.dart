@@ -202,17 +202,17 @@ class _ExplorePageState extends State<ExplorePage> {
             title:
                 const Text('精选', style: TextStyle(fontWeight: FontWeight.w800)),
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(54),
+              preferredSize: const Size.fromHeight(50),
               child: SizedBox(
-                height: 54,
+                height: 50,
                 child: ListView.separated(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      const EdgeInsets.fromLTRB(16, 6, 16, 10),
                   scrollDirection: Axis.horizontal,
                   itemCount: categories.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 7),
                   itemBuilder: (_, i) {
-                    return GlassCategoryChip(
+                    return GlassCategoryChip(menuOptics: true, height: 34,
                         label: categories[i],
                         selected: categories[i] == category,
                         onTap: () => _selectCategory(categories[i]));

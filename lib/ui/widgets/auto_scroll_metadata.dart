@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 class AutoScrollMetadata extends StatefulWidget {
   final Widget child;
   final Object identity;
+  final bool centered;
   const AutoScrollMetadata(
-      {super.key, required this.child, required this.identity});
+      {super.key, required this.child, required this.identity,
+      this.centered = false});
   @override
   State<AutoScrollMetadata> createState() => _AutoScrollMetadataState();
 }
@@ -76,7 +78,13 @@ class _AutoScrollMetadataState extends State<AutoScrollMetadata> {
             controller: _scroll,
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            child: widget.child,
+            child: widget.centered && constraints.hasBoundedWidth
+                ? ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                    child: Row(mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [widget.child]))
+                : widget.child,
           ),
         );
       });

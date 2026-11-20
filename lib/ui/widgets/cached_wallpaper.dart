@@ -45,22 +45,28 @@ class _CachedWallpaperState extends State<CachedWallpaper> {
         Size(width.toDouble(), height.toDouble()));
     final src = Alignment.center.inscribe(fitted.source,
         Offset.zero & Size(source.width.toDouble(), source.height.toDouble()));
-    final dst = Offset.zero & Size(width.toDouble(), height.toDouble());
-    canvas.drawImageRect(
-        source,
-        src,
-        dst,
-        Paint()
-          ..filterQuality = FilterQuality.medium
-          ..imageFilter = ui.ImageFilter.blur(
-              sigmaX: sigma * ratio,
-              sigmaY: sigma * ratio,
-              tileMode: TileMode.clamp));
+    final scale = width / src.width;
+    final matrix = Matrix4.identity()
+      ..translateByDouble(-src.left * scale, -src.top * scale, 0, 1)
+      ..scaleByDouble(scale, scale, 1, 1);
+    // Extend the actual image texels before filtering, not the transparent
+    // output bounds of drawImageRect. This also preserves the cover crop.
+    final shader = ui.ImageShader(source, TileMode.clamp, TileMode.clamp,
+        matrix.storage);
+    final padding = (sigma * ratio * 4).ceilToDouble() + 2;
+    final bounds = Rect.fromLTRB(-padding, -padding,
+        width + padding, height + padding);
+    canvas.saveLayer(bounds, Paint()..imageFilter = ui.ImageFilter.blur(
+        sigmaX: sigma * ratio, sigmaY: sigma * ratio,
+        tileMode: TileMode.clamp));
+    canvas.drawRect(bounds, Paint()..shader = shader);
+    canvas.restore();
     final picture = recorder.endRecording();
     try {
       return await picture.toImage(width, height);
     } finally {
       picture.dispose();
+      shader.dispose();
       source.dispose();
     }
   }
