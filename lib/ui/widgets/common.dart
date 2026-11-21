@@ -1731,32 +1731,39 @@ class KumoneScrollingTabHeader extends StatelessWidget {
   final Widget title;
   final List<Widget> actions;
   final PreferredSizeWidget? bottom;
+  final bool contentScrolled;
+  final double rightInset;
   const KumoneScrollingTabHeader({super.key, required this.title,
-    this.actions = const [], this.bottom});
+    this.actions = const [], this.bottom, this.contentScrolled = false,
+    this.rightInset = 8});
   @override
   Widget build(BuildContext context) => ScrollConfiguration(
     behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
     child: SliverPersistentHeader(pinned: true,
       delegate: _TabHeaderDelegate(title, actions, bottom,
-        MediaQuery.paddingOf(context).top)));
+        MediaQuery.paddingOf(context).top, contentScrolled, rightInset)));
 }
 class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Widget title;
   final List<Widget> actions;
   final PreferredSizeWidget? bottom;
   final double top;
-  _TabHeaderDelegate(this.title, this.actions, this.bottom, this.top);
+  final bool contentScrolled;
+  final double rightInset;
+  _TabHeaderDelegate(this.title, this.actions, this.bottom, this.top,
+    this.contentScrolled, this.rightInset);
   @override double get minExtent => top + (bottom?.preferredSize.height ?? 0);
   @override double get maxExtent => minExtent + kToolbarHeight;
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final progress = (shrinkOffset / kToolbarHeight).clamp(0.0, 1.0);
+    final blurProgress = contentScrolled ? 1.0 : progress;
     return AnnotatedRegion<SystemUiOverlayStyle>(value: kumoneGlassStatusBarStyle(context),
       child: Stack(clipBehavior: Clip.none, children: [
         Positioned.fill(child: _KumoneGlassBarSurface(
-          followScroll: false, scrollProgress: progress,
+          followScroll: false, scrollProgress: blurProgress,
           baseHeight: top + 46)),
-        Positioned(top: top, left: 16, right: 8,
+        Positioned(top: top, left: 16, right: rightInset,
           height: kToolbarHeight * (1 - progress),
           child: IgnorePointer(ignoring: progress >= 1,
             child: ClipRect(child: OverflowBox(alignment: Alignment.bottomCenter,

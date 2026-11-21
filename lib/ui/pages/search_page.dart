@@ -89,10 +89,14 @@ class _SearchPageState extends State<SearchPage> {
     final player = context.read<PlayerController>();
     final data = result;
 
-    return NestedScrollView(
-      physics: const BouncingScrollPhysics(),
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
+      child: NestedScrollView(
+      physics: const ClampingScrollPhysics(),
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         KumoneScrollingTabHeader(
+          contentScrolled: innerBoxIsScrolled,
+          rightInset: 16,
           title: Center(child: KumoneGlassSearchField(
             height: 40,
             controller: controller,
@@ -149,7 +153,7 @@ class _SearchPageState extends State<SearchPage> {
                       type: type,
                       player: player,
                     ),
-    );
+    ));
   }
 }
 
@@ -195,6 +199,7 @@ class _Results extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      physics: const ClampingScrollPhysics(),
       padding:
           EdgeInsets.only(bottom: KumoneBottomOverlayInset.of(context) + 24),
       children: [
