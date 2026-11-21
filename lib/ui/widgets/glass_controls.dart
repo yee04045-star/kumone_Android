@@ -114,7 +114,9 @@ class KumoneGlassSearchField extends StatelessWidget {
   const KumoneGlassSearchField({super.key, this.onChanged, this.decoration,
     this.controller, this.onSubmitted, this.height = 40});
   @override
-  Widget build(BuildContext context) => KumoneLiquidSurface(
+  Widget build(BuildContext context) => SizedBox(height: height,
+    child: KumoneLiquidSurface(
+      interactive: false,
       radius: 26,
       backingOpacity: context.watch<SettingsStore?>()?.menuBackingOpacity ?? .20,
       blur: context.watch<SettingsStore?>()?.songMenuBlur ?? 14,
@@ -142,5 +144,5 @@ class KumoneGlassSearchField extends StatelessWidget {
               filled: false,
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none))));
+              focusedBorder: InputBorder.none)))));
 }

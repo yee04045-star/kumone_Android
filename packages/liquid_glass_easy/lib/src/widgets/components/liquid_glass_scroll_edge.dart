@@ -316,7 +316,7 @@ class _LiquidGlassScrollEdgeState extends State<LiquidGlassScrollEdge>
   /// Shapes the tint (with [curve]) and the blur's feather mask (with
   /// [blurCurve]).
   LinearGradient _rampGradient(Color color, bool top, Curve falloff) {
-    const int stopsCount = 8;
+    const int stopsCount = 32;
     final List<double> stops = <double>[];
     final List<Color> colors = <Color>[];
     for (int i = 0; i < stopsCount; i++) {
@@ -362,7 +362,8 @@ class _LiquidGlassScrollEdgeState extends State<LiquidGlassScrollEdge>
   Widget _blurPass(bool top) {
     return ClipRect(
       child: LiquidGlassBatchBackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: _sigma(top), sigmaY: _sigma(top)),
+        filter: ui.ImageFilter.blur(sigmaX: _sigma(top), sigmaY: _sigma(top),
+            tileMode: TileMode.clamp),
         child: widget.style == LiquidGlassScrollEdgeStyle.soft
             ? _featherMask(top)
             : const SizedBox.expand(),

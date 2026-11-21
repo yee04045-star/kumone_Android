@@ -450,7 +450,12 @@ void main() {
         hintText: '搜索此歌单',
       )),
     )));
+    final glass = find.descendant(of: find.byType(KumoneGlassSearchField),
+        matching: find.byType(LiquidGlassLens));
+    expect(tester.getSize(glass).height, 40);
     final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.decoration!.contentPadding,
+        const EdgeInsets.symmetric(vertical: 8));
     expect(field.textAlignVertical, TextAlignVertical.center);
     expect(field.maxLines, 1);
     await tester.enterText(find.byType(TextField), '歌曲');
@@ -458,6 +463,12 @@ void main() {
     final iconCenter = tester.getCenter(find.byIcon(Icons.search));
     final textCenter = tester.getCenter(find.byType(EditableText));
     expect((iconCenter.dy - textCenter.dy).abs(), lessThanOrEqualTo(2));
+    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox(
+      height: 56, child: Center(child: KumoneGlassSearchField(height: 40,
+        decoration: InputDecoration(prefixIcon: Icon(Icons.search), hintText: '搜索')))))));
+    expect(tester.getSize(find.byType(LiquidGlassLens)).height, 40);
+    expect((tester.getCenter(find.byIcon(Icons.search)).dy -
+        tester.getCenter(find.byType(LiquidGlassLens)).dy).abs(), lessThanOrEqualTo(1));
   });
 
   testWidgets('long app bar titles use the clipped scrolling title',

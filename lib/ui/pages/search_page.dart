@@ -94,7 +94,7 @@ class _SearchPageState extends State<SearchPage> {
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         KumoneScrollingTabHeader(
           title: Center(child: KumoneGlassSearchField(
-            height: 38,
+            height: 40,
             controller: controller,
             decoration: const InputDecoration(
               hintText: '搜索歌曲、歌手、专辑或歌单',

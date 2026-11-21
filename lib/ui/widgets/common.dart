@@ -1752,7 +1752,7 @@ class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final progress = (shrinkOffset / kToolbarHeight).clamp(0.0, 1.0);
     return AnnotatedRegion<SystemUiOverlayStyle>(value: kumoneGlassStatusBarStyle(context),
-      child: Stack(clipBehavior: Clip.hardEdge, children: [
+      child: Stack(clipBehavior: Clip.none, children: [
         Positioned.fill(child: _KumoneGlassBarSurface(
           followScroll: false, scrollProgress: progress,
           baseHeight: top + 46)),
