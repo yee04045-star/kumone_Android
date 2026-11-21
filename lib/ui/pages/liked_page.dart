@@ -117,7 +117,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            icon: const Icon(Icons.play_arrow_rounded),
+                            icon: const KumonePlayAllIcon(),
                             label: const Text('播放全部'),
                           )))),
                         ],

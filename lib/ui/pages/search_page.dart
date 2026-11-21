@@ -93,7 +93,7 @@ class _SearchPageState extends State<SearchPage> {
       physics: const BouncingScrollPhysics(),
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         KumoneScrollingTabHeader(
-          title: KumoneGlassSearchField(
+          title: Center(child: KumoneGlassSearchField(
             height: 38,
             controller: controller,
             decoration: const InputDecoration(
@@ -101,7 +101,7 @@ class _SearchPageState extends State<SearchPage> {
               prefixIcon: Icon(Icons.search)),
             onChanged: (_) => _scheduleSearch(),
             onSubmitted: (_) => _search(),
-          ),
+          )),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(46),
             child: SizedBox(

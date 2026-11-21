@@ -209,6 +209,32 @@ class _PlaylistPageState extends State<PlaylistPage>
                       builder: (context, constraints) {
                         final coverSize = constraints.maxWidth < 400 ? 112.0 : 140.0;
                         final description = (playlist.description ?? '').trim();
+                        final owned = account.isLoggedIn &&
+                            playlist.creator?.userId == account.profile?.userId;
+                        if (owned && !isUserLikedPlaylist) {
+                          return Row(crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [Artwork(url: playlist.cover,
+                              resolveUrl: () => NeteaseApi.instance.playlistCover(playlist.id),
+                              size: 112, radius: 14, shadow: true),
+                              const SizedBox(width: 18),
+                              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min, children: [
+                                  Text(playlist.name, style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w800)),
+                                  const SizedBox(height: 8),
+                                  Text('${tracks.length} 首歌曲', style: TextStyle(
+                                    color: cs.onSurfaceVariant, fontSize: 13)),
+                                  const SizedBox(height: 14),
+                                  FilledButton.icon(onPressed: tracks.isEmpty ? null : () => player.playTracks(tracks),
+                                    style: FilledButton.styleFrom(fixedSize: const Size.fromHeight(40),
+                                      minimumSize: const Size(0, 40),
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
+                                    icon: const KumonePlayAllIcon(), label: const Text('播放全部')),
+                                ])),
+                            ]);
+                        }
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -250,7 +276,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                                 Expanded(
                                   child: FilledButton.icon(
                                     onPressed: tracks.isEmpty ? null : () => player.playTracks(tracks),
-                                    icon: const Icon(Icons.play_arrow_rounded, size: 22),
+                                    icon: const KumonePlayAllIcon(size: 22),
                                     label: const Text('播放全部'),
                                     style: FilledButton.styleFrom(
                                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -711,7 +737,7 @@ class _AlbumPageState extends State<AlbumPage> {
                                 child: FilledButton.icon(
                                   onPressed: songs.isEmpty ? null : () => player.playTracks(songs),
                                   style: _playButtonStyle(),
-                                  icon: const Icon(Icons.play_arrow_rounded, size: 22),
+                                  icon: const KumonePlayAllIcon(size: 22),
                                   label: const Text('播放全部'),
                                 ),
                               ),
@@ -948,7 +974,7 @@ class _ArtistPageState extends State<ArtistPage> {
                     child: FilledButton.icon(
                       onPressed: hotSongs.isEmpty ? null : () => player.playTracks(hotSongs),
                       style: _playButtonStyle(),
-                      icon: const Icon(Icons.play_arrow_rounded, size: 22),
+                      icon: const KumonePlayAllIcon(size: 22),
                       label: const Text('播放热门'),
                     ),
                   ),

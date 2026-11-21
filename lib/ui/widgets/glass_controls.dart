@@ -129,12 +129,14 @@ class KumoneGlassSearchField extends StatelessWidget {
           textAlignVertical: TextAlignVertical.center,
           decoration: (decoration ?? const InputDecoration()).copyWith(
               isDense: true,
+              constraints: BoxConstraints.tightFor(height: height),
               contentPadding: const EdgeInsets.symmetric(vertical: 8),
               prefixIcon: decoration?.prefixIcon == null ? null : SizedBox(
                 width: height, height: height,
                 child: Center(child: IconTheme.merge(
                   data: const IconThemeData(size: 20),
-                  child: decoration!.prefixIcon!))),
+                  child: Transform.translate(offset: const Offset(0, 1),
+                    child: decoration!.prefixIcon!)))),
               prefixIconConstraints:
                   BoxConstraints.tightFor(width: height, height: height),
               filled: false,

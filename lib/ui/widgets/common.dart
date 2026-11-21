@@ -1752,7 +1752,7 @@ class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final progress = (shrinkOffset / kToolbarHeight).clamp(0.0, 1.0);
     return AnnotatedRegion<SystemUiOverlayStyle>(value: kumoneGlassStatusBarStyle(context),
-      child: Stack(clipBehavior: Clip.none, children: [
+      child: Stack(clipBehavior: Clip.hardEdge, children: [
         Positioned.fill(child: _KumoneGlassBarSurface(
           followScroll: false, scrollProgress: progress,
           baseHeight: top + 46)),
@@ -1798,4 +1798,12 @@ class _TopBlurProgress extends InheritedNotifier<ValueNotifier<double>> {
     required super.child}) : super(notifier: notifier);
   static ValueNotifier<double>? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<_TopBlurProgress>()?.notifier;
+}
+
+class KumonePlayAllIcon extends StatelessWidget {
+  final double size;
+  const KumonePlayAllIcon({super.key, this.size = 24});
+  @override
+  Widget build(BuildContext context) => Transform.translate(
+    offset: const Offset(1, 1), child: Icon(Icons.play_arrow_rounded, size: size));
 }
