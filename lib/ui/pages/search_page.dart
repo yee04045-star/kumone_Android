@@ -92,11 +92,7 @@ class _SearchPageState extends State<SearchPage> {
     return NestedScrollView(
       physics: const BouncingScrollPhysics(),
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
-        KumoneGlassSliverAppBar(
-          pinned: true,
-          automaticallyImplyLeading: false,
-          toolbarHeight: kToolbarHeight,
-          titleSpacing: 8,
+        KumoneScrollingTabHeader(
           title: SearchBar(
             controller: controller,
             hintText: '搜索歌曲、歌手、专辑或歌单',
@@ -115,9 +111,9 @@ class _SearchPageState extends State<SearchPage> {
             onChanged: (_) => _scheduleSearch(),
           ),
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(50),
+            preferredSize: const Size.fromHeight(46),
             child: SizedBox(
-              height: 50,
+              height: 46,
               child: ListView.separated(
                 padding:
                     const EdgeInsets.fromLTRB(16, 6, 16, 10),
@@ -127,7 +123,7 @@ class _SearchPageState extends State<SearchPage> {
                 itemBuilder: (_, i) {
                   final value = SearchType.values[i];
                   final selected = value == type;
-                  return GlassCategoryChip(menuOptics: true, height: 34,
+                  return GlassCategoryChip(menuOptics: true, height: 30,
                     label: switch (value) {
                       SearchType.all => '综合',
                       SearchType.songs => '单曲',

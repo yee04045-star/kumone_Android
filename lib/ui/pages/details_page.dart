@@ -256,7 +256,8 @@ class _PlaylistPageState extends State<PlaylistPage>
                                       backgroundColor: Theme.of(context).colorScheme.primary,
                                       disabledBackgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: .28),
                                       foregroundColor: Colors.white,
-                                      minimumSize: const Size.fromHeight(44),
+                                      minimumSize: const Size.fromHeight(40),
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(23),
@@ -268,8 +269,8 @@ class _PlaylistPageState extends State<PlaylistPage>
                                 if (!isUserLikedPlaylist && account.isLoggedIn && playlist.creator?.userId != account.profile?.userId) ...[
                                   const SizedBox(width: 10),
                                   SizedBox(
-                                    width: 44,
-                                    height: 44,
+                                    width: 40,
+                                    height: 40,
                                     child: KumoneGlassIconButton(
                                       tooltip: playlist.subscribed ? '取消收藏歌单' : '收藏歌单',
                                       onPressed: _busySubscription ? null : () => _togglePlaylistSubscription(account, playlist),
@@ -623,7 +624,8 @@ class _AlbumPageState extends State<AlbumPage> {
   ButtonStyle _playButtonStyle() => FilledButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        minimumSize: const Size(0, 44),
+        minimumSize: const Size(0, 40),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         textStyle: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
@@ -716,8 +718,8 @@ class _AlbumPageState extends State<AlbumPage> {
                               if (context.read<AccountStore>().isLoggedIn) ...[
                                 const SizedBox(width: 10),
                                 SizedBox(
-                                  width: 44,
-                                  height: 44,
+                                  width: 40,
+                                  height: 40,
                                   child: KumoneGlassIconButton(
                                     tooltip: subscribed ? '取消收藏专辑' : '收藏专辑',
                                     onPressed: subscriptionBusy ? null : _toggleSubscription,
@@ -857,7 +859,8 @@ class _ArtistPageState extends State<ArtistPage> {
   ButtonStyle _playButtonStyle() => FilledButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        minimumSize: const Size.fromHeight(44),
+        minimumSize: const Size.fromHeight(40),
+                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
         textStyle: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
@@ -952,8 +955,8 @@ class _ArtistPageState extends State<ArtistPage> {
                   if (context.read<AccountStore>().isLoggedIn) ...[
                     const SizedBox(width: 10),
                     SizedBox(
-                      width: 44,
-                      height: 44,
+                      width: 40,
+                      height: 40,
                       child: KumoneGlassIconButton(
                         tooltip: followed ? '取消关注' : '关注歌手',
                         onPressed: followBusy ? null : _toggleFollow,

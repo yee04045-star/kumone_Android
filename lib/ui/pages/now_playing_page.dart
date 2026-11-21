@@ -49,6 +49,27 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   bool? _lastRequestedDarkStatusIcons;
   int? _lastRequestedStatusBarPrimary;
   int? _lastRequestedStatusBarSecondary;
+  Animation<double>? _coveringRoute;
+  bool _barsSuspended = false;
+  void _syncCoveredBars() {
+    final covered = (_coveringRoute?.value ?? 0) > 0;
+    if (covered == _barsSuspended || !mounted) return;
+    _barsSuspended = covered;
+    if (covered) {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        unawaited(_systemUiChannel.invokeMethod<void>('exitNowPlaying', {
+          'backgroundColor': _normalSystemBarColor.toARGB32(),
+          'darkIcons': _normalDarkIcons,
+        }));
+      }
+    } else {
+      _lastRequestedDarkStatusIcons = null;
+      _lastRequestedStatusBarPrimary = null;
+      _lastRequestedStatusBarSecondary = null;
+      _requestStatusBarAppearance(_artworkColors.primary.computeLuminance() > .52,
+          _artworkColors.primary, _artworkColors.secondary);
+    }
+  }
   bool _normalDarkIcons = true;
   Color _normalSystemBarColor = const Color(0xFFF8F8FA);
 
@@ -71,6 +92,12 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final covering = ModalRoute.of(context)?.secondaryAnimation;
+    if (_coveringRoute != covering) {
+      _coveringRoute?.removeListener(_syncCoveredBars);
+      _coveringRoute = covering;
+      covering?.addListener(_syncCoveredBars);
+    }
     final player = context.read<PlayerController>();
     final settings = context.read<SettingsStore>();
     final theme = Theme.of(context);
@@ -264,6 +291,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
 
   @override
   void dispose() {
+    _coveringRoute?.removeListener(_syncCoveredBars);
     final stream = _artworkStream;
     final listener = _artworkListener;
     if (stream != null && listener != null) {
@@ -311,7 +339,10 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     Color primary,
     Color secondary,
   ) {
-    if (defaultTargetPlatform != TargetPlatform.android) return;
+    if (defaultTargetPlatform != TargetPlatform.android || _barsSuspended ||
+        ModalRoute.of(context)?.isCurrent == false) {
+      return;
+    }
 
     final primaryValue = primary.toARGB32();
     final secondaryValue = secondary.toARGB32();
@@ -325,7 +356,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     _lastRequestedStatusBarSecondary = secondaryValue;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      if (!mounted || _barsSuspended || ModalRoute.of(context)?.isCurrent == false) return;
       unawaited(_systemUiChannel.invokeMethod<void>('enterNowPlaying', {
         'darkIcons': darkIcons,
         'primaryColor': primaryValue,
@@ -977,17 +1008,9 @@ class _ImmersiveArtworkMode extends StatelessWidget {
                       border: false,
                       scale: 1.0,
                     )),
-                    const Spacer(),
-                    const SizedBox(height: 9),
-                    Transform.translate(
-                      offset: const Offset(0, -18),
-                      child: _ThreeLineLyricPreview(
-                        lyrics: lyrics,
-                        player: player,
-                        onTap: onShowLyrics,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
+                    Expanded(child: Center(
+                      child: _ThreeLineLyricPreview(lyrics: lyrics,
+                        player: player, onTap: onShowLyrics))),
                   ],
                 ),
               ),
@@ -1215,10 +1238,10 @@ class _ThreeLineLyricPreview extends StatelessWidget {
               if (rows[i] != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Text(
+                  child: MarqueeText(
                     rows[i]!.text,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    scrollEnabled: i == 1,
+                    pixelsPerSecond: 46,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white.withValues(

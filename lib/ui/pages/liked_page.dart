@@ -102,12 +102,14 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                                 color: cs.onSurfaceVariant, fontSize: 13),
                           ),
                           const SizedBox(height: 14),
-                          FilledButton.icon(
+                          SizedBox(height: 48, child: Padding(padding: const EdgeInsets.only(bottom: 2), child: Align(alignment: Alignment.bottomLeft, child: FilledButton.icon(
                             onPressed: tracks.isEmpty
                                 ? null
                                 : () => player.playTracks(tracks),
                             style: FilledButton.styleFrom(
-                              fixedSize: const Size.fromHeight(44),
+                              fixedSize: const Size.fromHeight(40),
+                              minimumSize: const Size(0, 40),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               padding: const EdgeInsets.symmetric(horizontal: 16),
                               backgroundColor: Theme.of(context).colorScheme.primary,
                               foregroundColor: Colors.white,
@@ -117,7 +119,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                             ),
                             icon: const Icon(Icons.play_arrow_rounded),
                             label: const Text('播放全部'),
-                          ),
+                          )))),
                         ],
                       ),
                     ),

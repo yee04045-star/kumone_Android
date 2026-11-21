@@ -197,14 +197,13 @@ class _ExplorePageState extends State<ExplorePage> {
       child: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          KumoneGlassSliverAppBar(
-            pinned: true,
+          KumoneScrollingTabHeader(
             title:
-                const Text('精选', style: TextStyle(fontWeight: FontWeight.w800)),
+                const Text('精选', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(50),
+              preferredSize: const Size.fromHeight(46),
               child: SizedBox(
-                height: 50,
+                height: 46,
                 child: ListView.separated(
                   padding:
                       const EdgeInsets.fromLTRB(16, 6, 16, 10),
@@ -212,7 +211,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   itemCount: categories.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 7),
                   itemBuilder: (_, i) {
-                    return GlassCategoryChip(menuOptics: true, height: 34,
+                    return GlassCategoryChip(menuOptics: true, height: 30,
                         label: categories[i],
                         selected: categories[i] == category,
                         onTap: () => _selectCategory(categories[i]));

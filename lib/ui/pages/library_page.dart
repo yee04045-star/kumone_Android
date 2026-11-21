@@ -46,11 +46,10 @@ class LibraryPage extends StatelessWidget {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          KumoneGlassSliverAppBar(
-            pinned: true,
+          KumoneScrollingTabHeader(
             title: const Text(
               '我的',
-              style: TextStyle(fontWeight: FontWeight.w800),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
             ),
             actions: [
               IconButton(

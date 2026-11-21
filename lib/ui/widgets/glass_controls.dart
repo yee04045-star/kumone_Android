@@ -115,17 +115,17 @@ class KumoneGlassSearchField extends StatelessWidget {
       backingOpacity: context.watch<SettingsStore?>()?.menuBackingOpacity ?? .20,
       blur: context.watch<SettingsStore?>()?.songMenuBlur ?? 14,
       padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: TextField(
+      child: SizedBox(height: 40, child: TextField(
           onChanged: onChanged,
           maxLines: 1,
           textAlignVertical: TextAlignVertical.center,
           decoration: (decoration ?? const InputDecoration()).copyWith(
               isDense: true,
-              contentPadding: const EdgeInsets.symmetric(vertical: 11),
+              contentPadding: const EdgeInsets.symmetric(vertical: 8),
               prefixIconConstraints:
-                  const BoxConstraints(minWidth: 44, minHeight: 44),
+                  const BoxConstraints(minWidth: 40, minHeight: 40),
               filled: false,
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none)));
+              focusedBorder: InputBorder.none))));
 }

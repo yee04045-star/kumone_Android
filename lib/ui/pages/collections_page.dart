@@ -104,7 +104,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
               children: [
                 AspectRatio(aspectRatio: 1.08, child: Artwork(url: album.picUrl, radius: 14, shadow: false, size: 190)),
                 const SizedBox(height: 8),
-                Expanded(child: Text(album.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700))),
+                Text(album.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
                 if (album.artistName.isNotEmpty)
                   Text(album.artistName, maxLines: 1, overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),

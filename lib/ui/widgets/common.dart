@@ -23,11 +23,16 @@ Widget? _iosBackButton(BuildContext context, bool automaticallyImplyLeading) {
       ModalRoute.of(context)?.impliesAppBarDismissal != true) {
     return null;
   }
-  return IconButton(
-    tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-    icon: const Icon(CupertinoIcons.chevron_back, size: 26),
-    onPressed: () => Navigator.of(context).maybePop(),
-  );
+  final settings = context.watch<SettingsStore?>();
+  return Center(child: SizedBox(width: 42, height: 42,
+    child: KumoneLiquidSurface(radius: 999, interactive: false,
+      backingOpacity: settings?.menuBackingOpacity ?? .5,
+      blur: settings?.songMenuBlur ?? 3,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+        icon: const Icon(CupertinoIcons.chevron_back, size: 24),
+        onPressed: () => Navigator.of(context).maybePop()))));
 }
 
 SystemUiOverlayStyle kumoneGlassStatusBarStyle(BuildContext context) {
@@ -1262,17 +1267,16 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
   }
 
   Future<void> _remove(BuildContext context) async {
+    final player = context.read<PlayerController>();
     try {
       final callback = widget.onRemoveFromPlaylist;
       if (callback != null) await callback();
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('已从歌单移除')));
+        player.showNotice('已从歌单移除');
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('$e')));
+        player.showNotice('$e');
       }
     }
   }
@@ -1711,4 +1715,45 @@ class FeatureCard extends StatelessWidget {
       ),
     );
   }
+}
+
+// Only root tabs opt in: the toolbar scrolls away while categories stay pinned.
+class KumoneScrollingTabHeader extends StatelessWidget {
+  final Widget title;
+  final List<Widget> actions;
+  final PreferredSizeWidget? bottom;
+  const KumoneScrollingTabHeader({super.key, required this.title,
+    this.actions = const [], this.bottom});
+  @override
+  Widget build(BuildContext context) => SliverPersistentHeader(pinned: true,
+    delegate: _TabHeaderDelegate(title, actions, bottom,
+      MediaQuery.paddingOf(context).top));
+}
+class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget title;
+  final List<Widget> actions;
+  final PreferredSizeWidget? bottom;
+  final double top;
+  _TabHeaderDelegate(this.title, this.actions, this.bottom, this.top);
+  @override double get minExtent => top + (bottom?.preferredSize.height ?? 0);
+  @override double get maxExtent => minExtent + kToolbarHeight;
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final progress = (shrinkOffset / kToolbarHeight).clamp(0.0, 1.0);
+    return AnnotatedRegion<SystemUiOverlayStyle>(value: kumoneGlassStatusBarStyle(context),
+      child: Stack(clipBehavior: Clip.hardEdge, children: [
+        Positioned.fill(child: Opacity(opacity: progress,
+          child: const _KumoneGlassBarSurface())),
+        Positioned(top: top - shrinkOffset.clamp(0.0, kToolbarHeight), left: 16, right: 8,
+          height: kToolbarHeight,
+          child: IgnorePointer(ignoring: progress >= 1,
+            child: Opacity(opacity: 1 - progress,
+            child: Row(children: [Expanded(child: DefaultTextStyle(
+              style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                fontSize: 24, fontWeight: FontWeight.w800), child: title)), ...actions])))),
+        if (bottom != null) Positioned(left: 0, right: 0, bottom: 0,
+          height: bottom!.preferredSize.height, child: bottom!),
+      ]));
+  }
+  @override bool shouldRebuild(covariant _TabHeaderDelegate oldDelegate) => true;
 }

@@ -83,6 +83,9 @@ class _ContentNavigatorObserver extends NavigatorObserver {
 }
 
 class AppShell extends StatefulWidget {
+  static void selectTab(BuildContext context, int index) =>
+      context.findAncestorStateOfType<_AppShellState>()?._setTab(index);
+
   const AppShell({super.key});
 
   @override
@@ -299,6 +302,7 @@ class _AppShellState extends State<AppShell> {
                     blur: context.watch<SettingsStore>().chromeBlur),
                 selectedIndex: tab,
                 onChanged: _setTab,
+                onReselected: (index) { if (index != 2) _setTab(index); },
                 itemStyle: LiquidGlassTabItemStyle(
                   selectedColor: scheme.primary,
                   unselectedColor: scheme.onSurface,

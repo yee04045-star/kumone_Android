@@ -6,8 +6,11 @@ class MarqueeText extends StatefulWidget {
   final String text;
   final TextStyle? style;
   final TextAlign textAlign;
+  final double pixelsPerSecond;
+  final bool scrollEnabled;
   const MarqueeText(this.text,
-      {super.key, this.style, this.textAlign = TextAlign.start});
+      {super.key, this.style, this.textAlign = TextAlign.start, this.pixelsPerSecond = 28,
+      this.scrollEnabled = true});
   @override
   State<MarqueeText> createState() => _MarqueeTextState();
 }
@@ -33,7 +36,7 @@ class _MarqueeTextState extends State<MarqueeText>
       _pause = Timer(const Duration(seconds: 3), () async {
         if (!mounted || generation != _generation) return;
         _controller.duration =
-            Duration(milliseconds: (distance / 28 * 1000).round());
+            Duration(milliseconds: (distance / widget.pixelsPerSecond * 1000).round());
         await _controller.forward(from: 0).orCancel.catchError((Object _) {});
         if (!mounted || generation != _generation) return;
         _pause = Timer(const Duration(seconds: 2), () {
@@ -61,7 +64,7 @@ class _MarqueeTextState extends State<MarqueeText>
         final width = painter.width;
         final height = painter.height;
         painter.dispose();
-        final reduce = MediaQuery.disableAnimationsOf(context) ||
+        final reduce = !widget.scrollEnabled || MediaQuery.disableAnimationsOf(context) ||
             !TickerMode.valuesOf(context).enabled;
         final distance = constraints.hasBoundedWidth && !reduce
             ? (width - constraints.maxWidth).clamp(0.0, double.infinity)
@@ -73,11 +76,9 @@ class _MarqueeTextState extends State<MarqueeText>
           if (mounted) _configure(signature, distance);
         });
         if (distance <= 0) {
-          return Text(widget.text,
-              style: style,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: widget.textAlign);
+          return SizedBox(width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
+            child: Text(widget.text, style: style, maxLines: 1,
+              overflow: TextOverflow.ellipsis, textAlign: widget.textAlign));
         }
         return Semantics(
             label: widget.text,

@@ -1,3 +1,4 @@
+import 'app_shell.dart';
 import '../widgets/glass_refresh.dart';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -321,9 +322,14 @@ class _HomePageState extends State<HomePage> {
     }
 
     final slivers = <Widget>[
-      const KumoneGlassSliverAppBar(
-        pinned: true,
-        title: Text('推荐', style: TextStyle(fontWeight: FontWeight.w800)),
+      KumoneScrollingTabHeader(
+        title: const Text('推荐'),
+        actions: [if (account.isLoggedIn) Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: GestureDetector(
+            onTap: () => AppShell.selectTab(context, 3),
+            child: Artwork(url: account.profile?.avatarUrl, size: 32,
+              circle: true, radius: 16, shadow: false)))],
       ),
     ];
 
