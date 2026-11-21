@@ -71,7 +71,7 @@ void main() {
       for (final categories in [false, true]) {
         await tester.pumpWidget(MaterialApp(
           theme: ThemeData(brightness: brightness),
-          home: Scaffold(body: CustomScrollView(slivers: [
+          home: KumoneTopBlurScrollScope(child: Scaffold(body: CustomScrollView(slivers: [
             KumoneGlassSliverAppBar(
               title: const Text('精选'),
               bottom: categories ? const PreferredSize(
@@ -79,12 +79,12 @@ void main() {
                 child: SizedBox(height: 54)) : null,
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 1200)),
-          ])),
+          ]))),
         ));
         final finder = find.byType(LiquidGlassScrollEdge);
         final edge = tester.widget<LiquidGlassScrollEdge>(finder);
-        expect(edge.blur, 26);
-        expect(edge.color.a, closeTo(.10, .001));
+        expect(edge.blur, 0);
+        expect(edge.color.a, 0);
         expect(edge.style, LiquidGlassScrollEdgeStyle.soft);
         expect(edge.blurCurve.transform(.25), greaterThan(0));
         expect(edge.blurCurve.transform(.5), closeTo(.5, .001));
@@ -94,7 +94,7 @@ void main() {
         expect(tester.getTopLeft(finder).dy, 0);
         expect(tester.getSize(finder).height,
             kToolbarHeight + 28 + (categories ? 54 : 0));
-        await tester.drag(find.byType(CustomScrollView), const Offset(0, -180));
+        tester.state<ScrollableState>(find.byType(Scrollable).first).position.jumpTo(180);
         await tester.pumpAndSettle();
         expect(tester.getSize(finder).height,
             kToolbarHeight + 28 + (categories ? 54 : 0));

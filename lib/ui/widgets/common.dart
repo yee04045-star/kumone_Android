@@ -169,10 +169,13 @@ class KumoneGlassSliverAppBar extends StatelessWidget {
 }
 
 class _KumoneGlassBarSurface extends StatelessWidget {
-  const _KumoneGlassBarSurface();
+  final bool followScroll;
+  const _KumoneGlassBarSurface({this.followScroll = true});
 
   @override
   Widget build(BuildContext context) {
+    final progress = followScroll
+        ? (_TopBlurProgress.maybeOf(context)?.value ?? 0.0) : 1.0;
     final scheme = Theme.of(context).colorScheme;
     final settings = context.watch<SettingsStore?>();
     final distribution = settings?.topBlurDistribution ?? 1;
@@ -184,8 +187,8 @@ class _KumoneGlassBarSurface extends StatelessWidget {
         maxHeight: constraints.maxHeight * extent,
         child: LiquidGlassScrollEdge(
           edge: LiquidGlassEdge.top,
-          blur: 26,
-          color: scheme.surface.withValues(alpha: .10),
+          blur: 26 * progress,
+          color: scheme.surface.withValues(alpha: .10 * progress),
           curve: Curves.easeInOut,
           blurCurve: KumoneTopBlurDistribution(distribution),
         ),
@@ -203,7 +206,8 @@ class _KumonePageRoute<T> extends CupertinoPageRoute<T> {
   _KumonePageRoute({required Widget page, super.settings})
       : super(builder: (_) => settings?.name == '/now-playing'
               ? page : KumoneWallpaperRouteSurface(
-                  settingsPage: settings?.name == '/settings', child: page),
+                  settingsPage: settings?.name == '/settings',
+                  child: KumoneTopBlurScrollScope(child: page)),
           fullscreenDialog: settings?.name == '/now-playing');
 
   @override
@@ -1743,7 +1747,7 @@ class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
     return AnnotatedRegion<SystemUiOverlayStyle>(value: kumoneGlassStatusBarStyle(context),
       child: Stack(clipBehavior: Clip.hardEdge, children: [
         Positioned.fill(child: Opacity(opacity: progress,
-          child: const _KumoneGlassBarSurface())),
+          child: const _KumoneGlassBarSurface(followScroll: false))),
         Positioned(top: top - shrinkOffset.clamp(0.0, kToolbarHeight), left: 16, right: 8,
           height: kToolbarHeight,
           child: IgnorePointer(ignoring: progress >= 1,
@@ -1756,4 +1760,33 @@ class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
       ]));
   }
   @override bool shouldRebuild(covariant _TabHeaderDelegate oldDelegate) => true;
+}
+
+// Route-local progress: nested horizontal carousels cannot change top chrome.
+class KumoneTopBlurScrollScope extends StatefulWidget {
+  final Widget child;
+  const KumoneTopBlurScrollScope({super.key, required this.child});
+  @override
+  State<KumoneTopBlurScrollScope> createState() => _TopBlurScrollScopeState();
+}
+class _TopBlurScrollScopeState extends State<KumoneTopBlurScrollScope> {
+  final progress = ValueNotifier<double>(0);
+  void update(ScrollMetrics metrics, int depth) {
+    if (depth != 0 || metrics.axis != Axis.vertical) return;
+    progress.value = ((metrics.pixels - metrics.minScrollExtent) /
+        kToolbarHeight).clamp(0.0, 1.0);
+  }
+  @override
+  Widget build(BuildContext context) => _TopBlurProgress(notifier: progress,
+    child: NotificationListener<ScrollNotification>(
+        onNotification: (event) { update(event.metrics, event.depth); return false; },
+        child: widget.child));
+  @override
+  void dispose() { progress.dispose(); super.dispose(); }
+}
+class _TopBlurProgress extends InheritedNotifier<ValueNotifier<double>> {
+  const _TopBlurProgress({required ValueNotifier<double> notifier,
+    required super.child}) : super(notifier: notifier);
+  static ValueNotifier<double>? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_TopBlurProgress>()?.notifier;
 }

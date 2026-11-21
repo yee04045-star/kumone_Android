@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kumone_flutter/ui/widgets/common.dart';
 import 'package:kumone_flutter/ui/widgets/marquee_text.dart';
 
 void main() {
+  testWidgets('detail top blur grows with scroll and returns to zero', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: KumoneTopBlurScrollScope(
+      child: Scaffold(extendBodyBehindAppBar: true,
+        appBar: const KumoneGlassAppBar(title: SizedBox.shrink()),
+        body: ListView.builder(itemCount: 60,
+          itemBuilder: (_, i) => SizedBox(height: 60, child: Text('$i')))))));
+    double blur() => tester.widget<LiquidGlassScrollEdge>(
+        find.byType(LiquidGlassScrollEdge)).blur;
+    expect(blur(), 0);
+    await tester.drag(find.byType(ListView), const Offset(0, -200));
+    await tester.pumpAndSettle();
+    expect(blur(), 26);
+    await tester.drag(find.byType(ListView), const Offset(0, 1000));
+    await tester.pumpAndSettle();
+    expect(blur(), 0);
+  });
   testWidgets('category stays pinned while root title scrolls away', (tester) async {
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: CustomScrollView(
       slivers: [const KumoneScrollingTabHeader(title: Text('精选'),

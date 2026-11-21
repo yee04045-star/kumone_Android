@@ -38,8 +38,8 @@ void main() {
   test('distribution persists, clamps and restores without changing optics',
       () async {
     final settings = SettingsStore();
-    expect(settings.topBlurDistribution, 1.30);
-    expect(settings.topBlurExtent, 1.60);
+    expect(settings.topBlurDistribution, 1.20);
+    expect(settings.topBlurExtent, 1.20);
     await settings.saveTopBlurDistribution(3.75);
     final restored = SettingsStore();
     await restored.load();
@@ -79,9 +79,9 @@ void main() {
     expect(tester.getSize(finder), size);
     settings.previewTopBlurExtent(2);
     await tester.pump();
-    expect(tester.getSize(finder).height, size.height / 1.6 * 2);
+    expect(tester.getSize(finder).height, closeTo(size.height / 1.2 * 2, .001));
     expect(tester.getTopLeft(finder).dy, 0);
-    expect(tester.getSize(find.byType(AppBar)).height, size.height / 1.6);
+    expect(tester.getSize(find.byType(AppBar)).height, closeTo(size.height / 1.2, .001));
     await settings.saveTopBlurExtent(2.3);
     final restored = SettingsStore();
     await restored.load();

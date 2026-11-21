@@ -52,13 +52,19 @@ class LibraryPage extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
             ),
             actions: [
-              IconButton(
+              Padding(padding: const EdgeInsets.only(right: 8),
+                child: SizedBox(width: 42, height: 42,
+                  child: KumoneLiquidSurface(radius: 999, interactive: false,
+                    backingOpacity: context.watch<SettingsStore>().menuBackingOpacity,
+                    blur: context.watch<SettingsStore>().songMenuBlur,
+                    child: IconButton(
+                padding: EdgeInsets.zero,
                 tooltip: '设置',
                 onPressed: () => Navigator.of(context).push(
                   kumonePageRoute(const SettingsPage(), settings: const RouteSettings(name: '/settings')),
                 ),
-                icon: const Icon(Icons.settings_outlined),
-              ),
+                icon: const Icon(Icons.settings_outlined, size: 24),
+              )))),
             ],
           ),
           SliverToBoxAdapter(

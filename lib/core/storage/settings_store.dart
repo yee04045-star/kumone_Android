@@ -54,8 +54,8 @@ class SettingsStore extends ChangeNotifier {
     previewMiniTabGap(value);
     await prefs.setDouble('miniTabGap', miniTabGap);
   }
-  double topBlurDistribution = 1.30;
-  double topBlurExtent = 1.60;
+  double topBlurDistribution = 1.20;
+  double topBlurExtent = 1.20;
   double songMenuBlur = 3;
   bool songMenuFocus = true;
   double quickEntryBlur = 3;
@@ -125,10 +125,10 @@ class SettingsStore extends ChangeNotifier {
     backgroundExtend = await prefs.getBool('backgroundExtend') ?? true;
     chromeBlur =
         (await prefs.getDouble('chromeBlur') ?? 5).clamp(0, 40).toDouble();
-    topBlurExtent = (await prefs.getDouble('topBlurExtent') ?? 1.60)
+    topBlurExtent = (await prefs.getDouble('topBlurExtent') ?? 1.20)
         .clamp(.75, 3).toDouble();
     topBlurDistribution =
-        (await prefs.getDouble('topBlurDistribution') ?? 1.30).clamp(.5, 6).toDouble();
+        (await prefs.getDouble('topBlurDistribution') ?? 1.20).clamp(.5, 6).toDouble();
     songMenuFocus = await prefs.getBool('songMenuFocus') ?? true;
     quickEntryBlur = (await prefs.getDouble('quickEntryBlur') ?? 3).clamp(0, 40).toDouble();
     songMenuBlur = (await prefs.getDouble('songMenuBlur') ?? 3)
