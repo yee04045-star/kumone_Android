@@ -33,6 +33,7 @@ class GlassCategoryChip extends StatelessWidget {
             ? Duration.zero
             : const Duration(milliseconds: 220),
         child: KumoneLiquidSurface(
+          interactive: false,
           radius: 20,
           blur: settings?.songMenuBlur ?? (selected ? 8 : 16),
           backingOpacity: settings?.menuBackingOpacity ??

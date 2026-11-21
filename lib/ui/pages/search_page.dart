@@ -1,3 +1,4 @@
+import '../widgets/glass_controls.dart';
 import '../widgets/track_title.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -87,28 +88,19 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     final player = context.read<PlayerController>();
     final data = result;
-    final scheme = Theme.of(context).colorScheme;
 
     return NestedScrollView(
       physics: const BouncingScrollPhysics(),
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         KumoneScrollingTabHeader(
-          title: SearchBar(
+          title: KumoneGlassSearchField(
+            height: 38,
             controller: controller,
-            hintText: '搜索歌曲、歌手、专辑或歌单',
-            leading: const Icon(Icons.search),
-            trailing: [
-              IconButton(
-                onPressed: _search,
-                icon: const Icon(Icons.arrow_forward_rounded),
-              ),
-            ],
-            backgroundColor: WidgetStatePropertyAll(
-              scheme.surface.withValues(alpha: .16),
-            ),
-            elevation: const WidgetStatePropertyAll(0),
-            shadowColor: const WidgetStatePropertyAll(Colors.transparent),
+            decoration: const InputDecoration(
+              hintText: '搜索歌曲、歌手、专辑或歌单',
+              prefixIcon: Icon(Icons.search)),
             onChanged: (_) => _scheduleSearch(),
+            onSubmitted: (_) => _search(),
           ),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(46),

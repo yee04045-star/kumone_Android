@@ -172,12 +172,15 @@ class KumoneGlassSliverAppBar extends StatelessWidget {
 
 class _KumoneGlassBarSurface extends StatelessWidget {
   final bool followScroll;
-  const _KumoneGlassBarSurface({this.followScroll = true});
+  final double? scrollProgress;
+  final double? baseHeight;
+  const _KumoneGlassBarSurface({this.followScroll = true,
+    this.scrollProgress, this.baseHeight});
 
   @override
   Widget build(BuildContext context) {
-    final progress = followScroll
-        ? (_TopBlurProgress.maybeOf(context)?.value ?? 0.0) : 1.0;
+    final progress = scrollProgress ?? (followScroll
+        ? (_TopBlurProgress.maybeOf(context)?.value ?? 0.0) : 1.0);
     final scheme = Theme.of(context).colorScheme;
     final settings = context.watch<SettingsStore?>();
     final distribution = settings?.topBlurDistribution ?? 1;
@@ -185,8 +188,8 @@ class _KumoneGlassBarSurface extends StatelessWidget {
     return IgnorePointer(child: LayoutBuilder(builder: (context, constraints) {
       // Extend paint only; never enlarge toolbar layout or steal list gestures.
       return OverflowBox(alignment: Alignment.topCenter,
-        minHeight: constraints.maxHeight * extent,
-        maxHeight: constraints.maxHeight * extent,
+        minHeight: (baseHeight ?? constraints.maxHeight) * extent,
+        maxHeight: (baseHeight ?? constraints.maxHeight) * extent,
         child: LiquidGlassScrollEdge(
           edge: LiquidGlassEdge.top,
           blur: 26 * progress,
@@ -1731,9 +1734,11 @@ class KumoneScrollingTabHeader extends StatelessWidget {
   const KumoneScrollingTabHeader({super.key, required this.title,
     this.actions = const [], this.bottom});
   @override
-  Widget build(BuildContext context) => SliverPersistentHeader(pinned: true,
-    delegate: _TabHeaderDelegate(title, actions, bottom,
-      MediaQuery.paddingOf(context).top));
+  Widget build(BuildContext context) => ScrollConfiguration(
+    behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
+    child: SliverPersistentHeader(pinned: true,
+      delegate: _TabHeaderDelegate(title, actions, bottom,
+        MediaQuery.paddingOf(context).top)));
 }
 class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Widget title;
@@ -1747,16 +1752,18 @@ class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final progress = (shrinkOffset / kToolbarHeight).clamp(0.0, 1.0);
     return AnnotatedRegion<SystemUiOverlayStyle>(value: kumoneGlassStatusBarStyle(context),
-      child: Stack(clipBehavior: Clip.hardEdge, children: [
-        Positioned.fill(child: Opacity(opacity: progress,
-          child: const _KumoneGlassBarSurface(followScroll: false))),
-        Positioned(top: top - shrinkOffset.clamp(0.0, kToolbarHeight), left: 16, right: 8,
-          height: kToolbarHeight,
+      child: Stack(clipBehavior: Clip.none, children: [
+        Positioned.fill(child: _KumoneGlassBarSurface(
+          followScroll: false, scrollProgress: progress,
+          baseHeight: top + 46)),
+        Positioned(top: top, left: 16, right: 8,
+          height: kToolbarHeight * (1 - progress),
           child: IgnorePointer(ignoring: progress >= 1,
-            child: Opacity(opacity: 1 - progress,
-            child: Row(children: [Expanded(child: DefaultTextStyle(
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                fontSize: 26, fontWeight: FontWeight.w800), child: title)), ...actions])))),
+            child: ClipRect(child: OverflowBox(alignment: Alignment.bottomCenter,
+              minHeight: kToolbarHeight, maxHeight: kToolbarHeight,
+              child: Row(children: [Expanded(child: DefaultTextStyle(
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  fontSize: 26, fontWeight: FontWeight.w800), child: title)), ...actions]))))),
         if (bottom != null) Positioned(left: 0, right: 0, bottom: 0,
           height: bottom!.preferredSize.height, child: bottom!),
       ]));

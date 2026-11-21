@@ -108,22 +108,35 @@ class KumoneGlassIconButton extends StatelessWidget {
 class KumoneGlassSearchField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final InputDecoration? decoration;
-  const KumoneGlassSearchField({super.key, this.onChanged, this.decoration});
+  final TextEditingController? controller;
+  final ValueChanged<String>? onSubmitted;
+  final double height;
+  const KumoneGlassSearchField({super.key, this.onChanged, this.decoration,
+    this.controller, this.onSubmitted, this.height = 40});
   @override
   Widget build(BuildContext context) => KumoneLiquidSurface(
       radius: 26,
       backingOpacity: context.watch<SettingsStore?>()?.menuBackingOpacity ?? .20,
       blur: context.watch<SettingsStore?>()?.songMenuBlur ?? 14,
       padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: SizedBox(height: 40, child: TextField(
+      child: SizedBox(height: height, child: TextField(
+          controller: controller,
+          onSubmitted: onSubmitted,
+          textInputAction: TextInputAction.search,
           onChanged: onChanged,
+          style: const TextStyle(fontSize: 14, height: 1.2),
           maxLines: 1,
           textAlignVertical: TextAlignVertical.center,
           decoration: (decoration ?? const InputDecoration()).copyWith(
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(vertical: 8),
+              prefixIcon: decoration?.prefixIcon == null ? null : SizedBox(
+                width: height, height: height,
+                child: Center(child: IconTheme.merge(
+                  data: const IconThemeData(size: 20),
+                  child: decoration!.prefixIcon!))),
               prefixIconConstraints:
-                  const BoxConstraints(minWidth: 40, minHeight: 40),
+                  BoxConstraints.tightFor(width: height, height: height),
               filled: false,
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
