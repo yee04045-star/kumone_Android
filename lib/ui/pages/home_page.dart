@@ -328,8 +328,8 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.only(right: 8),
           child: GestureDetector(
             onTap: () => AppShell.selectTab(context, 3),
-            child: Artwork(url: account.profile?.avatarUrl, size: 32,
-              circle: true, radius: 16, shadow: false)))],
+            child: Artwork(url: account.profile?.avatarUrl, size: 36,
+              circle: true, radius: 18, shadow: false)))],
       ),
     ];
 

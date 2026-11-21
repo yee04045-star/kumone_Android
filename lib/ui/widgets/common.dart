@@ -31,7 +31,9 @@ Widget? _iosBackButton(BuildContext context, bool automaticallyImplyLeading) {
       child: IconButton(
         padding: EdgeInsets.zero,
         tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-        icon: const Icon(CupertinoIcons.chevron_back, size: 24),
+        // Balance the chevron's asymmetric ink, not just its font box.
+        icon: Transform.translate(offset: const Offset(-1, 0),
+          child: const Icon(CupertinoIcons.chevron_back, size: 24)),
         onPressed: () => Navigator.of(context).maybePop()))));
 }
 
@@ -1754,7 +1756,7 @@ class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
             child: Opacity(opacity: 1 - progress,
             child: Row(children: [Expanded(child: DefaultTextStyle(
               style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                fontSize: 24, fontWeight: FontWeight.w800), child: title)), ...actions])))),
+                fontSize: 26, fontWeight: FontWeight.w800), child: title)), ...actions])))),
         if (bottom != null) Positioned(left: 0, right: 0, bottom: 0,
           height: bottom!.preferredSize.height, child: bottom!),
       ]));

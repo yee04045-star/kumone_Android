@@ -1008,9 +1008,13 @@ class _ImmersiveArtworkMode extends StatelessWidget {
                       border: false,
                       scale: 1.0,
                     )),
-                    Expanded(child: Center(
+                    const Spacer(),
+                    const SizedBox(height: 9),
+                    Transform.translate(
+                      offset: const Offset(0, -18),
                       child: _ThreeLineLyricPreview(lyrics: lyrics,
-                        player: player, onTap: onShowLyrics))),
+                        player: player, onTap: onShowLyrics)),
+                    const SizedBox(height: 6),
                   ],
                 ),
               ),

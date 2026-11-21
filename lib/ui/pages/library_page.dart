@@ -49,7 +49,7 @@ class LibraryPage extends StatelessWidget {
           KumoneScrollingTabHeader(
             title: const Text(
               '我的',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
             ),
             actions: [
               Padding(padding: const EdgeInsets.only(right: 8),

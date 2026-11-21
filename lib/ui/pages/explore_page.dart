@@ -199,7 +199,7 @@ class _ExplorePageState extends State<ExplorePage> {
         slivers: [
           KumoneScrollingTabHeader(
             title:
-                const Text('精选', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+                const Text('精选', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(46),
               child: SizedBox(
