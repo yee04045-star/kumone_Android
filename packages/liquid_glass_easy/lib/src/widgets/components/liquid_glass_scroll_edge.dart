@@ -319,12 +319,18 @@ class _LiquidGlassScrollEdgeState extends State<LiquidGlassScrollEdge>
     const int stopsCount = 32;
     final List<double> stops = <double>[];
     final List<Color> colors = <Color>[];
+    // End both tint and dstIn feather INSIDE the filter's clip. A zero
+    // only at t=1 is interpolated across the last physical pixel and can
+    // leave a visible line when the backdrop layer is composited.
+    const fadeEnd = .94;
     for (int i = 0; i < stopsCount; i++) {
       final double t = i / (stopsCount - 1);
-      stops.add(t);
+      stops.add(t * fadeEnd);
       final double k = 1.0 - falloff.transform(t);
       colors.add(color.withValues(alpha: color.a * k));
     }
+    stops.add(1);
+    colors.add(color.withValues(alpha: 0));
     return LinearGradient(
       begin: top ? Alignment.topCenter : Alignment.bottomCenter,
       end: top ? Alignment.bottomCenter : Alignment.topCenter,

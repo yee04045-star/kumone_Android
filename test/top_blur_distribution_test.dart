@@ -9,6 +9,23 @@ import 'package:kumone_flutter/ui/widgets/common.dart';
 import 'package:kumone_flutter/ui/widgets/top_blur_distribution.dart';
 
 void main() {
+  testWidgets('top blur tint and feather reach zero before the clip boundary', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: SizedBox(height: 120,
+      child: LiquidGlassScrollEdge(edge: LiquidGlassEdge.top, blur: 26,
+        color: Color(0x33FFFFFF)))));
+    final gradients = tester.widgetList<DecoratedBox>(find.byType(DecoratedBox))
+      .map((box) => box.decoration)
+      .whereType<BoxDecoration>()
+      .map((box) => box.gradient)
+      .whereType<LinearGradient>().toList();
+    expect(gradients.length, greaterThanOrEqualTo(2));
+    for (final gradient in gradients) {
+      expect(gradient.stops![gradient.stops!.length - 2], .94);
+      expect(gradient.stops!.last, 1);
+      expect(gradient.colors[gradient.colors.length - 2].a, 0);
+      expect(gradient.colors.last.a, 0);
+    }
+  });
   setUp(() {
     SharedPreferencesAsyncPlatform.instance =
         InMemorySharedPreferencesAsync.empty();
