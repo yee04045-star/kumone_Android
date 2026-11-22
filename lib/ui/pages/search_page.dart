@@ -30,6 +30,14 @@ class _SearchPageState extends State<SearchPage> {
   bool loadingMore = false;
   bool hasMore = false;
 
+  int _resultCount(SearchResult page, SearchType selected) => switch (selected) {
+    SearchType.songs => page.songs.length,
+    SearchType.albums => page.albums.length,
+    SearchType.artists => page.artists.length,
+    SearchType.playlists => page.playlists.length,
+    SearchType.all => 0,
+  };
+
   Future<void> _loadMore() async {
     if (loading || loadingMore || !hasMore || result == null ||
         submittedQuery != controller.text.trim()) {
@@ -43,16 +51,26 @@ class _SearchPageState extends State<SearchPage> {
       final page = await NeteaseApi.instance.search(query, selectedType,
         limit: 30, offset: nextOffset);
       if (!mounted || token != requestEpoch) return;
-      final count = selectedType == SearchType.songs ? page.songs.length : page.albums.length;
+      final count = _resultCount(page, selectedType);
       nextOffset += count;
       final old = result!;
       final songIds = old.songs.map((e) => e.id).toSet();
       final albumIds = old.albums.map((e) => e.id).toSet();
+      final artistIds = old.artists.map((e) => e.id).toSet();
+      final playlistIds = old.playlists.map((e) => e.id).toSet();
       final songs = page.songs.where((e) => songIds.add(e.id)).toList();
       final albums = page.albums.where((e) => albumIds.add(e.id)).toList();
+      final artists = page.artists.where((e) => artistIds.add(e.id)).toList();
+      var playlists = page.playlists.where((e) => playlistIds.add(e.id)).toList();
+      if (playlists.isNotEmpty) {
+        playlists = await NeteaseApi.instance.hydratePlaylistCovers(playlists);
+      }
+      if (!mounted || token != requestEpoch) return;
       result = SearchResult(songs: [...old.songs, ...songs],
-        albums: [...old.albums, ...albums], artists: old.artists, playlists: old.playlists);
-      hasMore = count >= 30 && (songs.isNotEmpty || albums.isNotEmpty);
+        albums: [...old.albums, ...albums], artists: [...old.artists, ...artists],
+        playlists: [...old.playlists, ...playlists]);
+      hasMore = count >= 30 &&
+          (songs.isNotEmpty || albums.isNotEmpty || artists.isNotEmpty || playlists.isNotEmpty);
     } catch (_) {
       if (mounted && token == requestEpoch) {
         context.read<PlayerController>().showNotice('加载更多失败，请继续滑动重试');
@@ -109,8 +127,8 @@ class _SearchPageState extends State<SearchPage> {
       if (!mounted || token != requestEpoch) return;
       result = loaded;
       submittedQuery = query;
-      nextOffset = selectedType == SearchType.songs ? loaded.songs.length : loaded.albums.length;
-      hasMore = (selectedType == SearchType.songs || selectedType == SearchType.albums) && nextOffset >= 30;
+      nextOffset = _resultCount(loaded, selectedType);
+      hasMore = selectedType != SearchType.all && nextOffset >= 30;
     } catch (e) {
       if (mounted && token == requestEpoch) {
         context.read<PlayerController>().showNotice('搜索失败：$e');
@@ -211,9 +229,6 @@ class _SearchPageState extends State<SearchPage> {
                       player: player,
                       onSelectType: (selected) { setState(() => type = selected); _search(); },
                     )),
-          if (loadingMore) const Positioned(left: 0, right: 0, bottom: 8,
-            child: Center(child: SizedBox(width: 20, height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2)))),
         ])),
     ));
   }
@@ -438,9 +453,10 @@ class KumoneSearchResultGrid extends StatelessWidget {
       physics: const ClampingScrollPhysics(),
       padding: EdgeInsets.fromLTRB(16, 16, 16,
         KumoneBottomOverlayInset.of(context) + 24),
-      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: 190, crossAxisSpacing: 14,
-        mainAxisSpacing: 18, childAspectRatio: .74),
+        mainAxisSpacing: 18, childAspectRatio: .74,
+        mainAxisExtent: artist ? 166 : null),
       itemCount: count,
       itemBuilder: (context, index) => LayoutBuilder(builder: (context, cell) {
         final name = artist ? data.artists[index].name
@@ -464,7 +480,7 @@ class KumoneSearchResultGrid extends StatelessWidget {
             const SizedBox(height: 8),
             SizedBox(width: imageSize, child: Text(name,
               maxLines: artist || album ? 1 : 2, overflow: TextOverflow.ellipsis,
-              textAlign: album ? TextAlign.start : TextAlign.center,
+              textAlign: artist ? TextAlign.center : TextAlign.start,
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700))),
             if (album) ...[
               const SizedBox(height: 3),

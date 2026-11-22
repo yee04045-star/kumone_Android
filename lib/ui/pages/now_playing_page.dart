@@ -404,7 +404,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
         systemNavigationBarDividerColor: Colors.transparent,
         systemNavigationBarContrastEnforced: false,
       ),
-      child: Scaffold(
+      child: _PlayerDragDismiss(child: Scaffold(
         backgroundColor: Colors.black,
         body: Stack(
           fit: StackFit.expand,
@@ -503,6 +503,12 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
                           player: player,
                           onQueue: _openQueue,
                           showVolume: true,
+                          timelineOffset: _portraitTimelineOffset(
+                            constraints.maxWidth - (compact ? 72 : 88),
+                            constraints.maxHeight - 28 - 2 -
+                              ((constraints.maxWidth - (compact ? 72 : 88)) < 340 ? 240 : 256) -
+                              (compact ? 16 : 22),
+                            settings.nowPlaying == NowPlayingMode.minimal),
                           minimal: false,
                           immersive: true,
                           showLyrics: showLyrics,
@@ -519,7 +525,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }
@@ -918,156 +924,50 @@ class _ImmersiveMobileContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 420),
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.easeIn,
-      child: showLyrics
-          ? _ImmersiveLyricsMode(
-              key: const ValueKey('immersive-lyrics'),
-              track: track,
-              player: player,
-              lyrics: lyrics,
-              lyricLoading: lyricLoading,
-              lyricFailed: lyricFailed,
-              onRetryLyrics: onRetryLyrics,
-              onOpenArtist: onOpenArtist,
-              onOpenAlbum: onOpenAlbum,
-              onBackToArtwork: onToggleLyrics,
-            )
-          : _ImmersiveArtworkMode(
-              key: const ValueKey('immersive-artwork'),
-              minimal: minimal,
-              track: track,
-              player: player,
-              lyrics: lyrics,
-              onOpenArtist: onOpenArtist,
-              onOpenAlbum: onOpenAlbum,
-              onShowLyrics: onToggleLyrics,
-            ),
-    );
-  }
-}
-
-class _ImmersiveArtworkMode extends StatelessWidget {
-  final bool minimal;
-  final Track track;
-  final PlayerController player;
-  final ParsedLyrics? lyrics;
-  final ValueChanged<ArtistRef> onOpenArtist;
-  final ValueChanged<AlbumRef> onOpenAlbum;
-  final VoidCallback onShowLyrics;
-
-  const _ImmersiveArtworkMode({
-    super.key,
-    this.minimal = false,
-    required this.track,
-    required this.player,
-    required this.lyrics,
-    required this.onOpenArtist,
-    required this.onOpenAlbum,
-    required this.onShowLyrics,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final artworkSize = math
-            .min(
-              minimal ? 390.0 : 340.0,
-              math.min(constraints.maxWidth * (minimal ? .94 : .80), constraints.maxHeight * (minimal ? .68 : .56)),
-            )
-            .clamp(64.0, minimal ? 390.0 : 340.0)
-            .toDouble();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _MobilePlayerHeading(track: track, onOpenArtist: onOpenArtist,
-              onOpenAlbum: onOpenAlbum),
-            Expanded(
-              child: LayoutBuilder(builder: (context, area) {
-                final reserved = minimal ? 18.0 : 109.0;
-                final fittedCover = math.min(artworkSize,
-                    math.max(24.0, area.maxHeight - reserved));
-                return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: onShowLyrics,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 12),
-                    const Spacer(),
-                    Center(child: Artwork(
-                      url: track.album.picUrl,
-                      size: fittedCover,
-                      radius: 22,
-                      shadow: true,
-                      border: false,
-                      scale: 1.0,
-                    )),
-                    const Spacer(),
-                    if (!minimal) ...[
-                      const SizedBox(height: 9),
-                      _ThreeLineLyricPreview(lyrics: lyrics,
-                        player: player, onTap: onShowLyrics),
-                    ],
-                    const SizedBox(height: 6),
-                  ],
-                ),
-              ); }),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _ImmersiveLyricsMode extends StatelessWidget {
-  final Track track;
-  final PlayerController player;
-  final ParsedLyrics? lyrics;
-  final bool lyricLoading;
-  final bool lyricFailed;
-  final VoidCallback onRetryLyrics;
-  final ValueChanged<ArtistRef> onOpenArtist;
-  final ValueChanged<AlbumRef> onOpenAlbum;
-  final VoidCallback onBackToArtwork;
-
-  const _ImmersiveLyricsMode({
-    super.key,
-    required this.track,
-    required this.player,
-    required this.lyrics,
-    required this.lyricLoading,
-    required this.lyricFailed,
-    required this.onRetryLyrics,
-    required this.onOpenArtist,
-    required this.onOpenAlbum,
-    required this.onBackToArtwork,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _MobilePlayerHeading(track: track, showCover: true,
-          onCoverTap: onBackToArtwork, onOpenArtist: onOpenArtist,
-          onOpenAlbum: onOpenAlbum),
-        const SizedBox(height: 16),
-        Expanded(
-          child: _ImmersiveLyricsColumn(
-            lyrics: lyrics,
-            player: player,
-            loading: lyricLoading,
-            failed: lyricFailed,
-            onRetry: onRetryLyrics,
-          ),
-        ),
-      ],
-    );
+    return LayoutBuilder(builder: (context, bounds) {
+      const headingHeight = 62.0;
+      final available = math.max(0.0, bounds.maxHeight - headingHeight);
+      final reserved = minimal ? 18.0 : 109.0;
+      final coverSize = math.min(
+        math.min(minimal ? 390.0 : 340.0,
+          math.min(bounds.maxWidth * (minimal ? .94 : .80),
+            bounds.maxHeight * (minimal ? .68 : .56))),
+        math.max(24.0, available - reserved));
+      final extra = math.max(0.0, available - reserved - coverSize);
+      final coverTop = headingHeight + 12 + extra / 2;
+      final duration = MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero : const Duration(milliseconds: 420);
+      return Stack(children: [
+        Positioned(top: headingHeight + 16, bottom: 0, left: 0, right: 0,
+          child: ExcludeSemantics(excluding: !showLyrics, child: IgnorePointer(ignoring: !showLyrics,
+            child: AnimatedOpacity(opacity: showLyrics ? 1 : 0,
+              duration: duration, curve: Curves.easeOutCubic,
+              child: _ImmersiveLyricsColumn(lyrics: lyrics, player: player,
+                loading: lyricLoading, failed: lyricFailed, onRetry: onRetryLyrics))))),
+        if (!minimal) Positioned(left: 0, right: 0, bottom: 6,
+          child: IgnorePointer(ignoring: showLyrics,
+            child: AnimatedOpacity(opacity: showLyrics ? 0 : 1,
+              duration: duration, child: _ThreeLineLyricPreview(
+                key: const ValueKey('portrait-preview'),
+                lyrics: lyrics, player: player, onTap: onToggleLyrics)))),
+        Positioned(top: 0, left: 0, right: 0, height: headingHeight,
+          child: _MobilePlayerHeading(track: track, showCover: showLyrics,
+            externalCover: true, duration: duration,
+            onCoverTap: onToggleLyrics, onOpenArtist: onOpenArtist,
+            onOpenAlbum: onOpenAlbum)),
+        AnimatedPositioned(duration: duration, curve: Curves.easeInOutCubic,
+          top: showLyrics ? 0 : coverTop,
+          left: showLyrics ? 0 : (bounds.maxWidth - coverSize) / 2,
+          width: showLyrics ? 62 : coverSize,
+          height: showLyrics ? 62 : coverSize,
+          child: GestureDetector(onTap: onToggleLyrics,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(end: showLyrics ? 12 : 22), duration: duration,
+              builder: (context, radius, _) => Artwork(url: track.album.picUrl,
+                size: showLyrics ? 62 : coverSize, radius: radius,
+                shadow: false, border: false)))),
+      ]);
+    });
   }
 }
 
@@ -1184,6 +1084,7 @@ class _ThreeLineLyricPreview extends StatelessWidget {
   final VoidCallback onTap;
 
   const _ThreeLineLyricPreview({
+    super.key,
     required this.lyrics,
     required this.player,
     required this.onTap,
@@ -2306,6 +2207,7 @@ class _PlaybackControls extends StatelessWidget {
   final bool immersive;
   final bool dualPane;
   final bool queueSelected;
+  final double timelineOffset;
   final bool showLyrics;
   final VoidCallback onToggleLyrics;
 
@@ -2318,6 +2220,7 @@ class _PlaybackControls extends StatelessWidget {
     this.immersive = false,
     this.dualPane = false,
     this.queueSelected = false,
+    this.timelineOffset = -8,
     this.showLyrics = false,
     required this.onToggleLyrics,
   });
@@ -2363,7 +2266,7 @@ class _PlaybackControls extends StatelessWidget {
           child: Column(
             children: [
               Transform.translate(
-                offset: const Offset(0, -8),
+                offset: Offset(0, dualPane ? -8 : timelineOffset),
                 child: _Timeline(
                   player: player,
                   maxMs: maxMs,
@@ -2517,7 +2420,7 @@ class _MinimalPlaybackControls extends StatelessWidget {
       child: Column(
         children: [
           Transform.translate(
-            offset: const Offset(0, -8),
+            offset: Offset(0, compactHeight ? -8 : 12),
             child: _Timeline(
               player: player,
               maxMs: maxMs,
@@ -2627,7 +2530,7 @@ class _FullWidthSliderTrackShape extends RoundedRectSliderTrackShape {
   }
 }
 
-class _Timeline extends StatelessWidget {
+class _Timeline extends StatefulWidget {
   final PlayerController player;
   final int maxMs;
   final double value;
@@ -2640,8 +2543,16 @@ class _Timeline extends StatelessWidget {
     this.horizontalPadding = 22,
   });
 
+  @override State<_Timeline> createState() => _TimelineState();
+}
+class _TimelineState extends State<_Timeline> {
+  double? dragValue;
   @override
   Widget build(BuildContext context) {
+    final player = widget.player;
+    final horizontalPadding = widget.horizontalPadding;
+    final maxMs = widget.maxMs;
+
     final end = player.duration.inMilliseconds > 0
         ? player.duration
         : player.currentTrack?.duration ?? const Duration();
@@ -2661,20 +2572,25 @@ class _Timeline extends StatelessWidget {
               overlayColor: Colors.white.withValues(alpha: .10),
               overlayShape: SliderComponentShape.noOverlay,
             ),
-            child: Slider(
-                    value: value,
+            child: SizedBox(height: 36, child: Slider(
+                    value: (dragValue ?? widget.value).clamp(0, math.max(1, maxMs)).toDouble(),
                     max: math.max(1, maxMs).toDouble(),
-                    onChanged: (v) => player.seek(
-                      Duration(milliseconds: v.round()),
-                    ),
-                  ),
+                    onChangeStart: (v) => setState(() => dragValue = v),
+                    onChanged: (v) => setState(() => dragValue = v),
+                    onChangeEnd: (v) async {
+                      try { await player.seek(Duration(milliseconds: v.round())); }
+                      catch (_) { player.showNotice('调整播放进度失败'); }
+                      finally { if (mounted) setState(() => dragValue = null); }
+                    },
+                  )),
           ),
           const SizedBox(height: 2),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                formatDuration(player.position),
+                formatDuration(dragValue == null ? player.position :
+                    Duration(milliseconds: dragValue!.round())),
                 style: const TextStyle(color: Colors.white60, fontSize: 11),
               ),
               Text(
@@ -2830,23 +2746,28 @@ class _PlayerDismissHandleState extends State<_PlayerDismissHandle> {
 class _MobilePlayerHeading extends StatelessWidget {
   final Track track;
   final bool showCover;
+  final bool externalCover;
+  final Duration duration;
   final VoidCallback? onCoverTap;
   final ValueChanged<ArtistRef> onOpenArtist;
   final ValueChanged<AlbumRef> onOpenAlbum;
   const _MobilePlayerHeading({required this.track, required this.onOpenArtist,
-    required this.onOpenAlbum, this.showCover = false, this.onCoverTap});
+    required this.onOpenAlbum, this.showCover = false, this.externalCover = false,
+    this.duration = const Duration(milliseconds: 420), this.onCoverTap});
   @override
   Widget build(BuildContext context) {
     final account = context.watch<AccountStore>();
     final liked = account.liked(track.id);
     return Row(children: [
-      if (showCover) ...[
-        GestureDetector(onTap: onCoverTap, child: Artwork(url: track.album.picUrl,
-          size: 62, radius: 12, shadow: false, border: false)),
-        const SizedBox(width: 13),
-      ],
-      Expanded(child: _ImmersiveMetadata(track: track,
-        onOpenArtist: onOpenArtist, onOpenAlbum: onOpenAlbum)),
+      Expanded(child: Row(children: [
+        AnimatedContainer(duration: duration, curve: Curves.easeInOutCubic,
+          width: showCover ? 75 : 0,
+          child: externalCover ? null : (showCover ? GestureDetector(
+            onTap: onCoverTap, child: Artwork(url: track.album.picUrl,
+              size: 62, radius: 12, shadow: false, border: false)) : null)),
+        Expanded(child: _ImmersiveMetadata(track: track,
+          onOpenArtist: onOpenArtist, onOpenAlbum: onOpenAlbum)),
+      ])),
       const SizedBox(width: 6),
       _RoundGlassButton(iconSize: 26, hitSize: 44, icon: liked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
         active: liked, tooltip: liked ? '取消喜欢' : '喜欢', onTap: () async {
@@ -2867,7 +2788,7 @@ class _MobilePlayerHeading extends StatelessWidget {
 Widget kumonePlayerPortraitForTest({required Track track,
   required PlayerController player, ParsedLyrics? lyrics,
   bool showLyrics = false, bool minimal = false, VoidCallback? onClose}) =>
-  Column(children: [
+  LayoutBuilder(builder: (context, bounds) => Column(children: [
     _PlayerDismissHandle(onClose: onClose ?? () {}),
     Expanded(child: Padding(padding: const EdgeInsets.symmetric(horizontal: 36),
       child: _ImmersiveMobileContent(track: track, player: player,
@@ -2876,6 +2797,72 @@ Widget kumonePlayerPortraitForTest({required Track track,
         onOpenArtist: (_) {}, onOpenAlbum: (_) {}, onToggleLyrics: () {}))),
     Padding(padding: const EdgeInsets.fromLTRB(36, 6, 36, 10),
       child: _PlaybackControls(track: track, player: player, onQueue: () {},
+        timelineOffset: _portraitTimelineOffset(bounds.maxWidth - 72,
+          bounds.maxHeight - 28 - ((bounds.maxWidth - 72) < 340 ? 240 : 256) - 16,
+          minimal),
         showVolume: true, immersive: true, showLyrics: showLyrics,
         onToggleLyrics: () {})),
+  ]));
+
+class _PlayerDragDismiss extends StatefulWidget {
+  final Widget child;
+  const _PlayerDragDismiss({required this.child});
+  @override State<_PlayerDragDismiss> createState() => _PlayerDragDismissState();
+}
+class _PlayerDragDismissState extends State<_PlayerDragDismiss>
+    with SingleTickerProviderStateMixin {
+  late final animation = AnimationController(vsync: this,
+    duration: const Duration(milliseconds: 220));
+  double offset = 0, from = 0, target = 0;
+  bool completing = false;
+  @override void initState() {
+    super.initState();
+    animation.addListener(() {
+      setState(() => offset = from + (target - from) * Curves.easeOutCubic.transform(animation.value));
+    });
+  }
+  Future<void> finish(double velocity) async {
+    if (completing) return;
+    final dismiss = offset > 44 || (offset > 8 && velocity > 600);
+    completing = true;
+    from = offset;
+    target = dismiss ? MediaQuery.sizeOf(context).height : 0;
+    await animation.forward(from: 0);
+    if (!mounted) return;
+    if (dismiss) {
+      final route = ModalRoute.of(context);
+      if (route != null && route.isCurrent) Navigator.of(context).removeRoute(route);
+    } else { completing = false; }
+  }
+  @override Widget build(BuildContext context) => Stack(children: [
+    Transform.translate(offset: Offset(0, offset), child: widget.child),
+    Positioned(top: MediaQuery.paddingOf(context).top, left: 0, right: 0,
+      height: 44,
+      child: GestureDetector(behavior: HitTestBehavior.translucent,
+        onVerticalDragStart: (_) { animation.stop(); completing = false; },
+        onVerticalDragUpdate: (details) {
+          if (!completing) setState(() => offset = (offset + details.delta.dy).clamp(0, MediaQuery.sizeOf(context).height));
+        },
+        onVerticalDragEnd: (details) => finish(details.primaryVelocity ?? 0),
+        onVerticalDragCancel: () => finish(0))),
   ]);
+  @override void dispose() { animation.dispose(); super.dispose(); }
+}
+
+// Match the existing cover-to-preview gap with the three-row preview-to-track
+// gap. Row geometry includes the 2px padding on each lyric line. Two-row
+// previews keep this exact same anchor and never recalculate the timeline.
+double _portraitTimelineOffset(double width, double contentHeight, bool minimal) {
+  if (minimal) return -8;
+  const heading = 62.0;
+  final available = math.max(0.0, contentHeight - heading);
+  final cover = math.min(math.min(340.0, math.min(width * .80, contentHeight * .56)),
+      math.max(24.0, available - 109));
+  final extra = math.max(0.0, available - 109 - cover);
+  final coverBottom = heading + 12 + extra / 2 + cover;
+  final firstRowTop = contentHeight - 88 + 2;
+  final gap = math.max(0.0, firstRowTop - coverBottom);
+  // Full three-row text ends at preview top + 67.6; the Slider track center
+  // starts 24px below the content, before this translation (track is 5px).
+  return math.max(-8.0, gap - 41.9);
+}

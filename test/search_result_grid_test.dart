@@ -29,7 +29,7 @@ void main() {
             : type == SearchType.artists ? 'Artist' : 'Playlist';
         final text = tester.widget<Text>(find.text(name));
         expect(text.maxLines, type == SearchType.playlists ? 2 : 1);
-        expect(text.textAlign, type == SearchType.albums ? TextAlign.start : TextAlign.center);
+        expect(text.textAlign, type == SearchType.artists ? TextAlign.center : TextAlign.start);
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox());
       });

@@ -34,20 +34,20 @@ class _ArtistCatalogPageState extends State<ArtistCatalogPage> {
     try {
       final api = NeteaseApi.instance;
       final batch = widget.albums
-          ? await api.artistAlbums(widget.artistId, limit: 50, offset: offset)
-          : await api.artistSongs(widget.artistId, limit: 50, offset: offset);
+          ? await api.artistAlbums(widget.artistId, limit: 30, offset: offset)
+          : await api.artistSongs(widget.artistId, limit: 30, offset: offset);
       if (!mounted) return;
       offset += batch.length;
       if (widget.albums) {
         final ids = albums.map((a) => a.id).toSet();
         final fresh = batch.cast<AlbumSummary>().where((a) => ids.add(a.id)).toList();
         albums.addAll(fresh);
-        more = batch.length >= 50 && fresh.isNotEmpty;
+        more = batch.length >= 30 && fresh.isNotEmpty;
       } else {
         final ids = songs.map((s) => s.id).toSet();
         final fresh = batch.cast<Track>().where((s) => ids.add(s.id)).toList();
         songs.addAll(fresh);
-        more = batch.length >= 50 && fresh.isNotEmpty;
+        more = batch.length >= 30 && fresh.isNotEmpty;
       }
     } catch (_) {
       if (mounted) {
@@ -101,6 +101,9 @@ class _ArtistCatalogPageState extends State<ArtistCatalogPage> {
         }),
         if (busy) const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.all(20),
           child: Center(child: CircularProgressIndicator())))
+        else if (songs.isEmpty && albums.isEmpty && error == null)
+          const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.all(24),
+            child: Center(child: Text('暂无内容'))))
         else if (error != null) SliverToBoxAdapter(child: Center(
           child: TextButton(onPressed: load, child: const Text('加载失败，点击重试')))),
         SliverToBoxAdapter(child: SizedBox(height: KumoneBottomOverlayInset.of(context) + 24)),

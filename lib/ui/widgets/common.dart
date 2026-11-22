@@ -589,7 +589,8 @@ class SectionHeader extends StatelessWidget {
             child: Padding(padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Text(title, style: titleStyle), const SizedBox(width: 5),
-                Icon(Icons.chevron_right_rounded, size: 23, color: cs.onSurfaceVariant),
+                Transform.translate(offset: const Offset(0, 1.5),
+                  child: Icon(Icons.chevron_right_rounded, size: 23, color: cs.onSurfaceVariant)),
               ])))));
     }
     return Padding(
@@ -1020,13 +1021,37 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
     return count;
   }
 
-  double get _glassMenuNaturalHeight {
-    // Eight points of vertical panel padding + a seven-point divider.  The
-    // item height is fixed at 48, so the value matches the actual panel size
-    // unless the list hits its 500px max-height.
-    const itemHeight = 48.0;
-    const panelChrome = 16.0;
-    return math.min(500.0, _glassMenuItemCount * itemHeight + panelChrome);
+  String _artistMenuLabel(String name, double panelWidth) {
+    final label = '查看歌手：$name';
+    final painter = TextPainter(text: TextSpan(text: label,
+      style: const TextStyle(fontSize: 15.5, height: 1.2, fontWeight: FontWeight.w500)),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context), maxLines: 1)
+      ..layout(maxWidth: math.max(1, panelWidth - 46));
+    final needsWrap = painter.didExceedMaxLines;
+    painter.dispose();
+    return needsWrap ? '查看歌手：${String.fromCharCode(10)}$name' : label;
+  }
+
+  double _menuRowHeight(String label, double panelWidth) {
+    final painter = TextPainter(text: TextSpan(text: label,
+      style: const TextStyle(fontSize: 15.5, height: 1.2, fontWeight: FontWeight.w500)),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context))
+      ..layout(maxWidth: math.max(1, panelWidth - 46));
+    final height = math.max(48.0, painter.height + 20);
+    painter.dispose();
+    return height;
+  }
+
+  double _glassMenuNaturalHeight(double panelWidth) {
+    var height = _glassMenuItemCount * 48.0 + 16;
+    if (widget.onOpenArtist != null) {
+      for (final artist in widget.track.artists.take(3)) {
+        height += _menuRowHeight(_artistMenuLabel(artist.name, panelWidth), panelWidth) - 48;
+      }
+    }
+    return math.min(500, height);
   }
 
   void _toggleGlassMenu() {
@@ -1048,9 +1073,9 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
     final bottomRight = overlayBox.globalToLocal(sourceBottomRight);
     final overlaySize = overlayBox.size;
     final insets = MediaQuery.paddingOf(context);
-    final panelWidth = math.min(270.0, overlaySize.width - 24);
+    final panelWidth = math.min(240.0, overlaySize.width - 24);
     final estimatedHeight = math.min(
-        _glassMenuNaturalHeight, overlaySize.height - insets.vertical - 32);
+        _glassMenuNaturalHeight(panelWidth), overlaySize.height - insets.vertical - 32);
     final right = (overlaySize.width - bottomRight.dx)
         .clamp(12.0, math.max(12.0, overlaySize.width - panelWidth - 12))
         .toDouble();
@@ -1089,34 +1114,15 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
     final actions = <Widget>[];
 
     void add(IconData icon, String label, String value) {
-      actions.add(
-        InkWell(
-          borderRadius: BorderRadius.circular(11),
-          onTap: () => _selectGlass(value),
-          child: SizedBox(
-            height: 48,
-            child: Row(
-              children: [
-                const SizedBox(width: 11),
-                SizedBox(width: 42, child: Icon(icon, size: 21)),
-                Expanded(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15.5,
-                      fontWeight: FontWeight.w500,
-                      color: foreground,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-              ],
-            ),
-          ),
-        ),
-      );
+      actions.add(InkWell(
+        borderRadius: BorderRadius.circular(11),
+        onTap: () => _selectGlass(value),
+        child: SizedBox(height: _menuRowHeight(label, panelWidth),
+          child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Align(alignment: Alignment.centerLeft,
+              child: Text(label, softWrap: true,
+                style: TextStyle(fontSize: 15.5, height: 1.2,
+                  fontWeight: FontWeight.w500, color: foreground)))))));
     }
 
     add(CupertinoIcons.arrow_down, '下一首播放', 'next');
@@ -1131,7 +1137,7 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
     }
     if (widget.onOpenArtist != null) {
       for (final artist in widget.track.artists.take(3)) {
-        add(CupertinoIcons.person, '查看歌手：${artist.name}',
+        add(CupertinoIcons.person, _artistMenuLabel(artist.name, panelWidth),
             'artist:${artist.id}');
       }
     }
@@ -1356,14 +1362,14 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
     final size = overlayBox.size;
     final point = overlayBox.globalToLocal(globalPosition);
 
-    final panelWidth = math.min(270.0, size.width - 24);
+    final panelWidth = math.min(240.0, size.width - 24);
     const edgeInset = 12.0;
     const gap = 8.0;
     final insets = MediaQuery.paddingOf(context);
     final minTop = insets.top + edgeInset;
     final maxBottom = size.height - insets.bottom - edgeInset;
     final panelHeight =
-        math.min(_glassMenuNaturalHeight, math.max(48.0, maxBottom - minTop));
+        math.min(_glassMenuNaturalHeight(panelWidth), math.max(48.0, maxBottom - minTop));
 
     final maxLeft = math.max(edgeInset, size.width - panelWidth - edgeInset);
     final left =

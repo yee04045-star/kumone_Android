@@ -14,6 +14,8 @@ import 'package:kumone_flutter/ui/pages/now_playing_page.dart';
 const track = Track(id: 1, name: 'Song', artists: [ArtistRef(id: 1, name: 'Artist')],
   album: AlbumRef(id: 1, name: 'Album'), durationMs: 180000);
 class TestPlayer extends ChangeNotifier implements PlayerController {
+  Duration? lastSeek;
+  @override Future<void> seek(Duration target) async { lastSeek = target; playbackPosition = target; }
   @override Track get currentTrack => track;
   Duration playbackPosition = Duration.zero;
   @override Duration get position => playbackPosition;
@@ -43,12 +45,12 @@ void main() {
       track: track, player: player, lyrics: lyrics)))));
     await show();
     await tester.pump();
-    final firstTop = tester.getTopLeft(find.text('Line A')).dy;
+    final firstTop = tester.getTopLeft(find.descendant(of: find.byKey(const ValueKey('portrait-preview')), matching: find.text('Line A'))).dy;
     player.playbackPosition = const Duration(milliseconds: 1500);
     await show();
     await tester.pump();
-    expect(tester.getTopLeft(find.text('Line A')).dy, closeTo(firstTop, .01));
-    expect(find.text('Line C'), findsOneWidget);
+    expect(tester.getTopLeft(find.descendant(of: find.byKey(const ValueKey('portrait-preview')), matching: find.text('Line A'))).dy, closeTo(firstTop, .01));
+    expect(find.descendant(of: find.byKey(const ValueKey('portrait-preview')), matching: find.text('Line C')), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     player.dispose();
   });
@@ -84,6 +86,13 @@ void main() {
         for (final slider in tester.elementList(find.byType(Slider))) {
           expect(SliderTheme.of(slider).thumbShape, SliderComponentShape.noThumb);
         }
+        final timeline = find.byType(Slider).first;
+        final rect = tester.getRect(timeline);
+        await tester.dragFrom(Offset(rect.left + 8, rect.center.dy),
+            Offset(rect.width * .6, 0));
+        await tester.pump();
+        expect(player.lastSeek, isNotNull);
+        expect(player.lastSeek!.inSeconds, greaterThan(60));
         await tester.drag(find.bySemanticsLabel('下拉关闭播放页'), const Offset(0, 70));
         await tester.pump();
         expect(closed, true);

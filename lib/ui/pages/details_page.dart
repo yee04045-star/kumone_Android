@@ -851,7 +851,7 @@ class _ArtistPageState extends State<ArtistPage> {
       final extras = await Future.wait([
         NeteaseApi.instance.artistTopSongs(widget.id),
         NeteaseApi.instance.artistAlbums(widget.id),
-        NeteaseApi.instance.artistSongs(widget.id, limit: 100),
+        NeteaseApi.instance.artistSongs(widget.id, limit: 100).catchError((_) => <Track>[]),
       ]);
       if (!mounted) return;
       final topSongs = extras[0] as List<Track>;

@@ -1522,8 +1522,12 @@ class NeteaseApi {
   }
 
   Future<List<Track>> artistSongs(int id, {int limit = 100, int offset = 0}) async {
-    final payload = {'id': id, 'limit': limit, 'offset': offset, 'order': 'hot'};
+    final payload = {'id': id, 'limit': limit, 'offset': offset,
+      'order': 'hot', 'total': true, 'private_cloud': true, 'work_type': 1};
     final requests = <Future<Map<String, dynamic>> Function()>[
+      () => c.accountEapi('/v1/artist/songs', payload),
+      () => c.accountEapi('/artist/songs', payload),
+      () => c.weapi('/v1/artist/songs', payload),
       () => c.weapi('/artist/songs', payload),
       () => c.plainGet('/artist/songs', payload),
       () => c.publicPlainGet('/artist/songs', payload),
@@ -1532,12 +1536,17 @@ class NeteaseApi {
       try {
         final j = await request().timeout(const Duration(seconds: 8));
         final nested = _mapJsonString(j['data']);
-        final rawSongs = j['songs'] ?? (nested != null ? nested['songs'] : null) ?? j['result'];
+        final result = _mapJsonString(j['result']);
+        final rawSongs = j['songs'] ?? nested?['songs'] ?? result?['songs'] ??
+            nested?['list'] ?? (j['result'] is List ? j['result'] : null);
         final tracks = decodeTracks(rawSongs);
         if (tracks.isNotEmpty) return await enrichTracksMetadata(tracks);
+        if (rawSongs is List && rawSongs.isEmpty && asInt(j['code'], 200) == 200) {
+          return const [];
+        }
       } catch (_) {}
     }
-    return const [];
+    throw StateError('无法加载歌手全部歌曲，请稍后重试');
   }
 
   SearchResult? _parseSearch(Map<String, dynamic> j) {
