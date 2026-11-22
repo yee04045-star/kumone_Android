@@ -126,8 +126,29 @@ class _AppShellState extends State<AppShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       FirstLaunchNotice.showIfNeeded(context);
+      _warmupTopBlurOnFirstInstall();
       _bootstrap();
     });
+  }
+
+  Future<void> _warmupTopBlurOnFirstInstall() async {
+    final settings = context.read<SettingsStore>();
+    const key = 'topBlurFirstInstallWarmupV1';
+    if (await settings.prefs.getBool(key) == true || !mounted) return;
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    final original = settings.topBlurExtent;
+    final temporary = original == 1.3 ? 1.2 : 1.3;
+    settings.previewTopBlurExtent(temporary);
+    await Future<void>.delayed(const Duration(milliseconds: 500));
+    if (!mounted) {
+      if (settings.topBlurExtent == temporary) settings.topBlurExtent = original;
+      return;
+    }
+    if (settings.topBlurExtent == temporary) {
+      settings.previewTopBlurExtent(original);
+    }
+    await settings.prefs.setBool(key, true);
   }
 
   Future<void> _bootstrap() async {

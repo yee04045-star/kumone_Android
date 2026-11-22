@@ -782,9 +782,7 @@ class _RoundGlassButton extends StatelessWidget {
               icon,
               color: foreground,
               size: iconSize,
-              shadows: const [
-                Shadow(color: Colors.black54, blurRadius: 4),
-              ],
+              shadows: const [],
             ),
           ),
         ),
@@ -925,7 +923,7 @@ class _ImmersiveMobileContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, bounds) {
-      const headingHeight = 62.0;
+      const headingHeight = 68.0;
       final available = math.max(0.0, bounds.maxHeight - headingHeight);
       final reserved = minimal ? 18.0 : 109.0;
       final coverSize = math.min(
@@ -956,7 +954,7 @@ class _ImmersiveMobileContent extends StatelessWidget {
             onCoverTap: onToggleLyrics, onOpenArtist: onOpenArtist,
             onOpenAlbum: onOpenAlbum)),
         AnimatedPositioned(duration: duration, curve: Curves.easeInOutCubic,
-          top: showLyrics ? 0 : coverTop,
+          top: showLyrics ? 3 : coverTop,
           left: showLyrics ? 0 : (bounds.maxWidth - coverSize) / 2,
           width: showLyrics ? 62 : coverSize,
           height: showLyrics ? 62 : coverSize,
@@ -2253,13 +2251,17 @@ class _PlaybackControls extends StatelessWidget {
         }
 
         final controlHeight = narrow ? 240.0 : 256.0;
-        final transportIcon = narrow ? 34.0 : 37.0;
+        final transportIcon = narrow ? 38.0 : 41.0;
         final transportHit = narrow ? 56.0 : 62.0;
-        final playIcon = narrow ? 40.0 : 45.0;
+        final playIcon = narrow ? 46.0 : 50.0;
         final playHit = narrow ? 72.0 : 80.0;
         final secondaryIcon = narrow ? 21.0 : 23.0;
         final secondaryHit = narrow ? 52.0 : 56.0;
-        final transportGap = narrow ? 22.0 : 30.0;
+        final volumeWidth = math.min(320.0, constraints.maxWidth);
+        // 4px outer padding + 17px speaker + 7px gap at each end.
+        final volumeTrackWidth = volumeWidth - 56;
+        final transportRowWidth = math.min(constraints.maxWidth,
+            volumeTrackWidth + transportHit - transportIcon);
 
         return SizedBox(
           height: controlHeight,
@@ -2275,8 +2277,10 @@ class _PlaybackControls extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 14),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Transform.translate(
+                offset: Offset(0, dualPane ? 0 : timelineOffset / 2 - 4),
+                child: SizedBox(width: transportRowWidth, child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   _ControlIcon(
                     icon: CupertinoIcons.backward_fill,
@@ -2285,7 +2289,6 @@ class _PlaybackControls extends StatelessWidget {
                     onTap: player.previous,
                     label: '上一首',
                   ),
-                  SizedBox(width: transportGap),
                   _ControlIcon(
                     icon: player.isPlaying
                         ? CupertinoIcons.pause_fill
@@ -2295,7 +2298,6 @@ class _PlaybackControls extends StatelessWidget {
                     onTap: player.toggle,
                     label: player.isPlaying ? '暂停' : '播放',
                   ),
-                  SizedBox(width: transportGap),
                   _ControlIcon(
                     icon: CupertinoIcons.forward_fill,
                     size: transportIcon,
@@ -2304,7 +2306,7 @@ class _PlaybackControls extends StatelessWidget {
                     label: '下一首',
                   ),
                 ],
-              ),
+              ))),
               if (showVolume) ...[
                 const SizedBox(height: 10),
                 _VolumeControlBar(
@@ -2635,6 +2637,8 @@ class _VolumeControlBar extends StatelessWidget {
             child: SliderTheme(
               data: SliderTheme.of(context).copyWith(
                 trackHeight: 5,
+                trackShape: const _FullWidthSliderTrackShape(),
+                padding: EdgeInsets.zero,
                 activeTrackColor: Colors.white70,
                 inactiveTrackColor: Colors.white24,
                 thumbColor: Colors.white,
@@ -2706,7 +2710,7 @@ class _ControlIcon extends StatelessWidget {
               icon,
               color: iconColor,
               size: size,
-              shadows: const [
+              shadows: isHeart ? const [] : const [
                 Shadow(color: Colors.black54, blurRadius: 4),
               ],
             ),
@@ -2769,6 +2773,8 @@ class _MobilePlayerHeading extends StatelessWidget {
           onOpenArtist: onOpenArtist, onOpenAlbum: onOpenAlbum)),
       ])),
       const SizedBox(width: 6),
+      Transform.translate(offset: const Offset(0, -2),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
       _RoundGlassButton(iconSize: 26, hitSize: 44, icon: liked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
         active: liked, tooltip: liked ? '取消喜欢' : '喜欢', onTap: () async {
           final player = context.read<PlayerController>();
@@ -2780,6 +2786,7 @@ class _MobilePlayerHeading extends StatelessWidget {
       TrackActionMenu(track: track, glassMenu: true, plainPlayerButton: true,
         playerButtonSize: 44, playerIconSize: 26,
         onOpenArtist: onOpenArtist, onOpenAlbum: onOpenAlbum),
+      ])),
     ]);
   }
 }
@@ -2854,7 +2861,7 @@ class _PlayerDragDismissState extends State<_PlayerDragDismiss>
 // previews keep this exact same anchor and never recalculate the timeline.
 double _portraitTimelineOffset(double width, double contentHeight, bool minimal) {
   if (minimal) return -8;
-  const heading = 62.0;
+  const heading = 68.0;
   final available = math.max(0.0, contentHeight - heading);
   final cover = math.min(math.min(340.0, math.min(width * .80, contentHeight * .56)),
       math.max(24.0, available - 109));
