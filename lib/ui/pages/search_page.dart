@@ -25,6 +25,42 @@ class _SearchPageState extends State<SearchPage> {
   bool loading = false;
   SearchType type = SearchType.all;
   String? submittedQuery;
+  int requestEpoch = 0;
+  int nextOffset = 0;
+  bool loadingMore = false;
+  bool hasMore = false;
+
+  Future<void> _loadMore() async {
+    if (loading || loadingMore || !hasMore || result == null ||
+        submittedQuery != controller.text.trim()) {
+      return;
+    }
+    final token = requestEpoch;
+    final selectedType = type;
+    final query = submittedQuery!;
+    setState(() => loadingMore = true);
+    try {
+      final page = await NeteaseApi.instance.search(query, selectedType,
+        limit: 30, offset: nextOffset);
+      if (!mounted || token != requestEpoch) return;
+      final count = selectedType == SearchType.songs ? page.songs.length : page.albums.length;
+      nextOffset += count;
+      final old = result!;
+      final songIds = old.songs.map((e) => e.id).toSet();
+      final albumIds = old.albums.map((e) => e.id).toSet();
+      final songs = page.songs.where((e) => songIds.add(e.id)).toList();
+      final albums = page.albums.where((e) => albumIds.add(e.id)).toList();
+      result = SearchResult(songs: [...old.songs, ...songs],
+        albums: [...old.albums, ...albums], artists: old.artists, playlists: old.playlists);
+      hasMore = count >= 30 && (songs.isNotEmpty || albums.isNotEmpty);
+    } catch (_) {
+      if (mounted && token == requestEpoch) {
+        context.read<PlayerController>().showNotice('加载更多失败，请继续滑动重试');
+      }
+    } finally {
+      if (mounted && token == requestEpoch) setState(() => loadingMore = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -36,10 +72,13 @@ class _SearchPageState extends State<SearchPage> {
   Future<void> _search() async {
     final query = controller.text.trim();
     if (query.isEmpty) return;
-    setState(() => loading = true);
+    debounce?.cancel();
+    final token = ++requestEpoch;
+    final selectedType = type;
+    setState(() { loading = true; loadingMore = false; hasMore = false; });
     try {
       SearchResult loaded;
-      if (type == SearchType.all) {
+      if (selectedType == SearchType.all) {
         final values = await Future.wait([
           NeteaseApi.instance.search(query, SearchType.songs, limit: 30),
           NeteaseApi.instance.search(query, SearchType.albums, limit: 12),
@@ -54,9 +93,9 @@ class _SearchPageState extends State<SearchPage> {
               .hydratePlaylistCovers(values[3].playlists),
         );
       } else {
-        loaded = await NeteaseApi.instance.search(query, type);
+        loaded = await NeteaseApi.instance.search(query, selectedType);
       }
-      if ((type == SearchType.playlists || type == SearchType.all) &&
+      if ((selectedType == SearchType.playlists || selectedType == SearchType.all) &&
           loaded.playlists.isNotEmpty) {
         final hydrated =
             await NeteaseApi.instance.hydratePlaylistCovers(loaded.playlists);
@@ -67,19 +106,23 @@ class _SearchPageState extends State<SearchPage> {
           playlists: hydrated,
         );
       }
+      if (!mounted || token != requestEpoch) return;
       result = loaded;
       submittedQuery = query;
+      nextOffset = selectedType == SearchType.songs ? loaded.songs.length : loaded.albums.length;
+      hasMore = (selectedType == SearchType.songs || selectedType == SearchType.albums) && nextOffset >= 30;
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$e')),
-        );
+      if (mounted && token == requestEpoch) {
+        context.read<PlayerController>().showNotice('搜索失败：$e');
       }
     }
-    if (mounted) setState(() => loading = false);
+    if (mounted && token == requestEpoch) setState(() => loading = false);
   }
 
   void _scheduleSearch() {
+    requestEpoch++;
+    loadingMore = false;
+    hasMore = false;
     debounce?.cancel();
     debounce = Timer(const Duration(milliseconds: 500), _search);
   }
@@ -110,14 +153,16 @@ class _SearchPageState extends State<SearchPage> {
             preferredSize: const Size.fromHeight(46),
             child: SizedBox(
               height: 46,
-              child: ListView.separated(
-                padding:
-                    const EdgeInsets.fromLTRB(16, 6, 16, 10),
-                scrollDirection: Axis.horizontal,
-                itemCount: SearchType.values.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 7),
-                itemBuilder: (_, i) {
-                  final value = SearchType.values[i];
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+                child: LayoutBuilder(builder: (context, constraints) =>
+                  SingleChildScrollView(scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                      child: Row(mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [for (final value in SearchType.values)
+                          Builder(builder: (context) {
                   final selected = value == type;
                   return GlassCategoryChip(menuOptics: true, height: 30,
                     label: switch (value) {
@@ -133,13 +178,25 @@ class _SearchPageState extends State<SearchPage> {
                       _search();
                     },
                   );
-                },
+                          }),
+                        ]),
+                    ),
+                  )),
               ),
             ),
           ),
         ),
       ],
-      body: loading
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (event) {
+          if (event.depth == 0 && event.metrics.axis == Axis.vertical &&
+              event.metrics.extentAfter < 400 &&
+              (event is ScrollUpdateNotification || event is OverscrollNotification)) {
+            unawaited(_loadMore());
+          }
+          return false;
+        },
+        child: Stack(children: [Positioned.fill(child: loading
           ? const Center(child: CircularProgressIndicator())
           : data == null
               ? const Center(child: Text('输入关键词开始搜索'))
@@ -152,7 +209,12 @@ class _SearchPageState extends State<SearchPage> {
                       data: data,
                       type: type,
                       player: player,
-                    ),
+                      onSelectType: (selected) { setState(() => type = selected); _search(); },
+                    )),
+          if (loadingMore) const Positioned(left: 0, right: 0, bottom: 8,
+            child: Center(child: SizedBox(width: 20, height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2)))),
+        ])),
     ));
   }
 }
@@ -189,15 +251,21 @@ class _Results extends StatelessWidget {
   final SearchResult data;
   final SearchType type;
   final PlayerController player;
+  final ValueChanged<SearchType> onSelectType;
 
   const _Results({
     required this.data,
     required this.type,
     required this.player,
+    required this.onSelectType,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (type == SearchType.albums || type == SearchType.artists ||
+        type == SearchType.playlists) {
+      return KumoneSearchResultGrid(data: data, type: type);
+    }
     return ListView(
       physics: const ClampingScrollPhysics(),
       padding:
@@ -205,7 +273,7 @@ class _Results extends StatelessWidget {
       children: [
         if (type == SearchType.all) ...[
           if (data.songs.isNotEmpty) ...[
-            const SectionHeader(title: '单曲'),
+            SectionHeader(title: '单曲', showChevron: true, onTap: () => onSelectType(SearchType.songs)),
             ...data.songs.take(20).map(
                   (track) => TrackActionMenu(
                     track: track,
@@ -233,7 +301,7 @@ class _Results extends StatelessWidget {
                 ),
           ],
           if (data.albums.isNotEmpty) ...[
-            const SectionHeader(title: '专辑'),
+            SectionHeader(title: '专辑', showChevron: true, onTap: () => onSelectType(SearchType.albums)),
             ...data.albums.take(8).map(
                   (album) => ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -246,7 +314,7 @@ class _Results extends StatelessWidget {
                 ),
           ],
           if (data.artists.isNotEmpty) ...[
-            const SectionHeader(title: '歌手'),
+            SectionHeader(title: '歌手', showChevron: true, onTap: () => onSelectType(SearchType.artists)),
             ...data.artists.take(8).map(
                   (artist) => ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -259,7 +327,7 @@ class _Results extends StatelessWidget {
                 ),
           ],
           if (data.playlists.isNotEmpty) ...[
-            const SectionHeader(title: '歌单'),
+            SectionHeader(title: '歌单', showChevron: true, onTap: () => onSelectType(SearchType.playlists)),
             ...data.playlists.take(8).map(
                   (playlist) => ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -353,6 +421,60 @@ class _Results extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class KumoneSearchResultGrid extends StatelessWidget {
+  final SearchResult data;
+  final SearchType type;
+  const KumoneSearchResultGrid({super.key, required this.data, required this.type});
+  @override
+  Widget build(BuildContext context) {
+    final artist = type == SearchType.artists;
+    final album = type == SearchType.albums;
+    final count = artist ? data.artists.length : album ? data.albums.length : data.playlists.length;
+    return GridView.builder(
+      physics: const ClampingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(16, 16, 16,
+        KumoneBottomOverlayInset.of(context) + 24),
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 190, crossAxisSpacing: 14,
+        mainAxisSpacing: 18, childAspectRatio: .74),
+      itemCount: count,
+      itemBuilder: (context, index) => LayoutBuilder(builder: (context, cell) {
+        final name = artist ? data.artists[index].name
+            : album ? data.albums[index].name : data.playlists[index].name;
+        final picture = artist ? data.artists[index].picUrl
+            : album ? data.albums[index].picUrl : data.playlists[index].coverUrl;
+        final imageSize = artist ? cell.maxWidth.clamp(0.0, 128.0) : cell.maxWidth;
+        return KumoneInteractive(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => Navigator.of(context).push(kumonePageRoute(
+            artist ? ArtistPage(id: data.artists[index].id)
+              : album ? AlbumPage(id: data.albums[index].id)
+              : PlaylistPage(id: data.playlists[index].id,
+                  initialCover: data.playlists[index].coverUrl))),
+          child: Column(crossAxisAlignment: artist ? CrossAxisAlignment.center
+              : CrossAxisAlignment.stretch, children: [
+            Center(child: Artwork(url: picture, size: imageSize,
+              radius: artist ? imageSize / 2 : 14, circle: artist, shadow: false,
+              resolveUrl: artist ? () => NeteaseApi.instance.artistCover(data.artists[index].id)
+                : album ? null : () => NeteaseApi.instance.playlistCover(data.playlists[index].id))),
+            const SizedBox(height: 8),
+            SizedBox(width: imageSize, child: Text(name,
+              maxLines: artist || album ? 1 : 2, overflow: TextOverflow.ellipsis,
+              textAlign: album ? TextAlign.start : TextAlign.center,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700))),
+            if (album) ...[
+              const SizedBox(height: 3),
+              Text(data.albums[index].artistName, maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            ],
+          ]));
+      }),
     );
   }
 }

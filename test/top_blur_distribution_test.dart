@@ -61,7 +61,7 @@ void main() {
     final restored = SettingsStore();
     await restored.load();
     expect(restored.topBlurDistribution, 3.75);
-    expect(restored.chromeBlur, 5);
+    expect(restored.chromeBlur, 3);
     expect(restored.menuBackingOpacity, .50);
     restored.previewTopBlurDistribution(100);
     expect(restored.topBlurDistribution, 6);

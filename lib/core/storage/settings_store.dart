@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum AppearanceMode { system, light, dark }
 
-enum NowPlayingMode { vinyl, immersive, minimal }
+enum NowPlayingMode { immersive, minimal }
 
 enum LyricsAnnotationMode { off, romaji, furigana }
 
@@ -86,7 +86,7 @@ class SettingsStore extends ChangeNotifier {
         await prefs.getDouble('miniBackingOpacity'))?.clamp(0, 1).toDouble();
     miniTabGap = (await prefs.getDouble('miniTabGap') ?? 24).clamp(24, 36).toDouble();
     bottomChromeOffset = (await prefs.getDouble('bottomChromeOffset') ?? 6).clamp(-24, 6).toDouble();
-    freezeOutgoingPage = await prefs.getBool('freezeOutgoingPage') ?? true;
+    freezeOutgoingPage = true;
     final accentName = await prefs.getString('appAccent');
     accent = AppAccent.values.firstWhere((e) => e.name == accentName,
       orElse: () => AppAccent.appleBlue);
@@ -109,30 +109,31 @@ class SettingsStore extends ChangeNotifier {
       orElse: () => LyricsAnnotationMode.off,
     );
     unblock = await prefs.getBool('unblock') ?? true;
-    ambient = await prefs.getBool('ambient') ?? true;
+    ambient = true;
     usbExclusive = await prefs.getBool('usbExclusive') ?? false;
     ambientIntensity = await prefs.getDouble('ambientIntensity') ?? 1.0;
     menuBackingOpacity = ((await prefs.getDouble('menuBackingOpacity')) ?? .50)
         .clamp(0.0, 1.0)
         .toDouble();
-    landscapeDualPane = await prefs.getBool('landscapeDualPane') ?? true;
+    landscapeDualPane = true;
     lyricBlur =
         (await prefs.getDouble('lyricBlur') ?? 5).clamp(0, 8).toDouble();
     lyricFontScale = (await prefs.getDouble('lyricFontScale') ?? 1.1)
         .clamp(.8, 1.8).toDouble();
     cjkGlow = await prefs.getBool('cjkGlow') ?? true;
     crossfadeSeconds = (await prefs.getInt('crossfadeSeconds') ?? 0).clamp(0, 12);
-    backgroundExtend = await prefs.getBool('backgroundExtend') ?? true;
+    backgroundExtend = true;
     chromeBlur =
         (await prefs.getDouble('chromeBlur') ?? 5).clamp(0, 40).toDouble();
     topBlurExtent = (await prefs.getDouble('topBlurExtent') ?? 1.20)
         .clamp(.75, 3).toDouble();
     topBlurDistribution =
         (await prefs.getDouble('topBlurDistribution') ?? 1.20).clamp(.5, 6).toDouble();
-    songMenuFocus = await prefs.getBool('songMenuFocus') ?? true;
+    songMenuFocus = true;
     quickEntryBlur = (await prefs.getDouble('quickEntryBlur') ?? 3).clamp(0, 40).toDouble();
-    songMenuBlur = (await prefs.getDouble('songMenuBlur') ?? 3)
-        .clamp(0, 40).toDouble();
+    songMenuBlur = (await prefs.getDouble('songMenuBlur') ??
+        await prefs.getDouble('chromeBlur') ?? 3).clamp(0, 40).toDouble();
+    chromeBlur = songMenuBlur;
 
     sideNavigationScale = (await prefs.getDouble('sideNavigationScale') ?? 1)
         .clamp(.8, 1.4).toDouble();
@@ -217,12 +218,14 @@ class SettingsStore extends ChangeNotifier {
 
   void previewChromeBlur(double value) {
     chromeBlur = value.clamp(0, 40).toDouble();
+    songMenuBlur = chromeBlur;
     notifyListeners();
   }
 
   Future<void> saveChromeBlur(double value) async {
     previewChromeBlur(value);
     await prefs.setDouble('chromeBlur', chromeBlur);
+    await prefs.setDouble('songMenuBlur', chromeBlur);
   }
 
   Future<void> setAccent(AppAccent value) async {
@@ -239,12 +242,14 @@ class SettingsStore extends ChangeNotifier {
 
   void previewSongMenuBlur(double value) {
     songMenuBlur = value.clamp(0, 40).toDouble();
+    chromeBlur = songMenuBlur;
     notifyListeners();
   }
 
   Future<void> saveSongMenuBlur(double value) async {
     previewSongMenuBlur(value);
     await prefs.setDouble('songMenuBlur', songMenuBlur);
+    await prefs.setDouble('chromeBlur', songMenuBlur);
   }
 
   void previewQuickEntryBlur(double value) {

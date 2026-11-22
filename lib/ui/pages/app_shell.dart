@@ -114,10 +114,10 @@ class _AppShellState extends State<AppShell> {
 
   static const _labels = ['推荐', '精选', '搜索', '我的'];
   static const _icons = [
-    Icons.home_outlined,
-    Icons.grid_view_outlined,
-    Icons.search,
-    Icons.person_outline,
+    CupertinoIcons.house_fill,
+    CupertinoIcons.square_grid_2x2_fill,
+    CupertinoIcons.search,
+    CupertinoIcons.person_crop_circle_fill,
   ];
 
   @override
@@ -197,10 +197,10 @@ class _AppShellState extends State<AppShell> {
   }
 
   IconData _selectedIcon(int i) => const [
-        Icons.home,
-        Icons.grid_view,
-        Icons.search,
-        Icons.person,
+        CupertinoIcons.house_fill,
+        CupertinoIcons.square_grid_2x2_fill,
+        CupertinoIcons.search,
+        CupertinoIcons.person_crop_circle_fill,
       ][i];
 
   Widget _miniPlayer(BuildContext context) {

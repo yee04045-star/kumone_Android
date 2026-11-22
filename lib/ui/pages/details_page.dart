@@ -1,3 +1,5 @@
+import 'artist_catalog_page.dart';
+import '../../core/storage/app_accent.dart';
 import '../widgets/track_title.dart';
 import '../widgets/glass_refresh.dart';
 import '../widgets/glass_controls.dart';
@@ -596,7 +598,8 @@ class _DetailError extends StatelessWidget {
 
 class AlbumPage extends StatefulWidget {
   final int id;
-  const AlbumPage({super.key, required this.id});
+  final int? sourceArtistId;
+  const AlbumPage({super.key, required this.id, this.sourceArtistId});
 
   @override
   State<AlbumPage> createState() => _AlbumPageState();
@@ -707,7 +710,11 @@ class _AlbumPageState extends State<AlbumPage> {
                                 ),
                           ),
                           const SizedBox(height: 6),
-                          Text(
+                          InkWell(
+                            onTap: album.artistId <= 0 || album.artistId == widget.sourceArtistId
+                                ? null : () => Navigator.of(context).push(
+                                    kumonePageRoute(ArtistPage(id: album.artistId))),
+                            child: Text(
                             album.artistName.isEmpty ? '未知歌手' : album.artistName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -716,7 +723,7 @@ class _AlbumPageState extends State<AlbumPage> {
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
-                          ),
+                          )),
                           const SizedBox(height: 8),
                           Text(
                             [
@@ -764,6 +771,7 @@ class _AlbumPageState extends State<AlbumPage> {
                                             subscribed
                                                 ? Icons.favorite_rounded
                                                 : Icons.favorite_border_rounded,
+                                            color: subscribed ? AppAccent.appleRed.color : cs.onSurface,
                                           ),
                                   ),
                                 ),
@@ -1009,7 +1017,7 @@ class _ArtistPageState extends State<ArtistPage> {
               ),
             ),
             if (hotSongs.isNotEmpty) ...[
-              const SectionHeader(title: '热门歌曲'),
+              SectionHeader(title: '热门歌曲', showChevron: true, onTap: () => Navigator.of(context).push(kumonePageRoute(ArtistCatalogPage(artistId: widget.id)))),
               ...hotSongs.take(20).map(
                 (track) => TrackActionMenu(
                   track: track,
@@ -1026,7 +1034,7 @@ class _ArtistPageState extends State<ArtistPage> {
                     onTap: () => player.playTracks(hotSongs, start: track),
                   ),
                   onOpenAlbum: (album) => Navigator.of(context).push(
-                    kumonePageRoute(AlbumPage(id: album.id)),
+                    kumonePageRoute(AlbumPage(id: album.id, sourceArtistId: widget.id)),
                   ),
                   onOpenArtist: (artist) => Navigator.of(context).push(
                     kumonePageRoute(ArtistPage(id: artist.id)),
@@ -1035,7 +1043,7 @@ class _ArtistPageState extends State<ArtistPage> {
               ),
             ],
             if (albums.isNotEmpty) ...[
-              const SectionHeader(title: '专辑'),
+              SectionHeader(title: '专辑', showChevron: true, onTap: () => Navigator.of(context).push(kumonePageRoute(ArtistCatalogPage(artistId: widget.id, albums: true)))),
               SizedBox(
                 height: 204,
                 child: ListView.separated(
@@ -1050,7 +1058,7 @@ class _ArtistPageState extends State<ArtistPage> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
                         onTap: () => Navigator.of(context).push(
-                          kumonePageRoute(AlbumPage(id: album.id)),
+                          kumonePageRoute(AlbumPage(id: album.id, sourceArtistId: widget.id)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1105,7 +1113,7 @@ class _ArtistPageState extends State<ArtistPage> {
                     onTap: () => player.playTracks(allSongs, start: track),
                   ),
                   onOpenAlbum: (album) => Navigator.of(context).push(
-                    kumonePageRoute(AlbumPage(id: album.id)),
+                    kumonePageRoute(AlbumPage(id: album.id, sourceArtistId: widget.id)),
                   ),
                   onOpenArtist: (artist) => Navigator.of(context).push(
                     kumonePageRoute(ArtistPage(id: artist.id)),

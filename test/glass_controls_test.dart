@@ -180,7 +180,7 @@ void main() {
     await settings.setSideNavigationOrder([1, 0, 3]);
     final restored = SettingsStore();
     await restored.load();
-    expect(restored.chromeBlur, 37.5);
+    expect(restored.chromeBlur, 23);
     expect(restored.lyricFontScale, 1.23);
     restored.previewLyricFontScale(3);
     expect(restored.lyricFontScale, 1.8);
@@ -237,7 +237,7 @@ void main() {
     expect(changed[0].style.blur, 31);
     expect(changed[1].style.blur, 2);
     expect(changed[0].style.color, surfaces[0].style.color);
-    expect(settings.chromeBlur, 5);
+    expect(settings.chromeBlur, 31);
     await tester.pumpWidget(const SizedBox());
     settings.dispose();
   });

@@ -22,13 +22,13 @@ void main() {
     expect(store.darkFor(false), true);
     store.dispose();
   });
-  test('song menu focus defaults on and persists off', () async {
+  test('song menu focus is always enabled on load', () async {
     final settings = SettingsStore();
     expect(settings.songMenuFocus, true);
     await settings.setSongMenuFocus(false);
     final restored = SettingsStore();
     await restored.load();
-    expect(restored.songMenuFocus, false);
+    expect(restored.songMenuFocus, true);
     settings.dispose(); restored.dispose();
   });
   testWidgets('transparent search-style row has its own material and press feedback', (tester) async {

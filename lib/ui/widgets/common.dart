@@ -33,7 +33,10 @@ Widget? _iosBackButton(BuildContext context, bool automaticallyImplyLeading) {
         tooltip: MaterialLocalizations.of(context).backButtonTooltip,
         // Balance the chevron's asymmetric ink, not just its font box.
         icon: Transform.translate(offset: const Offset(-1, 0),
-          child: const Icon(CupertinoIcons.chevron_back, size: 24)),
+          child: Icon(CupertinoIcons.chevron_back, size: 24,
+            shadows: [for (final offset in const [Offset(-.35, 0), Offset(.35, 0),
+              Offset(0, -.35), Offset(0, .35)]) Shadow(
+                color: Theme.of(context).colorScheme.onSurface, offset: offset)])),
         onPressed: () => Navigator.of(context).maybePop()))));
 }
 
@@ -579,6 +582,16 @@ class SectionHeader extends StatelessWidget {
           fontWeight: FontWeight.w700,
           letterSpacing: -.25,
         );
+    if (showChevron && onTap != null && trailing == null) {
+      return Padding(padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 14),
+        child: Align(alignment: Alignment.centerLeft,
+          child: InkWell(onTap: onTap, borderRadius: BorderRadius.circular(8),
+            child: Padding(padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Text(title, style: titleStyle), const SizedBox(width: 5),
+                Icon(Icons.chevron_right_rounded, size: 23, color: cs.onSurfaceVariant),
+              ])))));
+    }
     return Padding(
       padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 14),
       child: Row(
@@ -878,20 +891,13 @@ class GlassMiniPlayer extends StatelessWidget {
                 ),
               ),
             ),
+            IconButton(tooltip: '上一首', onPressed: player.previous,
+              icon: const Icon(CupertinoIcons.backward_fill)),
             IconButton(
-              tooltip: player.isPlaying ? '暂停' : '播放',
-              onPressed: player.toggle,
-              icon: Icon(
-                player.isPlaying
-                    ? Icons.pause_rounded
-                    : Icons.play_arrow_rounded,
-              ),
-            ),
-            IconButton(
-              tooltip: '播放队列',
-              onPressed: onQueue,
-              icon: const Icon(Icons.queue_music_rounded),
-            ),
+              tooltip: player.isPlaying ? '暂停' : '播放', onPressed: player.toggle,
+              icon: Icon(player.isPlaying ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill)),
+            IconButton(tooltip: '下一首', onPressed: player.next,
+              icon: const Icon(CupertinoIcons.forward_fill)),
           ],
         ),
       ),
@@ -922,6 +928,9 @@ class TrackActionMenu extends StatefulWidget {
   final ValueChanged<AlbumRef>? onOpenAlbum;
   final ValueChanged<ArtistRef>? onOpenArtist;
   final bool glassMenu;
+  final bool plainPlayerButton;
+  final double playerButtonSize;
+  final double playerIconSize;
   final Color? glassMenuPrimary;
   final Color? glassMenuSecondary;
   final bool showButton;
@@ -937,6 +946,9 @@ class TrackActionMenu extends StatefulWidget {
     this.onOpenAlbum,
     this.onOpenArtist,
     this.glassMenu = false,
+    this.plainPlayerButton = false,
+    this.playerButtonSize = 42,
+    this.playerIconSize = 23,
     this.glassMenuPrimary,
     this.glassMenuSecondary,
     this.showButton = true,
@@ -1036,7 +1048,7 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
     final bottomRight = overlayBox.globalToLocal(sourceBottomRight);
     final overlaySize = overlayBox.size;
     final insets = MediaQuery.paddingOf(context);
-    final panelWidth = math.min(340.0, overlaySize.width - 24);
+    final panelWidth = math.min(270.0, overlaySize.width - 24);
     final estimatedHeight = math.min(
         _glassMenuNaturalHeight, overlaySize.height - insets.vertical - 32);
     final right = (overlaySize.width - bottomRight.dx)
@@ -1210,7 +1222,12 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
       return;
     }
     if (value == 'next') {
-      player.insertAsNext(widget.track);
+      try {
+        player.insertAsNext(widget.track);
+        player.showNotice('已加入下一首播放');
+      } catch (_) {
+        player.showNotice('加入失败');
+      }
       return;
     }
     if (value == 'like') {
@@ -1413,18 +1430,18 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
       return CompositedTransformTarget(
         link: _layerLink,
         child: Material(
-          color: Colors.black.withValues(alpha: .18),
+          color: widget.plainPlayerButton ? Colors.transparent : Colors.black.withValues(alpha: .18),
           shape: const CircleBorder(),
           child: InkWell(
             customBorder: const CircleBorder(),
             splashColor: Colors.white.withValues(alpha: .10),
             highlightColor: Colors.white.withValues(alpha: .06),
             onTap: _toggleGlassMenu,
-            child: const SizedBox(
-              width: 42,
-              height: 42,
-              child:
-                  Icon(Icons.more_horiz_rounded, color: Colors.white, size: 23),
+            child: SizedBox(
+              width: widget.playerButtonSize,
+              height: widget.playerButtonSize,
+              child: Icon(Icons.more_horiz_rounded, color: Colors.white,
+                  size: widget.playerIconSize),
             ),
           ),
         ),

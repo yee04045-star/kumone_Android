@@ -173,10 +173,10 @@ class UserProfile {
   );
 }
 
-class AlbumSummary { final int id; final String name; final String? picUrl; final String artistName; final int publishTime; final int size; final String? subType; final List<String> alias;
-  const AlbumSummary({required this.id,required this.name,this.picUrl,this.artistName='',this.publishTime=0,this.size=0,this.subType,this.alias=const []});
+class AlbumSummary { final int artistId; final int id; final String name; final String? picUrl; final String artistName; final int publishTime; final int size; final String? subType; final List<String> alias;
+  const AlbumSummary({this.artistId = 0, required this.id,required this.name,this.picUrl,this.artistName='',this.publishTime=0,this.size=0,this.subType,this.alias=const []});
   factory AlbumSummary.fromJson(Map<String,dynamic> j) { final a=j['artist'] is Map ? asString(j['artist']['name']) : null; final list=j['artists'] as List?;
-    return AlbumSummary(id:asInt(j['id']),name:asString(j['name'])??'',picUrl:asUrlString(j['picUrl'])??asUrlString(j['cover'])??asUrlString(j['coverImgUrl'])??asUrlString(j['coverUrl'])??asUrlString(j['imgUrl']),artistName:a??(list?.whereType<Map>().map((e)=>asString(e['name'])).whereType<String>().join(' / ')??''),publishTime:asInt(j['publishTime']),size:asInt(j['size']),subType:asString(j['subType']),alias: ((j['alia'] ?? j['alias']) as List?)?.whereType<String>().toList() ?? const []);
+    return AlbumSummary(artistId: j['artist'] is Map ? asInt(j['artist']['id']) : (list != null && list.isNotEmpty && list.first is Map ? asInt(list.first['id']) : 0), id:asInt(j['id']),name:asString(j['name'])??'',picUrl:asUrlString(j['picUrl'])??asUrlString(j['cover'])??asUrlString(j['coverImgUrl'])??asUrlString(j['coverUrl'])??asUrlString(j['imgUrl']),artistName:a??(list?.whereType<Map>().map((e)=>asString(e['name'])).whereType<String>().join(' / ')??''),publishTime:asInt(j['publishTime']),size:asInt(j['size']),subType:asString(j['subType']),alias: ((j['alia'] ?? j['alias']) as List?)?.whereType<String>().toList() ?? const []);
   }
 }
 

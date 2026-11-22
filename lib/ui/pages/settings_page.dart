@@ -117,7 +117,7 @@ class SettingsPage extends StatelessWidget {
       ),
       child: Scaffold(
         extendBodyBehindAppBar: true,
-        appBar: KumoneGlassAppBar(title: Text(category ?? '设置')),
+        appBar: KumoneGlassAppBar(title: category == null ? const Text('设置') : const SizedBox.shrink()),
         body: ListView(
           padding: EdgeInsets.only(
               top: kumoneToolbarInset(context),
@@ -164,12 +164,7 @@ class SettingsPage extends StatelessWidget {
                                 child: Text(landscape ? '移除横屏壁纸' : '移除竖屏壁纸')),
                         ],
                       ])),
-              KumoneGlassSwitchTile(
-                  secondary: const Icon(Icons.open_in_full),
-                  title: const Text('背景延伸至状态栏'),
-                  subtitle: const Text('让背景（含自定义背景）铺满状态栏；大播放页不受影响，始终使用自己的氛围背景'),
-                  value: settings.backgroundExtend,
-                  onChanged: settings.setBackgroundExtend),
+
               const Divider(height: 24),
               const _SettingsHeader('应用图标与启动屏'),
               Consumer<AppIconStore>(
@@ -206,25 +201,6 @@ class SettingsPage extends StatelessWidget {
                       )),
               const Divider(height: 24),
               const _SettingsHeader('外观'),
-              ListTile(title: const Text('mini 播放器与 Tab 间距'),
-                subtitle: const Text('按 1206px 参考截图比例：24～36px'),
-                trailing: Text('${settings.miniTabGap.round()}px')),
-              KumoneGlassSlider(value: settings.miniTabGap, min: 24, max: 36,
-                onChanged: settings.previewMiniTabGap,
-                onChangeEnd: settings.saveMiniTabGap),
-
-              ListTile(title: const Text('底栏与 mini 播放器 · 纵向位置'),
-                subtitle: const Text('向左上移，向右下移；下移最多 6，保留系统导航安全间距'),
-                trailing: Text(settings.bottomChromeOffset.toStringAsFixed(0))),
-              KumoneGlassSlider(value: settings.bottomChromeOffset, min: -24, max: 6,
-                onChanged: settings.previewBottomChromeOffset,
-                onChangeEnd: settings.saveBottomChromeOffset),
-
-              KumoneGlassSwitchTile(value: settings.freezeOutgoingPage,
-                onChanged: settings.setFreezeOutgoingPage,
-                title: const Text('转场冻结离场页面（实验性）'),
-                subtitle: const Text('使用整页快照暂停被覆盖页面的玻璃与动画；如有闪烁请关闭，默认开启')),
-
               const ListTile(title: Text('主题强调色')),
               for (final accent in AppAccent.values)
                 _CheckChoice(selected: settings.accent == accent,
@@ -274,10 +250,7 @@ class SettingsPage extends StatelessWidget {
                   child: const Text('恢复默认渐变分布'))),
               const Divider(height: 24),
               const _SettingsHeader('歌曲菜单 · 液态玻璃'),
-              KumoneGlassSwitchTile(value: settings.songMenuFocus,
-                onChanged: settings.setSongMenuFocus,
-                title: const Text('长按歌曲聚焦'),
-                subtitle: const Text('保留当前歌曲和菜单的亮度，其他区域轻微变暗')),
+
               ListTile(
                 title: const Text('二级菜单与快捷入口底色不透明度'),
                 subtitle: const Text('菜单、快捷入口、搜索框及收藏关注按钮共用；不影响底栏与 mini 播放器'),
@@ -291,22 +264,13 @@ class SettingsPage extends StatelessWidget {
                 onChangeEnd: settings.saveMenuBackingOpacity,
               ),
               const Divider(height: 24),
-              ListTile(
-                  title: const Text('底栏与 mini 播放器 · 玻璃模糊强度'),
-                  subtitle: const Text('连续调节清晰折射到磨砂模糊，不改变不透明度'),
-                  trailing: Text(settings.chromeBlur.toStringAsFixed(1))),
-              KumoneGlassSlider(
-                  value: settings.chromeBlur,
-                  max: 40,
-                  onChanged: settings.previewChromeBlur,
-                  onChangeEnd: settings.saveChromeBlur),
               ListTile(title: const Text('Tab 栏与 mini 播放器 · 底色不透明度'),
                 trailing: Text('${((settings.chromeBackingOpacity ?? KumoneGlassOptics.backingOpacity(Theme.of(context).brightness)) * 100).round()}%')),
               KumoneGlassSlider(value: settings.chromeBackingOpacity ?? KumoneGlassOptics.backingOpacity(Theme.of(context).brightness),
                 min: 0, max: 1, onChanged: settings.previewChromeBackingOpacity,
                 onChangeEnd: settings.saveChromeBackingOpacity),
               ListTile(
-                title: const Text('菜单与控件 · 模糊强度'),
+                title: const Text('菜单、控件、底栏与 mini · 模糊强度'),
                 trailing: Text(settings.songMenuBlur.toStringAsFixed(1)),
               ),
               KumoneGlassSlider(value: settings.songMenuBlur, max: 40,
@@ -320,6 +284,23 @@ class SettingsPage extends StatelessWidget {
                 onChangeEnd: settings.saveQuickEntryBlur),
               const Divider(height: 24),
               const _SettingsHeader('横屏 / 平板 · 浮动功能栏'),
+              ListTile(title: const Text('mini 播放器与 Tab 间距'),
+                subtitle: const Text('按 1206px 参考截图比例：24～36px'),
+                trailing: Text('${settings.miniTabGap.round()}px')),
+              KumoneGlassSlider(value: settings.miniTabGap, min: 24, max: 36,
+                onChanged: settings.previewMiniTabGap,
+                onChangeEnd: settings.saveMiniTabGap),
+
+              ListTile(title: const Text('底栏与 mini 播放器 · 纵向位置'),
+                subtitle: const Text('向左上移，向右下移；下移最多 6，保留系统导航安全间距'),
+                trailing: Text(settings.bottomChromeOffset.toStringAsFixed(0))),
+              KumoneGlassSlider(value: settings.bottomChromeOffset, min: -24, max: 6,
+                onChanged: settings.previewBottomChromeOffset,
+                onChangeEnd: settings.saveBottomChromeOffset),
+
+
+
+
               KumoneGlassSwitchTile(
                 title: const Text('功能栏位于左侧'),
                 subtitle: const Text('关闭时位于右侧；搜索始终单独显示'),
@@ -425,18 +406,13 @@ class SettingsPage extends StatelessWidget {
                       _CheckChoice(selected: settings.nowPlaying == mode,
                         onTap: () => settings.setNowPlaying(mode),
                         title: switch (mode) {
-                          NowPlayingMode.vinyl => '黑胶模式',
                           NowPlayingMode.immersive => '沉浸模式',
                           NowPlayingMode.minimal => '简洁模式',
                         }),
                   ],
                 ),
               ),
-              KumoneGlassSwitchTile(
-                value: settings.ambient,
-                onChanged: settings.setAmbient,
-                title: const Text('播放页环境氛围背景'),
-              ),
+
               const Divider(height: 24),
               const _SettingsHeader('横屏与歌词效果'),
               ListTile(
@@ -451,11 +427,7 @@ class SettingsPage extends StatelessWidget {
               Align(alignment: Alignment.centerRight,
                 child: TextButton(onPressed: () => settings.saveLyricFontScale(1),
                   child: const Text('恢复默认字号'))),
-              KumoneGlassSwitchTile(
-                  value: settings.landscapeDualPane,
-                  onChanged: settings.setLandscapeDualPane,
-                  title: const Text('横屏双栏播放器'),
-                  subtitle: const Text('空间足够时并排显示播放控件与实时歌词，竖屏布局不变')),
+
               ListTile(
                   title: const Text('双向歌词模糊强度'),
                   subtitle: const Text('当前行保持清晰；设为 0 关闭'),
@@ -532,15 +504,15 @@ class SettingsPage extends StatelessWidget {
 
   List<Widget> _categorized(BuildContext context, List<Widget> items) {
     const groups = <String, String>{
-      '自定义背景': '背景与外观', '应用图标与启动屏': '应用图标与启动屏',
-      '外观': '背景与外观', '顶部渐变模糊': '顶部渐变模糊',
-      '歌曲菜单 · 液态玻璃': '液态玻璃',
+      '自定义背景': '背景与外观', '应用图标与启动屏': '背景与外观',
+      '外观': '背景与外观', '顶部渐变模糊': '玻璃与模糊',
+      '歌曲菜单 · 液态玻璃': '玻璃与模糊',
       '横屏 / 平板 · 浮动功能栏': '浮动功能栏',
       '播放音质': '音频与播放', '淡入/淡出': '音频与播放',
       '音频输出': '音频与播放', '存储': '存储与账户',
       '补源与账户': '存储与账户',
-      '播放页': '播放页', '横屏与歌词效果': '歌词与横屏',
-      '歌词': '歌词与横屏',
+      '播放页': '播放页', '横屏与歌词效果': '播放页',
+      '歌词': '播放页',
     };
     final sections = <String, List<Widget>>{};
     var current = '存储与账户';
@@ -549,10 +521,13 @@ class SettingsPage extends StatelessWidget {
       (sections[current] ??= []).add(item);
     }
     if (category != null) return sections[category] ?? [];
-    return [for (final name in sections.keys) ListTile(
+    return [for (final name in sections.keys) Container(
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(
+        color: Theme.of(context).dividerColor.withValues(alpha: .16), width: .5))),
+      child: ListTile(
       title: Text(name), trailing: const Icon(Icons.chevron_right),
       onTap: () => Navigator.of(context).push(kumonePageRoute(SettingsPage(category: name), settings: const RouteSettings(name: '/settings'))),
-    )];
+    ))];
   }
 
   Future<void> _confirmClearCache(

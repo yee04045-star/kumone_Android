@@ -1475,14 +1475,14 @@ class NeteaseApi {
     }
   }
 
-  Future<List<AlbumSummary>> artistAlbums(int id) async {
+  Future<List<AlbumSummary>> artistAlbums(int id, {int limit = 100, int offset = 0}) async {
     final requests = <Future<Map<String, dynamic>> Function()>[
-      () => c.weapi('/artist/albums/$id', {'limit': 100, 'offset': 0, 'total': true}),
-      () => c.plainGet('/artist/albums/$id', {'limit': 100, 'offset': 0, 'total': true}),
-      () => c.weapi('/artist/album', {'id': id, 'limit': 100, 'offset': 0}),
-      () => c.publicPlainGet('/artist/album', {'id': id, 'limit': 100, 'offset': 0}),
-      () => c.publicPlainGet('/artist/albums', {'id': id, 'limit': 100, 'offset': 0}),
-      () => c.plainGet('/artist/album', {'id': id, 'limit': 100, 'offset': 0}),
+      () => c.weapi('/artist/albums/$id', {'limit': limit, 'offset': offset, 'total': true}),
+      () => c.plainGet('/artist/albums/$id', {'limit': limit, 'offset': offset, 'total': true}),
+      () => c.weapi('/artist/album', {'id': id, 'limit': limit, 'offset': offset}),
+      () => c.publicPlainGet('/artist/album', {'id': id, 'limit': limit, 'offset': offset}),
+      () => c.publicPlainGet('/artist/albums', {'id': id, 'limit': limit, 'offset': offset}),
+      () => c.plainGet('/artist/album', {'id': id, 'limit': limit, 'offset': offset}),
     ];
     for (final request in requests) {
       try {

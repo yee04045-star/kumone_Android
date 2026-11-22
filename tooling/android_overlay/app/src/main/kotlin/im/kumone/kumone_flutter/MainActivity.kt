@@ -254,8 +254,8 @@ open class MainActivity : AudioServiceActivity() {
             window.isNavigationBarContrastEnforced = false
         }
 
-        ensureNowPlayingStatusBarView()
-        nowPlayingStatusBarView?.setGradientColors(primaryColor, secondaryColor)
+        // Flutter paints the same ambient background behind transparent bars.
+        removeNowPlayingStatusBarView()
         applySystemBarIconAppearance(darkIcons)
     }
 
