@@ -2769,8 +2769,10 @@ class _MobilePlayerHeading extends StatelessWidget {
           child: externalCover ? null : (showCover ? GestureDetector(
             onTap: onCoverTap, child: Artwork(url: track.album.picUrl,
               size: 62, radius: 12, shadow: false, border: false)) : null)),
-        Expanded(child: _ImmersiveMetadata(track: track,
-          onOpenArtist: onOpenArtist, onOpenAlbum: onOpenAlbum)),
+        Expanded(child: Transform.translate(
+          offset: const Offset(0, 9),
+          child: _ImmersiveMetadata(track: track,
+            onOpenArtist: onOpenArtist, onOpenAlbum: onOpenAlbum))),
       ])),
       const SizedBox(width: 6),
       Transform.translate(offset: const Offset(0, -2),
