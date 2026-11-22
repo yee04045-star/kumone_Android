@@ -366,15 +366,16 @@ class _LiquidGlassScrollEdgeState extends State<LiquidGlassScrollEdge>
   /// pass carries the batch's key and reads its shared copy. Outside one
   /// it is a plain `BackdropFilter`.
   Widget _blurPass(bool top) {
-    return ClipRect(
+    return LayoutBuilder(builder: (context, constraints) => ClipRect(
       child: LiquidGlassBatchBackdropFilter(
+        key: ValueKey('edge-filter-${constraints.maxWidth}-${constraints.maxHeight}'),
         filter: ui.ImageFilter.blur(sigmaX: _sigma(top), sigmaY: _sigma(top),
             tileMode: TileMode.clamp),
         child: widget.style == LiquidGlassScrollEdgeStyle.soft
             ? _featherMask(top)
             : const SizedBox.expand(),
       ),
-    );
+    ));
   }
 
   /// How much the bottom band's sigma is nudged off the top band's while

@@ -65,9 +65,10 @@ void main() {
   test('detail routes support native iOS transitions and player presents vertically', () {
     final detail = kumonePageRoute<void>(const SizedBox()) as CupertinoPageRoute<void>;
     final player = kumonePageRoute<void>(const SizedBox(),
-        settings: const RouteSettings(name: '/now-playing')) as CupertinoPageRoute<void>;
+        settings: const RouteSettings(name: '/now-playing')) as PageRoute<void>;
     expect(detail.fullscreenDialog, false);
     expect(player.fullscreenDialog, true);
+    expect(player.opaque, false);
   });
 
   testWidgets('metadata row scrolls as one tappable artist and album line',

@@ -293,7 +293,8 @@ class _AppShellState extends State<AppShell> {
               child: Align(alignment: Alignment.bottomCenter, child: LiquidGlassTabBar(
                 width: constraints.maxWidth - 28,
                 height: 60,
-                swell: const LiquidGlassTabBarSwell(),
+                swell: const LiquidGlassTabBarSwell(
+                  grip: 0, damping: 36, releaseDamping: 36),
                 margin: EdgeInsets.zero,
                 style: barStyle.copyWith(
                     color: (brightness == Brightness.dark ? Colors.black : Colors.white)

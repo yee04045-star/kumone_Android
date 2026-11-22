@@ -1,4 +1,5 @@
 import 'route_snapshot.dart';
+import 'package:flutter/gestures.dart';
 import 'dart:math' as math;
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:flutter/material.dart';
@@ -194,6 +195,7 @@ class _KumoneGlassBarSurface extends StatelessWidget {
         minHeight: (baseHeight ?? constraints.maxHeight) * extent,
         maxHeight: (baseHeight ?? constraints.maxHeight) * extent,
         child: LiquidGlassScrollEdge(
+          key: ValueKey('top-edge-${(baseHeight ?? constraints.maxHeight) * extent}-$distribution'),
           edge: LiquidGlassEdge.top,
           blur: 26 * progress,
           color: scheme.surface.withValues(alpha: .10 * progress),
@@ -208,7 +210,9 @@ class _KumoneGlassBarSurface extends StatelessWidget {
 // Use the platform's coordinated incoming/outgoing transition and edge-swipe
 // back gesture. The player is presented vertically without changing its layout.
 Route<T> kumonePageRoute<T>(Widget page, {RouteSettings? settings}) =>
-    _KumonePageRoute<T>(page: page, settings: settings);
+    settings?.name == '/now-playing'
+        ? _KumonePlayerRoute<T>(page: page, settings: settings)
+        : _KumonePageRoute<T>(page: page, settings: settings);
 
 class _KumonePageRoute<T> extends CupertinoPageRoute<T> {
   _KumonePageRoute({required Widget page, super.settings})
@@ -225,6 +229,20 @@ class _KumonePageRoute<T> extends CupertinoPageRoute<T> {
     return super.buildTransitions(context, animation, secondaryAnimation,
         KumoneRouteSnapshot(covered: secondaryAnimation, child: child));
   }
+}
+
+// Transparent route keeps the outgoing page/snapshot painted under drag exit.
+// The live player is deliberately never wrapped in SnapshotWidget.
+class _KumonePlayerRoute<T> extends PageRouteBuilder<T> {
+  _KumonePlayerRoute({required Widget page, super.settings}) : super(
+    opaque: false, fullscreenDialog: true,
+    transitionDuration: const Duration(milliseconds: 350),
+    reverseTransitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (_, __, ___) => page,
+    transitionsBuilder: (_, animation, __, child) => SlideTransition(
+      position: Tween(begin: const Offset(0, 1), end: Offset.zero)
+        .animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic)), child: child));
 }
 
 Future<T?> kumoneDialog<T>({required BuildContext context,
@@ -852,7 +870,12 @@ class GlassMiniPlayer extends StatelessWidget {
     if (track == null) return const SizedBox.shrink();
 
     final cs = Theme.of(context).colorScheme;
-    return Material(
+    return TooltipVisibility(visible: false,
+      child: RawGestureDetector(
+        gestures: {LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+          () => LongPressGestureRecognizer(duration: const Duration(seconds: 1)),
+          (recognizer) => recognizer.onLongPress = onQueue)},
+        child: Material(
       color: Colors.transparent,
       child: KumoneLiquidSurface(
         radius: 999,
@@ -902,7 +925,7 @@ class GlassMiniPlayer extends StatelessWidget {
           ],
         ),
       ),
-    );
+    )));
   }
 }
 
