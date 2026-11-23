@@ -2786,11 +2786,15 @@ class _MobilePlayerHeading extends StatelessWidget {
           child: externalCover ? null : (showCover ? GestureDetector(
             onTap: onCoverTap, child: Artwork(url: track.album.picUrl,
               size: 62, radius: 12, shadow: false, border: false)) : null)),
-        Expanded(child: Transform.translate(
-          offset: const Offset(0, 9),
-          child: AnimatedSwitcher(duration: const Duration(milliseconds: 800),
-            child: _ImmersiveMetadata(key: ValueKey(track.id), track: track,
-              onOpenArtist: onOpenArtist, onOpenAlbum: onOpenAlbum)))),
+        Expanded(child: LayoutBuilder(builder: (context, bounds) => OverflowBox(
+          alignment: Alignment.centerLeft,
+          minWidth: bounds.maxWidth + 10,
+          maxWidth: bounds.maxWidth + 10,
+          child: Transform.translate(
+            offset: const Offset(0, 9),
+            child: AnimatedSwitcher(duration: const Duration(milliseconds: 800),
+              child: _ImmersiveMetadata(key: ValueKey(track.id), track: track,
+                onOpenArtist: onOpenArtist, onOpenAlbum: onOpenAlbum)))))),
       ])),
       const SizedBox(width: 6),
       // Align the 26px more icon with the timeline edge, rather than the
