@@ -34,12 +34,33 @@ class _QueueResizeHost extends StatefulWidget {
     required this.foreground, required this.secondaryForeground});
   @override State<_QueueResizeHost> createState() => _QueueResizeHostState();
 }
-class _QueueResizeHostState extends State<_QueueResizeHost> {
+class _QueueResizeHostState extends State<_QueueResizeHost>
+    with SingleTickerProviderStateMixin {
   double fraction = .76;
   double drag = 0;
+  double slide = 0;
+  double startFraction = .76;
+  late final motion = AnimationController(vsync: this,
+    duration: const Duration(milliseconds: 240));
+  Future<void> settle(double target, {bool dismiss = false}) async {
+    final from = fraction, fromSlide = slide;
+    void tick() {
+      final t = Curves.easeOutCubic.transform(motion.value);
+      setState(() {
+        fraction = from + (target - from) * t;
+        slide = fromSlide + ((dismiss ? MediaQuery.sizeOf(context).height : 0) - fromSlide) * t;
+      });
+    }
+    motion.addListener(tick);
+    await motion.forward(from: 0);
+    motion.removeListener(tick);
+    if (mounted && dismiss) Navigator.of(context).pop();
+  }
+  @override void dispose() { motion.dispose(); super.dispose(); }
   @override Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, bounds) => Align(alignment: Alignment.bottomCenter,
       child: FractionallySizedBox(heightFactor: fraction,
+        child: Transform.translate(offset: Offset(0, slide),
         child: _GlassQueueSurface(primary: widget.primary, secondary: widget.secondary,
           child: Stack(children: [
             Positioned.fill(child: QueueListPanel(
@@ -47,17 +68,29 @@ class _QueueResizeHostState extends State<_QueueResizeHost> {
               secondaryForegroundColor: widget.secondaryForeground)),
             Positioned(top: 0, left: 0, right: 0, height: 28,
               child: GestureDetector(behavior: HitTestBehavior.opaque,
-                onVerticalDragStart: (_) => drag = 0,
-                onVerticalDragUpdate: (details) => drag += details.delta.dy,
+                onVerticalDragStart: (_) {
+                  motion.stop(); drag = 0; startFraction = fraction;
+                },
+                onVerticalDragUpdate: (details) {
+                  drag += details.delta.dy;
+                  setState(() {
+                    fraction = drag < 0
+                        ? (startFraction - drag / bounds.maxHeight).clamp(.76, .96)
+                        : startFraction;
+                    slide = drag > 0 ? drag : 0;
+                  });
+                },
                 onVerticalDragEnd: (details) {
                   final velocity = details.primaryVelocity ?? 0;
                   if (drag > 36 || velocity > 500) {
-                    Navigator.of(context).maybePop();
+                    settle(startFraction, dismiss: true);
                   } else if (drag < -28 || velocity < -500) {
-                    setState(() => fraction = .96);
+                    settle(.96);
+                  } else {
+                    settle(startFraction >= .86 ? .96 : .76);
                   }
                 }, child: const SizedBox.expand())),
-          ])))));
+          ]))))));
 }
 
 class _GlassQueueSurface extends StatelessWidget {
