@@ -2730,7 +2730,7 @@ class _ControlIcon extends StatelessWidget {
           height: buttonSize,
           child: Center(
             child: Transform.translate(
-              offset: Offset(icon == CupertinoIcons.play_fill ? 2 : 0, 0),
+              offset: Offset(icon == CupertinoIcons.play_fill ? 4 : 0, 0),
               child: Icon(
               icon,
               color: iconColor,
@@ -2804,7 +2804,7 @@ class _MobilePlayerHeading extends StatelessWidget {
       const SizedBox(width: 6),
       // Align the 26px more icon with the timeline edge, rather than the
       // outside of its 44px hit target. Move heart/more together.
-      Transform.translate(offset: const Offset(9, -2),
+      Transform.translate(offset: const Offset(15, -2),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
       _RoundGlassButton(iconSize: 26, hitSize: 44, icon: liked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
         active: liked, tooltip: liked ? '取消喜欢' : '喜欢', onTap: () async {

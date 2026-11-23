@@ -1,3 +1,4 @@
+import '../widgets/cached_entry_snapshot.dart';
 import '../widgets/content_fade.dart';
 import '../widgets/loading_placeholder.dart';
 import '../widgets/track_title.dart';
@@ -22,6 +23,14 @@ class LikedSongsPage extends StatefulWidget {
 }
 
 class _LikedSongsPageState extends State<LikedSongsPage> {
+  static String? cachedKey;
+  static List<Track>? cachedTracks;
+  String get dataKey {
+    final account = context.read<AccountStore>();
+    final ids = account.likedIds.toList()..sort();
+    return '${account.profile?.userId}:${account.likedRevision}:${ids.join(',')}';
+  }
+  bool _animateSongs = true;
   bool loading = true;
   String? error;
   List<Track> tracks = const [];
@@ -30,7 +39,9 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
   @override
   void initState() {
     super.initState();
-    _load();
+    if (cachedKey == dataKey && cachedTracks != null) {
+      tracks = List.of(cachedTracks!); loading = false; _animateSongs = false;
+    } else { _load(); }
   }
 
   Future<void> _load() async {
@@ -42,6 +53,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
           .timeout(const Duration(seconds: 20));
       if (!mounted) return;
       setState(() {
+        cachedKey = dataKey; cachedTracks = List.of(loaded);
         tracks = loaded;
         loading = false;
       });
@@ -66,7 +78,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                 .toLowerCase()
                 .contains(query))
         .toList();
-    return Scaffold(
+    return CachedEntrySnapshot(identity: dataKey, family: 'liked', ready: !loading && error == null, child: Scaffold(
       extendBodyBehindAppBar: true,
       appBar: KumoneGlassAppBar(title: const SizedBox.shrink()),
       body: KumoneGlassRefresh.adaptive(
@@ -157,7 +169,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                   return TrackActionMenu(
                     track: track,
                     showButton: false,
-                    child: HomeAppear(index: i, child: ListTile(
+                    child: HomeAppear(index: i, enabled: _animateSongs, child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 2),
                       leading: Artwork(fadeIn: true, 
@@ -194,7 +206,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
           ],
         ),
       ),
-    );
+    ));
   }
 }
 

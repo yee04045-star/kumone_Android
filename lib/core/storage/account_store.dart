@@ -7,6 +7,7 @@ class AccountStore extends ChangeNotifier {
   final api = NeteaseApi.instance;
   UserProfile? profile;
   Set<int> likedIds = {};
+  int likedRevision = 0;
   List<PlaylistSummary> playlists = [];
   List<AlbumSummary> likedAlbums = [];
   List<ArtistSummary> likedArtists = [];
@@ -298,6 +299,7 @@ class AccountStore extends ChangeNotifier {
     notifyListeners();
     try {
       await api.likeTrack(id, next);
+      likedRevision++;
     } catch (e) {
       if (next) {
         likedIds.remove(id);

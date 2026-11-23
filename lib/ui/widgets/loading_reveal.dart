@@ -4,7 +4,8 @@ import 'loading_placeholder.dart';
 
 class KumoneLoadingReveal extends StatefulWidget {
   final Widget child;
-  const KumoneLoadingReveal({super.key, required this.child});
+  final EdgeInsets placeholderPadding;
+  const KumoneLoadingReveal({super.key, required this.child, this.placeholderPadding = EdgeInsets.zero});
   @override State<KumoneLoadingReveal> createState() => _LoadingRevealState();
 }
 class _LoadingRevealState extends State<KumoneLoadingReveal> {
@@ -17,6 +18,6 @@ class _LoadingRevealState extends State<KumoneLoadingReveal> {
     });
   }
   @override Widget build(BuildContext context) => ready ? widget.child
-      : const KumoneLoadingPlaceholder();
+      : Padding(padding: widget.placeholderPadding, child: const KumoneLoadingPlaceholder());
   @override void dispose() { timer?.cancel(); super.dispose(); }
 }

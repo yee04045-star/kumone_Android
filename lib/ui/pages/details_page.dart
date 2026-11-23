@@ -1,3 +1,4 @@
+import '../widgets/cached_entry_snapshot.dart';
 import '../widgets/content_fade.dart';
 import '../widgets/loading_placeholder.dart';
 import 'artist_catalog_page.dart';
@@ -91,7 +92,7 @@ class _PlaylistPageState extends State<PlaylistPage>
       if (!mounted) return;
       _recent.remove(_cacheKey);
       _recent[_cacheKey] = (detail: detail!, tracks: List.of(tracks));
-      while (_recent.length > 3) { _recent.remove(_recent.keys.first); }
+      while (_recent.length > 1) { _recent.remove(_recent.keys.first); }
       setState(() => loading = false);
     } catch (e) {
       if (!mounted) return;
@@ -187,7 +188,7 @@ class _PlaylistPageState extends State<PlaylistPage>
             .toLowerCase().contains(query)).toList();
     final isUserLikedPlaylist = account.isLoggedIn &&
         (playlist.id == account.likedPlaylist?.id || playlist.name.trim() == '我喜欢的音乐');
-    return Scaffold(
+    return CachedEntrySnapshot(identity: _cacheKey, family: 'playlist', ready: !loading, child: Scaffold(
       extendBodyBehindAppBar: true,
       appBar: KumoneGlassAppBar(
         title: const SizedBox.shrink(),
@@ -442,7 +443,7 @@ class _PlaylistPageState extends State<PlaylistPage>
           ],
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -1172,7 +1173,7 @@ class _DailyPageState extends State<DailyPage> {
   @override
   Widget build(BuildContext context) {
     final player = context.read<PlayerController>();
-    return Scaffold(
+    return CachedEntrySnapshot(identity: _dailyKey, family: 'daily', ready: !loading && songs.isNotEmpty, child: Scaffold(
       extendBodyBehindAppBar: true,
       appBar: KumoneGlassAppBar(title: const SizedBox.shrink()),
       body: loading
@@ -1208,6 +1209,6 @@ class _DailyPageState extends State<DailyPage> {
                     );
                   },
                 ),
-    );
+    ));
   }
 }

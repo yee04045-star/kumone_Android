@@ -310,7 +310,7 @@ class _PlaylistListPageState extends State<_PlaylistListPage> {
             ),
         ],
       ),
-      body: KumoneLoadingReveal(child: KumoneGlassRefresh.adaptive(
+      body: KumoneLoadingReveal(placeholderPadding: EdgeInsets.only(top: kumoneToolbarInset(context)), child: KumoneGlassRefresh.adaptive(
         onRefresh: _refresh,
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(

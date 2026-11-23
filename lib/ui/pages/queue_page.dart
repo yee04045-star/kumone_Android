@@ -36,6 +36,7 @@ class _QueueResizeHost extends StatefulWidget {
 }
 class _QueueResizeHostState extends State<_QueueResizeHost> {
   double fraction = .76;
+  double drag = 0;
   @override Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, bounds) => Align(alignment: Alignment.bottomCenter,
       child: FractionallySizedBox(heightFactor: fraction,
@@ -46,10 +47,15 @@ class _QueueResizeHostState extends State<_QueueResizeHost> {
               secondaryForegroundColor: widget.secondaryForeground)),
             Positioned(top: 0, left: 0, right: 0, height: 28,
               child: GestureDetector(behavior: HitTestBehavior.opaque,
-                onVerticalDragUpdate: (details) {
-                  if (bounds.maxHeight <= 0) return;
-                  setState(() => fraction = (fraction - details.delta.dy / bounds.maxHeight)
-                    .clamp(.36, .96));
+                onVerticalDragStart: (_) => drag = 0,
+                onVerticalDragUpdate: (details) => drag += details.delta.dy,
+                onVerticalDragEnd: (details) {
+                  final velocity = details.primaryVelocity ?? 0;
+                  if (drag > 36 || velocity > 500) {
+                    Navigator.of(context).maybePop();
+                  } else if (drag < -28 || velocity < -500) {
+                    setState(() => fraction = .96);
+                  }
                 }, child: const SizedBox.expand())),
           ])))));
 }

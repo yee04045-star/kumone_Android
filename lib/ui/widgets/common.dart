@@ -929,7 +929,7 @@ class GlassMiniPlayer extends StatelessWidget {
             IconButton(
               tooltip: player.isPlaying ? '暂停' : '播放', onPressed: player.toggle,
               icon: Transform.translate(
-                offset: Offset(player.isPlaying ? 0 : 1, 0),
+                offset: Offset(player.isPlaying ? 0 : 2, 0),
                 child: Icon(player.isPlaying ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill))),
             IconButton(tooltip: '下一首', onPressed: player.next,
               icon: const Icon(CupertinoIcons.forward_fill)),
