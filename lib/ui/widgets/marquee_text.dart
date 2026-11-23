@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'scroll_text_edges.dart';
 import 'package:flutter/material.dart';
 
 // Single copy, edge-clipped marquee. No animation/timer when the text fits.
@@ -8,9 +9,10 @@ class MarqueeText extends StatefulWidget {
   final TextAlign textAlign;
   final double pixelsPerSecond;
   final bool scrollEnabled;
+  final Duration startPause;
   const MarqueeText(this.text,
       {super.key, this.style, this.textAlign = TextAlign.start, this.pixelsPerSecond = 28,
-      this.scrollEnabled = true});
+      this.scrollEnabled = true, this.startPause = const Duration(seconds: 3)});
   @override
   State<MarqueeText> createState() => _MarqueeTextState();
 }
@@ -33,15 +35,16 @@ class _MarqueeTextState extends State<MarqueeText>
     _distance = distance;
     if (distance <= 0) return;
     void cycle() {
-      _pause = Timer(const Duration(seconds: 3), () async {
+      _pause = Timer(widget.startPause, () async {
         if (!mounted || generation != _generation) return;
         _controller.duration =
             Duration(milliseconds: (distance / widget.pixelsPerSecond * 1000).round());
         await _controller.forward(from: 0).orCancel.catchError((Object _) {});
         if (!mounted || generation != _generation) return;
-        _pause = Timer(const Duration(seconds: 2), () {
+        _pause = Timer(const Duration(seconds: 2), () async {
           if (!mounted || generation != _generation) return;
-          _controller.value = 0;
+          await _controller.reverse(from: 1).orCancel.catchError((Object _) {});
+          if (!mounted || generation != _generation) return;
           cycle();
         });
       });
@@ -88,7 +91,10 @@ class _MarqueeTextState extends State<MarqueeText>
                   height: height,
                   child: AnimatedBuilder(
                     animation: _controller,
-                    builder: (_, __) => OverflowBox(
+                    builder: (_, __) => ScrollTextEdges(
+                      left: (_distance * _controller.value / 14).clamp(0.0, 1.0),
+                      right: (_distance * (1 - _controller.value) / 14).clamp(0.0, 1.0),
+                      child: OverflowBox(
                       alignment: Alignment.centerLeft,
                       minWidth: width,
                       maxWidth: width,
@@ -96,7 +102,7 @@ class _MarqueeTextState extends State<MarqueeText>
                           offset: Offset(-_distance * _controller.value, 0),
                           child: Text(widget.text,
                               style: style, maxLines: 1, softWrap: false)),
-                    ),
+                    )), 
                   )),
             )));
       });

@@ -1107,7 +1107,7 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
     final bottomRight = overlayBox.globalToLocal(sourceBottomRight);
     final overlaySize = overlayBox.size;
     final insets = MediaQuery.paddingOf(context);
-    final panelWidth = math.min(240.0, overlaySize.width - 24);
+    final panelWidth = math.min(220.0, overlaySize.width - 24);
     final estimatedHeight = math.min(
         _glassMenuNaturalHeight(panelWidth), overlaySize.height - insets.vertical - 32);
     final right = (overlaySize.width - bottomRight.dx)
@@ -1396,7 +1396,7 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
     final size = overlayBox.size;
     final point = overlayBox.globalToLocal(globalPosition);
 
-    final panelWidth = math.min(240.0, size.width - 24);
+    final panelWidth = math.min(220.0, size.width - 24);
     const edgeInset = 12.0;
     const gap = 8.0;
     final insets = MediaQuery.paddingOf(context);

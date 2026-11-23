@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'scroll_text_edges.dart';
 import 'package:flutter/material.dart';
 
 // Keeps artist/album links individually tappable while scrolling their row.
@@ -31,9 +32,12 @@ class _AutoScrollMetadataState extends State<AutoScrollMetadata> {
           duration: Duration(milliseconds: (distance / 28 * 1000).round()),
           curve: Curves.linear);
       if (!mounted || epoch != _epoch) return;
-      _timer = Timer(const Duration(seconds: 2), () {
-        if (!mounted || epoch != _epoch || !_scroll.hasClients) return;
-        _scroll.jumpTo(0);
+      _timer = Timer(const Duration(seconds: 2), () async {
+        if (!mounted || epoch != _epoch || !_scroll.hasClients || !_enabled) return;
+        await _scroll.animateTo(0,
+          duration: Duration(milliseconds: (distance / 28 * 1000).round()),
+          curve: Curves.linear);
+        if (!mounted || epoch != _epoch || !_enabled) return;
         _start();
       });
     });
@@ -74,7 +78,16 @@ class _AutoScrollMetadataState extends State<AutoScrollMetadata> {
       LayoutBuilder(builder: (context, constraints) {
         return SizedBox(
           width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
-          child: SingleChildScrollView(
+          child: AnimatedBuilder(animation: _scroll,
+            builder: (context, child) {
+              final position = _scroll.hasClients ? _scroll.position : null;
+              final offset = position?.hasContentDimensions == true ? position!.pixels : 0.0;
+              final remaining = position?.hasContentDimensions == true
+                  ? position!.maxScrollExtent - offset : 0.0;
+              return ScrollTextEdges(left: (offset / 14).clamp(0.0, 1.0),
+                right: (remaining / 14).clamp(0.0, 1.0), child: child!);
+            },
+            child: SingleChildScrollView(
             controller: _scroll,
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -85,9 +98,17 @@ class _AutoScrollMetadataState extends State<AutoScrollMetadata> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [widget.child]))
                 : widget.child,
-          ),
+          )), 
         );
       });
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   void dispose() {
     ++_epoch;
