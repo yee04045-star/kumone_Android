@@ -10,7 +10,8 @@ class ScrollTextEdges extends StatelessWidget {
     required this.child});
   @override
   Widget build(BuildContext context) => LayoutBuilder(builder: (context, bounds) {
-    if (left == 0 && right == 0) return child;
+    // Keep the hierarchy stable as overflow measurements become available;
+    // otherwise the scrollable is remounted and an active scroll is cancelled.
     final edge = (14 / bounds.maxWidth).clamp(0.0, .45);
     return ClipRect(child: ShaderMask(
       blendMode: BlendMode.dstIn,
@@ -46,6 +47,10 @@ class _RenderEdgeBlur extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child == null || size.isEmpty) return;
+    if (left <= .001 && right <= .001) {
+      super.paint(context, offset);
+      return;
+    }
     final edge = (size.width / 2).clamp(0.0, 14.0);
     final l = left > .001 ? edge : 0.0;
     final r = right > .001 ? edge : 0.0;
