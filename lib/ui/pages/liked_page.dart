@@ -157,7 +157,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                   return TrackActionMenu(
                     track: track,
                     showButton: false,
-                    child: ListTile(
+                    child: HomeAppear(index: i, child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 2),
                       leading: Artwork(fadeIn: true, 
@@ -178,7 +178,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                             TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
                       ),
                       onTap: () => player.playTracks(tracks, start: track),
-                    ),
+                    )),
                     onOpenAlbum: (album) => Navigator.of(context).push(
                       kumonePageRoute(AlbumPage(id: album.id)),
                     ),

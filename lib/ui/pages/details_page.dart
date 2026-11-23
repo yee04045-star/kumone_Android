@@ -34,6 +34,7 @@ class _PlaylistPageState extends State<PlaylistPage>
   List<Track> tracks = [];
   bool loading = true;
   String? error;
+  bool _animateSongs = true;
   bool _busySubscription = false;
   String _query = '';
   @override
@@ -41,6 +42,7 @@ class _PlaylistPageState extends State<PlaylistPage>
     super.initState();
     final cached = _recent.remove(_cacheKey);
     if (cached != null) {
+      _animateSongs = false;
       _recent[_cacheKey] = cached;
       detail = cached.detail;
       tracks = List.of(cached.tracks);
@@ -374,9 +376,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                   onOpenArtist: (artist) {
                     Navigator.of(context).push(kumonePageRoute(ArtistPage(id: artist.id)));
                   },
-                  child: HomeAppear(
-                    index: i,
-                    child: Material(
+                  child: HomeAppear(index: i, enabled: _animateSongs, child: Material(
                       color: active ? cs.primary.withValues(alpha: .065) : Colors.transparent,
                       child: InkWell(
                         onTap: () => player.playTracks(tracks, start: track),
@@ -427,8 +427,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                           ),
                         ),
                       ),
-                    ),
-                  ),
+                    )),
                 );
               },
             ),
@@ -1123,6 +1122,7 @@ class _DailyPageState extends State<DailyPage> {
     return '${context.read<AccountStore>().profile?.userId ?? 0}:${now.year}-${now.month}-${now.day}';
   }
   List<Track> songs = const [];
+  bool _animateSongs = true;
   bool loading = true;
   String? error;
 
@@ -1130,7 +1130,7 @@ class _DailyPageState extends State<DailyPage> {
   void initState() {
     super.initState();
     final cached = _dailyCache[_dailyKey];
-    if (cached != null) { songs = List.of(cached); loading = false; }
+    if (cached != null) { _animateSongs = false; songs = List.of(cached); loading = false; }
     else { _load(); }
   }
 
@@ -1188,7 +1188,7 @@ class _DailyPageState extends State<DailyPage> {
                     return TrackActionMenu(
                       track: track,
                       showButton: false,
-                      child: ListTile(
+                      child: HomeAppear(index: i, enabled: _animateSongs, child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                         leading: Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                         title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -1198,7 +1198,7 @@ class _DailyPageState extends State<DailyPage> {
                           style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
                         onTap: () => player.playTracks(songs, start: track),
-                      ),
+                      )),
                       onOpenAlbum: (album) => Navigator.of(context).push(
                         kumonePageRoute(AlbumPage(id: album.id)),
                       ),

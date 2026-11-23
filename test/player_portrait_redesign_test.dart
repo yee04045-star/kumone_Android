@@ -66,7 +66,7 @@ void main() {
       settings.landscapeDualPane, settings.songMenuFocus], everyElement(isTrue));
     expect(settings.nowPlaying, NowPlayingMode.immersive);
   });
-  for (final size in [const Size(360, 640), const Size(393, 800), const Size(430, 920)]) {
+  for (final size in [const Size(360, 640), const Size(393, 800), const Size(430, 920), const Size(820, 1180)]) {
     for (final minimal in [false, true]) {
       testWidgets('portrait $size minimal=$minimal fits with thumb-free sliders', (tester) async {
         tester.view.devicePixelRatio = 1;

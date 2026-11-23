@@ -21,22 +21,37 @@ class QueuePage extends StatelessWidget {
         : Colors.black87;
     final secondaryForeground = foreground.withValues(alpha: .72);
     return Theme(data: theme, child: SafeArea(
-      child: DraggableScrollableSheet(
-        initialChildSize: .76,
-        minChildSize: .36,
-        maxChildSize: .96,
-        builder: (context, controller) => _GlassQueueSurface(
-          primary: primary,
-          secondary: secondary,
-          child: QueueListPanel(
-            scrollController: controller,
-            foregroundColor: foreground,
-            secondaryForegroundColor: secondaryForeground,
-          ),
-        ),
-      ),
+      child: _QueueResizeHost(primary: primary, secondary: secondary,
+        foreground: foreground, secondaryForeground: secondaryForeground),
     ));
   }
+}
+
+class _QueueResizeHost extends StatefulWidget {
+  final Color? primary, secondary;
+  final Color foreground, secondaryForeground;
+  const _QueueResizeHost({this.primary, this.secondary,
+    required this.foreground, required this.secondaryForeground});
+  @override State<_QueueResizeHost> createState() => _QueueResizeHostState();
+}
+class _QueueResizeHostState extends State<_QueueResizeHost> {
+  double fraction = .76;
+  @override Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, bounds) => Align(alignment: Alignment.bottomCenter,
+      child: FractionallySizedBox(heightFactor: fraction,
+        child: _GlassQueueSurface(primary: widget.primary, secondary: widget.secondary,
+          child: Stack(children: [
+            Positioned.fill(child: QueueListPanel(
+              foregroundColor: widget.foreground,
+              secondaryForegroundColor: widget.secondaryForeground)),
+            Positioned(top: 0, left: 0, right: 0, height: 28,
+              child: GestureDetector(behavior: HitTestBehavior.opaque,
+                onVerticalDragUpdate: (details) {
+                  if (bounds.maxHeight <= 0) return;
+                  setState(() => fraction = (fraction - details.delta.dy / bounds.maxHeight)
+                    .clamp(.36, .96));
+                }, child: const SizedBox.expand())),
+          ])))));
 }
 
 class _GlassQueueSurface extends StatelessWidget {

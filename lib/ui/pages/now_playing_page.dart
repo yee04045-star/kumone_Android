@@ -723,9 +723,12 @@ class _TopChrome extends StatelessWidget {
     final liked = account.liked(track.id);
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 7, 14, 4),
-      child: Row(
+      child: Stack(
+        alignment: Alignment.topCenter,
         children: [
-          SizedBox(width: 64, child: _PlayerDismissHandle(onClose: onClose)),
+          Positioned.fill(child: Align(alignment: Alignment.topCenter,
+            child: SizedBox(width: 100, child: _PlayerDismissHandle(onClose: onClose)))),
+          Row(children: [
           const Spacer(),
           if (!hideHeart) _RoundGlassButton(
             icon: liked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
@@ -753,6 +756,7 @@ class _TopChrome extends StatelessWidget {
             glassMenuPrimary: menuPrimary,
             glassMenuSecondary: menuSecondary,
           ),
+          ]),
         ],
       ),
     );
@@ -1287,6 +1291,7 @@ class _ImmersiveLyricsColumnState extends State<_ImmersiveLyricsColumn> {
         blendMode: BlendMode.dstIn,
         child: SingleChildScrollView(
           controller: controller,
+          clipBehavior: Clip.none,
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.fromLTRB(0, 66, 0, 40),
           child: Column(
@@ -2724,13 +2729,16 @@ class _ControlIcon extends StatelessWidget {
           width: buttonSize,
           height: buttonSize,
           child: Center(
-            child: Icon(
+            child: Transform.translate(
+              offset: Offset(icon == CupertinoIcons.play_fill ? 2 : 0, 0),
+              child: Icon(
               icon,
               color: iconColor,
               size: size,
               shadows: isHeart ? const [] : const [
                 Shadow(color: Colors.black54, blurRadius: 4),
               ],
+            ),
             ),
           ),
         ),
@@ -2794,7 +2802,9 @@ class _MobilePlayerHeading extends StatelessWidget {
               onOpenArtist: onOpenArtist, onOpenAlbum: onOpenAlbum)))),
       ])),
       const SizedBox(width: 6),
-      Transform.translate(offset: const Offset(0, -2),
+      // Align the 26px more icon with the timeline edge, rather than the
+      // outside of its 44px hit target. Move heart/more together.
+      Transform.translate(offset: const Offset(9, -2),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
       _RoundGlassButton(iconSize: 26, hitSize: 44, icon: liked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
         active: liked, tooltip: liked ? '取消喜欢' : '喜欢', onTap: () async {
@@ -2892,5 +2902,7 @@ double _portraitTimelineOffset(double width, double contentHeight, bool minimal)
   final gap = math.max(0.0, firstRowTop - coverBottom);
   // Full three-row text ends at preview top + 67.6; the Slider track center
   // starts 24px below the content, before this translation (track is 5px).
-  return math.max(-8.0, gap - 41.9);
+  // A tall tablet can produce a very large gap. The timeline may not move
+  // down into transport/volume controls simply to match that cover gap.
+  return (gap - 41.9).clamp(-8.0, 12.0);
 }

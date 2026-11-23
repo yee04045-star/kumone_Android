@@ -317,7 +317,9 @@ class _KumoneInteractiveState extends State<KumoneInteractive> {
 class HomeAppear extends StatefulWidget {
   final Widget child;
   final int index;
-  const HomeAppear({super.key, required this.child, this.index = 0});
+  final bool enabled;
+  const HomeAppear({super.key, required this.child, this.index = 0,
+    this.enabled = true});
 
   @override
   State<HomeAppear> createState() => _HomeAppearState();
@@ -343,6 +345,10 @@ class _HomeAppearState extends State<HomeAppear>
   @override
   void initState() {
     super.initState();
+    if (!widget.enabled) {
+      _controller.value = 1;
+      return;
+    }
     final delay = Duration(milliseconds: (widget.index.clamp(0, 8)) * 40);
     Future<void>.delayed(delay, () {
       if (mounted) _controller.forward();
@@ -357,6 +363,7 @@ class _HomeAppearState extends State<HomeAppear>
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.enabled) return widget.child;
     return FadeTransition(
       opacity: _opacity,
       child: SlideTransition(position: _offset, child: widget.child),
@@ -921,7 +928,9 @@ class GlassMiniPlayer extends StatelessWidget {
               icon: const Icon(CupertinoIcons.backward_fill)),
             IconButton(
               tooltip: player.isPlaying ? '暂停' : '播放', onPressed: player.toggle,
-              icon: Icon(player.isPlaying ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill)),
+              icon: Transform.translate(
+                offset: Offset(player.isPlaying ? 0 : 1, 0),
+                child: Icon(player.isPlaying ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill))),
             IconButton(tooltip: '下一首', onPressed: player.next,
               icon: const Icon(CupertinoIcons.forward_fill)),
           ],

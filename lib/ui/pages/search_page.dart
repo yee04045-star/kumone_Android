@@ -313,7 +313,7 @@ class _Results extends StatelessWidget {
                   (track) => TrackActionMenu(
                     track: track,
                     showButton: false,
-                    child: ListTile(
+                    child: HomeAppear(child: ListTile(
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 20),
                       leading:
@@ -327,7 +327,7 @@ class _Results extends StatelessWidget {
                                 Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       onTap: () => player.playTrack(track),
-                    ),
+                    )),
                     onOpenAlbum: (album) => Navigator.of(context)
                         .push(kumonePageRoute(AlbumPage(id: album.id))),
                     onOpenArtist: (artist) => Navigator.of(context)
@@ -387,7 +387,7 @@ class _Results extends StatelessWidget {
             (track) => TrackActionMenu(
               track: track,
               showButton: false,
-              child: ListTile(
+              child: HomeAppear(child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                 leading: Artwork(fadeIn: true, 
                   url: track.album.picUrl,
@@ -402,7 +402,7 @@ class _Results extends StatelessWidget {
                       color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
                 onTap: () => player.playTrack(track),
-              ),
+              )),
               onOpenAlbum: (album) => Navigator.of(context)
                   .push(kumonePageRoute(AlbumPage(id: album.id))),
               onOpenArtist: (artist) => Navigator.of(context)

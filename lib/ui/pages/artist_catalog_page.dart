@@ -94,12 +94,12 @@ class _ArtistCatalogPageState extends State<ArtistCatalogPage> {
           return TrackActionMenu(track: song, showButton: false,
             onOpenAlbum: (a) => Navigator.of(context).push(kumonePageRoute(AlbumPage(id: a.id))),
             onOpenArtist: (a) => Navigator.of(context).push(kumonePageRoute(ArtistPage(id: a.id))),
-            child: ListTile(leading: Artwork(fadeIn: true, url: song.album.picUrl, size: 52, radius: 9),
+            child: HomeAppear(index: i, child: ListTile(leading: Artwork(fadeIn: true, url: song.album.picUrl, size: 52, radius: 9),
               title: KumoneTrackTitle(trackId: song.id, title: song.name,
                 maxLines: 1, overflow: TextOverflow.ellipsis),
               subtitle: KumoneLoadingText(song.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
               trailing: KumoneLoadingText(formatDuration(song.duration)),
-              onTap: () => player.playTracks(songs, index: i)));
+              onTap: () => player.playTracks(songs, index: i))));
         }),
         if (busy && songs.isEmpty && albums.isEmpty) SliverToBoxAdapter(
           child: SizedBox(height: 900, child: KumoneLoadingPlaceholder(grid: widget.albums)))

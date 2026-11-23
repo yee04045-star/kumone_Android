@@ -127,7 +127,7 @@ class _RecentPageState extends State<RecentPage> {
                   return TrackActionMenu(
                     track: record.song,
                     showButton: false,
-                    child: ListTile(
+                    child: HomeAppear(index: i, child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
                       leading: Artwork(fadeIn: true, url: record.song.album.picUrl, size: 52, radius: 9),
                       title: KumoneTrackTitle(trackId: record.song.id, title: record.song.name, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -141,7 +141,7 @@ class _RecentPageState extends State<RecentPage> {
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       onTap: () => player.playTracks(tracks, start: record.song),
-                    ),
+                    )),
                     onOpenAlbum: (album) => Navigator.of(context).push(
                       kumonePageRoute(AlbumPage(id: album.id)),
                     ),
@@ -303,7 +303,7 @@ class _CloudPageState extends State<CloudPage> {
                   return TrackActionMenu(
                     track: track,
                     showButton: false,
-                    child: ListTile(
+                    child: HomeAppear(index: i, child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
                       leading: Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                       title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -313,7 +313,7 @@ class _CloudPageState extends State<CloudPage> {
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       onTap: () => player.playTracks(tracks, start: track),
-                    ),
+                    )),
                     onOpenAlbum: (album) => Navigator.of(context).push(
                       kumonePageRoute(AlbumPage(id: album.id)),
                     ),
