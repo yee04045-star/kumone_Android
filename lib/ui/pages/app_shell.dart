@@ -301,9 +301,9 @@ class _AppShellState extends State<AppShell> {
                         .withValues(alpha: context.watch<SettingsStore>().chromeBackingOpacity ??
                             KumoneGlassOptics.backingOpacity(brightness)),
                     blur: context.watch<SettingsStore>().chromeBlur),
-                selectedIndex: tab,
-                onChanged: _setTab,
-                onReselected: (index) { if (index != 2) _setTab(index); },
+                selectedIndex: context.watch<SettingsStore>().bottomTabOrder.indexOf(tab),
+                onChanged: (index) => _setTab(context.read<SettingsStore>().bottomTabOrder[index]),
+                onReselected: (index) => _setTab(context.read<SettingsStore>().bottomTabOrder[index]),
                 itemStyle: LiquidGlassTabItemStyle(
                   selectedColor: scheme.primary,
                   unselectedColor: scheme.onSurface,
@@ -311,7 +311,7 @@ class _AppShellState extends State<AppShell> {
                   underGlassIconSize: 30,
                 ),
                 items: [
-                  for (var i = 0; i < _labels.length; i++)
+                  for (final i in context.watch<SettingsStore>().bottomTabOrder)
                     LiquidGlassTabBarItem(
                       icon: _icons[i],
                       selectedIcon: _selectedIcon(i),

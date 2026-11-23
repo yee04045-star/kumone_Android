@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import '../../core/storage/settings_store.dart';
 import '../widgets/liquid_surface.dart';
 import '../theme/player_surface_theme.dart';
@@ -55,6 +56,7 @@ class _GlassQueueSurface extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: KumoneLiquidSurface(
+        interactive: false,
         radius: 28,
         backingOpacity: opacity,
         child: Material(color: Colors.transparent, child: child),
@@ -157,7 +159,25 @@ class QueueListPanel extends StatelessWidget {
           ),
         Divider(height: 1, color: dividerColor),
         Expanded(
-          child: ReorderableListView.builder(
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
+            child: ReorderableListView.builder(
+            physics: const ClampingScrollPhysics(),
+            // Blur only beneath the dragged row, not its artwork/text.
+            // Avoid the default opaque Material and animated elevation.
+            proxyDecorator: (child, index, animation) => ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: BackdropFilter(
+                filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Material(
+                  color: (foreground.computeLuminance() > .5
+                      ? Colors.black : Colors.white).withValues(alpha: .28),
+                  elevation: 0,
+                  surfaceTintColor: Colors.transparent,
+                  child: child,
+                ),
+              ),
+            ),
             scrollController: scrollController,
             itemCount: items.length,
             onReorderItem: player.reorderUpcoming,
@@ -199,6 +219,7 @@ class QueueListPanel extends StatelessWidget {
                 ),
               );
             },
+          ),
           ),
         ),
       ],

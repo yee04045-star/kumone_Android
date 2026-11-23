@@ -1,3 +1,5 @@
+import '../widgets/content_fade.dart';
+import '../widgets/loading_placeholder.dart';
 import '../widgets/glass_controls.dart';
 import '../widgets/track_title.dart';
 import 'dart:async';
@@ -25,6 +27,24 @@ class _SearchPageState extends State<SearchPage> {
   bool loading = false;
   SearchType type = SearchType.all;
   String? submittedQuery;
+  final _categoryCache = <String, ({SearchResult result, int offset, bool more})>{};
+  Future<void> _selectType(SearchType selected) async {
+    if (selected == type && result != null) return;
+    if (result != null && submittedQuery != null && !loading) {
+      _categoryCache['$submittedQuery:${type.name}'] =
+        (result: result!, offset: nextOffset, more: hasMore);
+    }
+    final cached = _categoryCache['${controller.text.trim()}:${selected.name}'];
+    ++requestEpoch;
+    setState(() {
+      type = selected; loadingMore = false;
+      if (cached != null) {
+        result = cached.result; nextOffset = cached.offset; hasMore = cached.more;
+        submittedQuery = controller.text.trim(); loading = false;
+      }
+    });
+    if (cached == null) await _search();
+  }
   int requestEpoch = 0;
   int nextOffset = 0;
   bool loadingMore = false;
@@ -192,8 +212,7 @@ class _SearchPageState extends State<SearchPage> {
                     },
                     selected: selected,
                     onTap: () {
-                      setState(() => type = value);
-                      _search();
+                      _selectType(value);
                     },
                   );
                           }),
@@ -215,7 +234,8 @@ class _SearchPageState extends State<SearchPage> {
           return false;
         },
         child: Stack(children: [Positioned.fill(child: loading
-          ? const Center(child: CircularProgressIndicator())
+          ? KumoneLoadingPlaceholder(grid: type != SearchType.all && type != SearchType.songs,
+              circle: type == SearchType.artists)
           : data == null
               ? const Center(child: Text('输入关键词开始搜索'))
               : data.songs.isEmpty &&
@@ -227,7 +247,7 @@ class _SearchPageState extends State<SearchPage> {
                       data: data,
                       type: type,
                       player: player,
-                      onSelectType: (selected) { setState(() => type = selected); _search(); },
+                      onSelectType: _selectType,
                     )),
         ])),
     ));
@@ -297,10 +317,10 @@ class _Results extends StatelessWidget {
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 20),
                       leading:
-                          Artwork(url: track.album.picUrl, size: 52, radius: 9),
+                          Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                       title: KumoneTrackTitle(trackId: track.id, title: track.name),
-                      subtitle: Text(track.artistNames),
-                      trailing: Text(
+                      subtitle: KumoneLoadingText(track.artistNames),
+                      trailing: KumoneLoadingText(
                         formatDuration(track.duration),
                         style: TextStyle(
                             color:
@@ -320,9 +340,9 @@ class _Results extends StatelessWidget {
             ...data.albums.take(8).map(
                   (album) => ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    leading: Artwork(url: album.picUrl, size: 52, radius: 9),
-                    title: Text(album.name),
-                    subtitle: Text(album.artistName),
+                    leading: Artwork(fadeIn: true, url: album.picUrl, size: 52, radius: 9),
+                    title: KumoneLoadingText(album.name),
+                    subtitle: KumoneLoadingText(album.artistName),
                     onTap: () => Navigator.of(context)
                         .push(kumonePageRoute(AlbumPage(id: album.id))),
                   ),
@@ -333,9 +353,9 @@ class _Results extends StatelessWidget {
             ...data.artists.take(8).map(
                   (artist) => ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    leading: Artwork(
+                    leading: Artwork(fadeIn: true, 
                         url: artist.picUrl, size: 52, radius: 26, circle: true),
-                    title: Text(artist.name),
+                    title: KumoneLoadingText(artist.name),
                     onTap: () => Navigator.of(context)
                         .push(kumonePageRoute(ArtistPage(id: artist.id))),
                   ),
@@ -346,14 +366,14 @@ class _Results extends StatelessWidget {
             ...data.playlists.take(8).map(
                   (playlist) => ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    leading: Artwork(
+                    leading: Artwork(fadeIn: true, 
                       url: playlist.coverUrl,
                       resolveUrl: () =>
                           NeteaseApi.instance.playlistCover(playlist.id),
                       size: 52,
                       radius: 9,
                     ),
-                    title: Text(playlist.name),
+                    title: KumoneLoadingText(playlist.name),
                     subtitle: Text('${playlist.trackCount} 首'),
                     onTap: () => Navigator.of(context).push(kumonePageRoute(
                         PlaylistPage(
@@ -369,14 +389,14 @@ class _Results extends StatelessWidget {
               showButton: false,
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                leading: Artwork(
+                leading: Artwork(fadeIn: true, 
                   url: track.album.picUrl,
                   size: 52,
                   radius: 9,
                 ),
                 title: KumoneTrackTitle(trackId: track.id, title: track.name),
-                subtitle: Text(track.artistNames),
-                trailing: Text(
+                subtitle: KumoneLoadingText(track.artistNames),
+                trailing: KumoneLoadingText(
                   formatDuration(track.duration),
                   style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurfaceVariant),
@@ -393,9 +413,9 @@ class _Results extends StatelessWidget {
           ...data.albums.map(
             (album) => ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-              leading: Artwork(url: album.picUrl, size: 52, radius: 9),
-              title: Text(album.name),
-              subtitle: Text(album.artistName),
+              leading: Artwork(fadeIn: true, url: album.picUrl, size: 52, radius: 9),
+              title: KumoneLoadingText(album.name),
+              subtitle: KumoneLoadingText(album.artistName),
               onTap: () => Navigator.of(context).push(
                 kumonePageRoute(AlbumPage(id: album.id)),
               ),
@@ -405,13 +425,13 @@ class _Results extends StatelessWidget {
           ...data.artists.map(
             (artist) => ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-              leading: Artwork(
+              leading: Artwork(fadeIn: true, 
                 url: artist.picUrl,
                 size: 52,
                 radius: 26,
                 circle: true,
               ),
-              title: Text(artist.name),
+              title: KumoneLoadingText(artist.name),
               onTap: () => Navigator.of(context).push(
                 kumonePageRoute(ArtistPage(id: artist.id)),
               ),
@@ -421,14 +441,14 @@ class _Results extends StatelessWidget {
           ...data.playlists.map(
             (playlist) => ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-              leading: Artwork(
+              leading: Artwork(fadeIn: true, 
                 url: playlist.coverUrl,
                 resolveUrl: () =>
                     NeteaseApi.instance.playlistCover(playlist.id),
                 size: 52,
                 radius: 9,
               ),
-              title: Text(playlist.name),
+              title: KumoneLoadingText(playlist.name),
               subtitle: Text('${playlist.trackCount} 首'),
               onTap: () => Navigator.of(context).push(
                 kumonePageRoute(PlaylistPage(id: playlist.id)),
@@ -473,18 +493,18 @@ class KumoneSearchResultGrid extends StatelessWidget {
                   initialCover: data.playlists[index].coverUrl))),
           child: Column(crossAxisAlignment: artist ? CrossAxisAlignment.center
               : CrossAxisAlignment.stretch, children: [
-            Center(child: Artwork(url: picture, size: imageSize,
+            Center(child: Artwork(fadeIn: true, url: picture, size: imageSize,
               radius: artist ? imageSize / 2 : 14, circle: artist, shadow: false,
               resolveUrl: artist ? () => NeteaseApi.instance.artistCover(data.artists[index].id)
                 : album ? null : () => NeteaseApi.instance.playlistCover(data.playlists[index].id))),
             const SizedBox(height: 8),
-            SizedBox(width: imageSize, child: Text(name,
+            SizedBox(width: imageSize, child: KumoneLoadingText(name,
               maxLines: artist || album ? 1 : 2, overflow: TextOverflow.ellipsis,
               textAlign: artist ? TextAlign.center : TextAlign.start,
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700))),
             if (album) ...[
               const SizedBox(height: 3),
-              Text(data.albums[index].artistName, maxLines: 1,
+              KumoneLoadingText(data.albums[index].artistName, maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 12,
                   color: Theme.of(context).colorScheme.onSurfaceVariant)),

@@ -1,3 +1,5 @@
+import '../widgets/content_fade.dart';
+import '../widgets/loading_placeholder.dart';
 import '../widgets/track_title.dart';
 import '../widgets/glass_refresh.dart';
 import '../widgets/liquid_surface.dart';
@@ -106,7 +108,7 @@ class _RecentPageState extends State<RecentPage> {
             if (loading)
               const SliverFillRemaining(
                 hasScrollBody: false,
-                child: Center(child: CircularProgressIndicator()),
+                child: KumoneLoadingPlaceholder(),
               )
             else if (records.isEmpty)
               SliverFillRemaining(
@@ -127,14 +129,14 @@ class _RecentPageState extends State<RecentPage> {
                     showButton: false,
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-                      leading: Artwork(url: record.song.album.picUrl, size: 52, radius: 9),
+                      leading: Artwork(fadeIn: true, url: record.song.album.picUrl, size: 52, radius: 9),
                       title: KumoneTrackTitle(trackId: record.song.id, title: record.song.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                       subtitle: Text(
                         '${record.song.artistNames.isEmpty ? '未知歌手' : record.song.artistNames}${record.song.album.name.isEmpty ? '' : ' · ${record.song.album.name}'} · ${record.playCount} 次',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      trailing: Text(
+                      trailing: KumoneLoadingText(
                         formatDuration(record.song.duration),
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
@@ -281,7 +283,7 @@ class _CloudPageState extends State<CloudPage> {
             if (loading)
               const SliverFillRemaining(
                 hasScrollBody: false,
-                child: Center(child: CircularProgressIndicator()),
+                child: KumoneLoadingPlaceholder(),
               )
             else if (visibleTracks.isEmpty)
               SliverFillRemaining(
@@ -303,10 +305,10 @@ class _CloudPageState extends State<CloudPage> {
                     showButton: false,
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-                      leading: Artwork(url: track.album.picUrl, size: 52, radius: 9),
+                      leading: Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                       title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-                      subtitle: Text(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
-                      trailing: Text(
+                      subtitle: KumoneLoadingText(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      trailing: KumoneLoadingText(
                         formatDuration(track.duration),
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
@@ -370,10 +372,10 @@ class _LibraryEmpty extends StatelessWidget {
           children: [
             Icon(icon, size: 48, color: cs.onSurfaceVariant),
             const SizedBox(height: 12),
-            Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700)),
+            KumoneLoadingText(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700)),
             if (subtitle != null) ...[
               const SizedBox(height: 8),
-              Text(subtitle!, textAlign: TextAlign.center, style: TextStyle(color: cs.onSurfaceVariant)),
+              KumoneLoadingText(subtitle!, textAlign: TextAlign.center, style: TextStyle(color: cs.onSurfaceVariant)),
             ],
             if (retry != null) ...[
               const SizedBox(height: 16),

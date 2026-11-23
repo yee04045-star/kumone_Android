@@ -58,6 +58,7 @@ class KumoneLiquidSurface extends StatelessWidget {
   final double? backingOpacity;
   final double? blur;
   final bool interactive;
+  final double revealProgress;
 
   const KumoneLiquidSurface({
     super.key,
@@ -67,6 +68,7 @@ class KumoneLiquidSurface extends StatelessWidget {
     this.backingOpacity,
     this.blur,
     this.interactive = true,
+    this.revealProgress = 1,
   });
 
   @override
@@ -82,18 +84,18 @@ class KumoneLiquidSurface extends StatelessWidget {
         shape:
             LiquidGlassShape.continuousRoundedRectangle(cornerRadius: radius),
         color: backingOpacity == null
-            ? KumoneGlassOptics.backingColor(brightness)
+            ? KumoneGlassOptics.backingColor(brightness).withValues(alpha: KumoneGlassOptics.backingOpacity(brightness) * revealProgress)
             : (dark ? Colors.black : Colors.white)
-                .withValues(alpha: backingOpacity),
-        blur: blur ?? (backingOpacity == null
+                .withValues(alpha: backingOpacity! * revealProgress),
+        blur: revealProgress * (blur ?? (backingOpacity == null
             ? (context.watch<SettingsStore?>()?.chromeBlur ??
                 KumoneGlassOptics.blur)
-            : 14),
-        refractionIndex: KumoneGlassOptics.refractionIndex,
-        refractionWidth: KumoneGlassOptics.refractionWidth,
-        magnification: KumoneGlassOptics.magnification,
+            : 14)),
+        refractionIndex: 1 + (KumoneGlassOptics.refractionIndex - 1) * revealProgress,
+        refractionWidth: KumoneGlassOptics.refractionWidth * revealProgress,
+        magnification: 1 + (KumoneGlassOptics.magnification - 1) * revealProgress,
         dispersion: KumoneGlassOptics.dispersion,
-        saturation: KumoneGlassOptics.saturation,
+        saturation: 1 + (KumoneGlassOptics.saturation - 1) * revealProgress,
       ),
       child: Padding(padding: padding, child: child),
     );

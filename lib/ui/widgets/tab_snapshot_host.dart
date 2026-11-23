@@ -24,6 +24,7 @@ class _KumoneTabSnapshotHostState extends State<KumoneTabSnapshotHost> {
   late final keys = List.generate(widget.pages.length, (_) => GlobalKey());
   final images = <int, ui.Image>{};
   Animation<double>? covered;
+  int? coveredTab;
   late final controllers =
       List.generate(widget.pages.length, (_) => SnapshotController());
   final visited = <int>{0};
@@ -51,6 +52,9 @@ class _KumoneTabSnapshotHostState extends State<KumoneTabSnapshotHost> {
     if (next != covered) {
       covered?.removeStatusListener(coverChanged);
       covered = next;
+      if (next != null && next.status != AnimationStatus.dismissed) {
+        coveredTab = widget.selected.value;
+      }
       covered?.addStatusListener(coverChanged);
     }
     final settings = context.watch<SettingsStore?>();
@@ -137,7 +141,11 @@ class _KumoneTabSnapshotHostState extends State<KumoneTabSnapshotHost> {
 
   void coverChanged(AnimationStatus status) {
     if (!mounted) return;
+    if (status == AnimationStatus.forward && coveredTab == null) {
+      coveredTab = widget.selected.value;
+    }
     if (status == AnimationStatus.dismissed) {
+      coveredTab = null;
       // The startup frame is a one-time bridge, never a permanent tab image.
       visited.add(widget.selected.value);
       images.remove(widget.selected.value)?.dispose();
@@ -162,10 +170,13 @@ class _KumoneTabSnapshotHostState extends State<KumoneTabSnapshotHost> {
   @override
   Widget build(BuildContext context) {
     final selected = widget.selected.value;
-    final snapshot = frozen ? images[selected] : null;
+    // A tab selected underneath an open detail is an incoming live page,
+    // not the outgoing page that was visible when the detail was pushed.
+    final freezeSelected = frozen && selected == coveredTab;
+    final snapshot = freezeSelected ? images[selected] : null;
     for (var i = 0; i < controllers.length; i++) {
       controllers[i].allowSnapshotting =
-          frozen && i == selected && snapshot == null;
+          freezeSelected && i == selected && snapshot == null;
     }
     return Stack(fit: StackFit.expand, children: [
       for (final i in [
@@ -178,9 +189,9 @@ class _KumoneTabSnapshotHostState extends State<KumoneTabSnapshotHost> {
             offstage: (i != selected && i != warming) ||
                 (i == selected && snapshot != null),
             child: IgnorePointer(
-                ignoring: i != selected || frozen,
+                ignoring: i != selected || freezeSelected,
                 child: TickerMode(
-                    enabled: i == selected && !frozen,
+                    enabled: i == selected && !freezeSelected,
                     child: SnapshotWidget(
                         controller: controllers[i],
                         mode: SnapshotMode.permissive,

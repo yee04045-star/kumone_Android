@@ -1,3 +1,5 @@
+import '../widgets/content_fade.dart';
+import '../widgets/loading_reveal.dart';
 import '../../core/player/player_controller.dart';
 import '../widgets/glass_playlist_dialog.dart';
 import '../widgets/glass_refresh.dart';
@@ -72,7 +74,7 @@ class LibraryPage extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
               child: Row(
                 children: [
-                  Artwork(
+                  Artwork(fadeIn: true, 
                     url: profile.avatarUrl,
                     resolveUrl: () => account.api.userAvatar(profile.userId),
                     size: 64,
@@ -84,7 +86,7 @@ class LibraryPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        KumoneLoadingText(
                           profile.nickname,
                           style: Theme.of(context)
                               .textTheme
@@ -92,7 +94,7 @@ class LibraryPage extends StatelessWidget {
                               ?.copyWith(fontWeight: FontWeight.w800),
                         ),
                         const SizedBox(height: 3),
-                        Text(
+                        KumoneLoadingText(
                           account.vipType > 0 ? '黑胶 / VIP' : '普通账号',
                           style: TextStyle(
                             color: account.vipType > 0
@@ -258,7 +260,7 @@ class _Entry extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Text(
+                  child: KumoneLoadingText(
                     title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -308,7 +310,7 @@ class _PlaylistListPageState extends State<_PlaylistListPage> {
             ),
         ],
       ),
-      body: KumoneGlassRefresh.adaptive(
+      body: KumoneLoadingReveal(child: KumoneGlassRefresh.adaptive(
         onRefresh: _refresh,
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(
@@ -324,7 +326,7 @@ class _PlaylistListPageState extends State<_PlaylistListPage> {
               return SizedBox(
                 height: MediaQuery.sizeOf(context).height * .55,
                 child: Center(
-                  child: Text(widget.subscribed ? '还没有收藏歌单' : '还没有创建歌单'),
+                  child: KumoneLoadingText(widget.subscribed ? '还没有收藏歌单' : '还没有创建歌单'),
                 ),
               );
             }
@@ -334,13 +336,13 @@ class _PlaylistListPageState extends State<_PlaylistListPage> {
                 horizontal: 20,
                 vertical: 4,
               ),
-              leading: Artwork(
+              leading: Artwork(fadeIn: true, 
                 url: playlist.coverUrl,
                 resolveUrl: () => account.api.playlistCover(playlist.id),
                 size: 52,
                 radius: 10,
               ),
-              title: Text(
+              title: KumoneLoadingText(
                 playlist.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -366,13 +368,14 @@ class _PlaylistListPageState extends State<_PlaylistListPage> {
                   PlaylistPage(
                     id: playlist.id,
                     initialCover: playlist.coverUrl,
+                    ownedHeader: !widget.subscribed,
                   ),
                 ),
               ),
             );
           },
         ),
-      ),
+      )),
     );
   }
 }

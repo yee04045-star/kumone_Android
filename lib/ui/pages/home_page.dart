@@ -1,3 +1,4 @@
+import '../widgets/content_fade.dart';
 import 'app_shell.dart';
 import '../widgets/glass_refresh.dart';
 import 'dart:math';
@@ -227,7 +228,7 @@ class _HomePageState extends State<HomePage> {
     messenger.hideCurrentSnackBar();
     messenger.showSnackBar(
       SnackBar(
-        content: Text(message, maxLines: 2, overflow: TextOverflow.ellipsis),
+        content: KumoneLoadingText(message, maxLines: 2, overflow: TextOverflow.ellipsis),
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 144),
         shape: const StadiumBorder(),
@@ -261,7 +262,7 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
       child: Row(
         children: [
-          Text(title, style: titleStyle),
+          KumoneLoadingText(title, style: titleStyle),
           const Spacer(),
           if (showChevron)
             Icon(
@@ -328,26 +329,23 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.only(right: 8),
           child: GestureDetector(
             onTap: () => AppShell.selectTab(context, 3),
-            child: Artwork(url: account.profile?.avatarUrl, size: 36,
+            child: Artwork(fadeIn: true, url: account.profile?.avatarUrl, size: 36,
               circle: true, radius: 18, shadow: false)))],
       ),
     ];
 
     if (loading) {
-      slivers.add(
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
-          sliver: SliverList.list(
-            children: [
-              _skeletonRow(width: 230, height: 132),
-              const SizedBox(height: 30),
-              _skeletonRow(width: 160, height: 204),
-              const SizedBox(height: 30),
-              _skeletonRow(width: 160, height: 204),
-            ],
-          ),
-        ),
-      );
+      slivers.add(SliverList.list(children: [
+        if (account.isLoggedIn) Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 34),
+          child: _skeletonRow(width: 230, height: 142, feature: true)),
+        for (final title in ['推荐歌单', '排行榜', '新碟上架', '推荐歌手']) ...[
+          SectionHeader(title: title),
+          Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 34),
+            child: _skeletonRow(width: title == '推荐歌手' ? 140 : 160,
+              height: title == '推荐歌手' ? 196 : 226,
+              artist: title == '推荐歌手')),
+        ],
+      ]));
     } else {
       // iOS hides the personalized feature shelf for anonymous visitors.
       if (account.isLoggedIn) {
@@ -513,34 +511,21 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _skeletonRow({required double width, required double height}) {
-    return SizedBox(
-      height: height,
-      child: Row(
-        children: [
-          Container(
-            width: width,
-            height: height,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Container(
-            width: width,
-            height: height,
-            decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .surfaceContainerHighest
-                  .withValues(alpha: .72),
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        ],
-      ),
-    );
+  Widget _skeletonRow({required double width, required double height,
+    bool artist = false, bool feature = false}) {
+    final fill = Theme.of(context).colorScheme.surfaceContainerHighest;
+    Widget block(double h, double w, double radius) => Container(height: h, width: w,
+      decoration: BoxDecoration(color: fill, borderRadius: BorderRadius.circular(radius)));
+    return SizedBox(height: height, child: ListView.separated(
+      scrollDirection: Axis.horizontal, physics: const NeverScrollableScrollPhysics(),
+      itemCount: 3, separatorBuilder: (_, __) => const SizedBox(width: 16),
+      itemBuilder: (_, i) => SizedBox(width: width, child: feature
+        ? block(height, width, 18)
+        : Column(crossAxisAlignment: artist ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+            children: [block(artist ? 128 : 160, artist ? 128 : width, artist ? 64 : 14),
+              const SizedBox(height: 10), block(14, width * .8, 5),
+              if (!artist) ...[const SizedBox(height: 7), block(12, width * .6, 5)],
+            ]))));
   }
 }
 
@@ -561,7 +546,7 @@ class _ChartCard extends StatelessWidget {
           children: [
             Hero(
               tag: 'playlist-cover-${item.id}',
-              child: Artwork(
+              child: Artwork(fadeIn: true, 
                 url: item.coverImgUrl,
                 size: 160,
                 radius: 9,
@@ -569,14 +554,14 @@ class _ChartCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 9),
-            Text(
+            KumoneLoadingText(
               item.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
             ),
             if (item.updateFrequency != null)
-              Text(
+              KumoneLoadingText(
                 item.updateFrequency!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -609,7 +594,7 @@ class _AlbumCard extends StatelessWidget {
           children: [
             Hero(
               tag: 'album-cover-${item.id}',
-              child: Artwork(
+              child: Artwork(fadeIn: true, 
                 url: item.picUrl,
                 resolveUrl: () => NeteaseApi.instance.albumCover(item.id),
                 size: 160,
@@ -618,14 +603,14 @@ class _AlbumCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 9),
-            Text(
+            KumoneLoadingText(
               item.name,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w600),
             ),
             if (item.artistName.isNotEmpty)
-              Text(
+              KumoneLoadingText(
                 item.artistName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -657,7 +642,7 @@ class _ArtistCard extends StatelessWidget {
           children: [
             Hero(
               tag: 'artist-cover-${item.id}',
-              child: Artwork(
+              child: Artwork(fadeIn: true, 
                 url: item.picUrl,
                 resolveUrl: () => NeteaseApi.instance.artistCover(item.id),
                 size: 128,
@@ -667,7 +652,7 @@ class _ArtistCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Text(
+            KumoneLoadingText(
               item.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

@@ -25,7 +25,8 @@ Widget? _iosBackButton(BuildContext context, bool automaticallyImplyLeading) {
     return null;
   }
   final settings = context.watch<SettingsStore?>();
-  return Center(child: SizedBox(width: 42, height: 42,
+  return Padding(padding: const EdgeInsets.only(left: 10),
+    child: Center(child: SizedBox(width: 42, height: 42,
     child: KumoneLiquidSurface(radius: 999, interactive: false,
       backingOpacity: settings?.menuBackingOpacity ?? .5,
       blur: settings?.songMenuBlur ?? 3,
@@ -38,7 +39,7 @@ Widget? _iosBackButton(BuildContext context, bool automaticallyImplyLeading) {
             shadows: [for (final offset in const [Offset(-.35, 0), Offset(.35, 0),
               Offset(0, -.35), Offset(0, .35)]) Shadow(
                 color: Theme.of(context).colorScheme.onSurface, offset: offset)])),
-        onPressed: () => Navigator.of(context).maybePop()))));
+        onPressed: () => Navigator.of(context).maybePop())))));
 }
 
 SystemUiOverlayStyle kumoneGlassStatusBarStyle(BuildContext context) {
@@ -195,7 +196,6 @@ class _KumoneGlassBarSurface extends StatelessWidget {
         minHeight: (baseHeight ?? constraints.maxHeight) * extent,
         maxHeight: (baseHeight ?? constraints.maxHeight) * extent,
         child: LiquidGlassScrollEdge(
-          key: ValueKey('top-edge-${(baseHeight ?? constraints.maxHeight) * extent}-$distribution'),
           edge: LiquidGlassEdge.top,
           blur: 26 * progress,
           color: scheme.surface.withValues(alpha: .10 * progress),
@@ -372,6 +372,7 @@ class Artwork extends StatefulWidget {
   final bool circle;
   final bool shadow;
   final bool border;
+  final bool fadeIn;
   final double scale;
 
   const Artwork({
@@ -383,6 +384,7 @@ class Artwork extends StatefulWidget {
     this.circle = false,
     this.shadow = true,
     this.border = false,
+    this.fadeIn = false,
     this.scale = 1.0,
   });
 
@@ -538,7 +540,7 @@ class _ArtworkState extends State<Artwork> with AutomaticKeepAliveClientMixin {
               'Mozilla/5.0 (Android) AppleWebKit/537.36 Chrome/125.0 Mobile Safari/537.36',
         },
         fit: BoxFit.cover,
-        fadeInDuration: Duration.zero,
+        fadeInDuration: widget.fadeIn ? const Duration(milliseconds: 320) : Duration.zero,
         fadeOutDuration: Duration.zero,
         placeholder: (_, __) => fallback,
         errorWidget: (_, __, ___) {

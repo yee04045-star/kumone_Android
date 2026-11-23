@@ -1,3 +1,5 @@
+import '../widgets/content_fade.dart';
+import '../widgets/loading_placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/api/netease_api.dart';
@@ -76,13 +78,13 @@ class _ArtistCatalogPageState extends State<ArtistCatalogPage> {
                 onTap: () => Navigator.of(context).push(kumonePageRoute(
                   AlbumPage(id: album.id, sourceArtistId: widget.artistId))),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [AspectRatio(aspectRatio: 1, child: Artwork(
+                  children: [AspectRatio(aspectRatio: 1, child: Artwork(fadeIn: true, 
                     url: album.picUrl, size: 190, radius: 14, shadow: false)),
                     const SizedBox(height: 8),
-                    Text(album.name, maxLines: 1, overflow: TextOverflow.ellipsis,
+                    KumoneLoadingText(album.name, maxLines: 1, overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 3),
-                    Text(album.artistName, maxLines: 1, overflow: TextOverflow.ellipsis,
+                    KumoneLoadingText(album.artistName, maxLines: 1, overflow: TextOverflow.ellipsis,
                       style: TextStyle(fontSize: 12,
                         color: Theme.of(context).colorScheme.onSurfaceVariant)),
                   ]));
@@ -92,15 +94,15 @@ class _ArtistCatalogPageState extends State<ArtistCatalogPage> {
           return TrackActionMenu(track: song, showButton: false,
             onOpenAlbum: (a) => Navigator.of(context).push(kumonePageRoute(AlbumPage(id: a.id))),
             onOpenArtist: (a) => Navigator.of(context).push(kumonePageRoute(ArtistPage(id: a.id))),
-            child: ListTile(leading: Artwork(url: song.album.picUrl, size: 52, radius: 9),
+            child: ListTile(leading: Artwork(fadeIn: true, url: song.album.picUrl, size: 52, radius: 9),
               title: KumoneTrackTitle(trackId: song.id, title: song.name,
                 maxLines: 1, overflow: TextOverflow.ellipsis),
-              subtitle: Text(song.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
-              trailing: Text(formatDuration(song.duration)),
+              subtitle: KumoneLoadingText(song.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
+              trailing: KumoneLoadingText(formatDuration(song.duration)),
               onTap: () => player.playTracks(songs, index: i)));
         }),
-        if (busy) const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.all(20),
-          child: Center(child: CircularProgressIndicator())))
+        if (busy && songs.isEmpty && albums.isEmpty) SliverToBoxAdapter(
+          child: SizedBox(height: 900, child: KumoneLoadingPlaceholder(grid: widget.albums)))
         else if (songs.isEmpty && albums.isEmpty && error == null)
           const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.all(24),
             child: Center(child: Text('暂无内容'))))

@@ -1,3 +1,4 @@
+import 'content_fade.dart';
 import 'package:provider/provider.dart';
 import '../../core/storage/settings_store.dart';
 import 'package:flutter/material.dart';
@@ -85,14 +86,20 @@ class KumoneGlassIconButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final ButtonStyle? style;
   final Widget icon;
+  final bool fadeIn;
   const KumoneGlassIconButton(
       {super.key,
       this.tooltip,
+      this.fadeIn = false,
       required this.onPressed,
       this.style,
       required this.icon});
   @override
-  Widget build(BuildContext context) => KumoneLiquidSurface(
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+    tween: Tween(begin: fadeIn ? 0 : 1, end: 1),
+    duration: const Duration(milliseconds: 320),
+    builder: (context, progress, _) => KumoneLiquidSurface(
+      revealProgress: progress,
       radius: 24,
       backingOpacity: context.watch<SettingsStore?>()?.menuBackingOpacity ?? .20,
       blur: context.watch<SettingsStore?>()?.songMenuBlur ?? 14,
@@ -102,7 +109,7 @@ class KumoneGlassIconButton extends StatelessWidget {
           style: style?.copyWith(
               backgroundColor:
                   const WidgetStatePropertyAll(Colors.transparent)),
-          icon: icon));
+          icon: fadeIn ? KumoneContentFade(child: icon) : icon)));
 }
 
 class KumoneGlassSearchField extends StatelessWidget {
@@ -111,12 +118,17 @@ class KumoneGlassSearchField extends StatelessWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onSubmitted;
   final double height;
+  final bool fadeIn;
   const KumoneGlassSearchField({super.key, this.onChanged, this.decoration,
-    this.controller, this.onSubmitted, this.height = 40});
+    this.controller, this.onSubmitted, this.height = 40, this.fadeIn = false});
   @override
-  Widget build(BuildContext context) => SizedBox(height: height,
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+    tween: Tween(begin: fadeIn ? 0 : 1, end: 1),
+    duration: const Duration(milliseconds: 320),
+    builder: (context, progress, _) => SizedBox(height: height,
     child: KumoneLiquidSurface(
       interactive: false,
+      revealProgress: progress,
       radius: 26,
       backingOpacity: context.watch<SettingsStore?>()?.menuBackingOpacity ?? .20,
       blur: context.watch<SettingsStore?>()?.songMenuBlur ?? 14,
@@ -144,5 +156,5 @@ class KumoneGlassSearchField extends StatelessWidget {
               filled: false,
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none)))));
+              focusedBorder: InputBorder.none))))));
 }

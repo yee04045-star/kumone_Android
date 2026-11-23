@@ -1,3 +1,4 @@
+import 'content_fade.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/player/player_controller.dart';
@@ -14,7 +15,7 @@ class KumoneTrackTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final active = context.select<PlayerController, bool>(
       (player) => player.currentTrack?.id == trackId);
-    return Text(title, maxLines: maxLines, overflow: overflow,
+    return KumoneLoadingText(title, maxLines: maxLines, overflow: overflow,
       style: active ? TextStyle(color: Theme.of(context).colorScheme.primary,
         fontWeight: FontWeight.w700) : null);
   }

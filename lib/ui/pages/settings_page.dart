@@ -318,6 +318,19 @@ class SettingsPage extends StatelessWidget {
               KumoneGlassSlider(value: settings.sideNavigationPosition,
                 onChanged: settings.previewSideNavigationPosition,
                 onChangeEnd: settings.saveSideNavigationPosition),
+              const ListTile(title: Text('底部 Tab 顺序（从左到右）')),
+              for (var position = 0; position < 4; position++) ListTile(
+                title: Text(const ['推荐', '精选', '搜索', '我的'][settings.bottomTabOrder[position]]),
+                trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                  for (final delta in [-1, 1]) IconButton(
+                    icon: Icon(delta < 0 ? Icons.chevron_left : Icons.chevron_right),
+                    onPressed: position + delta < 0 || position + delta > 3 ? null : () {
+                      final order = List<int>.of(settings.bottomTabOrder);
+                      final item = order.removeAt(position);
+                      order.insert(position + delta, item);
+                      settings.setBottomTabOrder(order);
+                    }),
+                ])),
               const ListTile(title: Text('功能顺序（从上到下）'),
                 subtitle: Text('使用上移 / 下移调整，搜索不参与排序')),
               for (var position = 0; position < settings.sideNavigationOrder.length; position++)

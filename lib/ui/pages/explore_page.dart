@@ -1,3 +1,5 @@
+import '../widgets/content_fade.dart';
+import '../widgets/loading_placeholder.dart';
 import '../widgets/glass_refresh.dart';
 import 'dart:async';
 
@@ -50,6 +52,13 @@ class _ExplorePageState extends State<ExplorePage> {
     '夜晚',
   ];
 
+  final _categoryCache = <String, ({List<PlaylistSummary> playlists,
+    List<ToplistItem> toplists, int offset, int before, bool more, String? error})>{};
+  void _saveCategory() {
+    if (loading) return;
+    _categoryCache[category] = (playlists: List.of(playlists), toplists: List.of(toplists),
+      offset: offset, before: highQualityBefore, more: hasMore, error: error);
+  }
   String category = '全部';
   List<PlaylistSummary> playlists = [];
   List<ToplistItem> toplists = [];
@@ -186,8 +195,27 @@ class _ExplorePageState extends State<ExplorePage> {
             (value == '排行榜' && toplists.isNotEmpty))) {
       return;
     }
-    setState(() => category = value);
-    await _load(reset: true);
+    final wasCollapsed = _scrollController.hasClients && _scrollController.offset >= kToolbarHeight;
+    _saveCategory();
+    ++_requestToken;
+    final cached = _categoryCache[value];
+    setState(() {
+      category = value;
+      loadingMore = false;
+      if (cached != null) {
+        playlists = cached.playlists; toplists = cached.toplists;
+        offset = cached.offset; highQualityBefore = cached.before;
+        hasMore = cached.more; error = cached.error; loading = false;
+      }
+    });
+    if (cached == null) await _load(reset: true);
+    if (mounted && wasCollapsed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _scrollController.hasClients && _scrollController.offset < kToolbarHeight) {
+          _scrollController.jumpTo(kToolbarHeight);
+        }
+      });
+    }
   }
 
   @override
@@ -221,15 +249,13 @@ class _ExplorePageState extends State<ExplorePage> {
             ),
           ),
           if (loading)
-            const SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(child: CircularProgressIndicator()),
-            )
+            const SliverToBoxAdapter(child: SizedBox(height: 1200,
+              child: KumoneLoadingPlaceholder(grid: true)))
           else if (_showToplists)
             if (toplists.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: Center(child: Text(error ?? '排行榜暂时没有数据')),
+                child: Center(child: KumoneLoadingText(error ?? '排行榜暂时没有数据')),
               )
             else
               SliverPadding(
@@ -256,7 +282,7 @@ class _ExplorePageState extends State<ExplorePage> {
           else if (playlists.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(child: Text(error ?? '暂时没有歌单')),
+              child: Center(child: KumoneLoadingText(error ?? '暂时没有歌单')),
             )
           else
             SliverPadding(
@@ -310,7 +336,7 @@ class _ToplistCard extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           child: Row(
             children: [
-              Artwork(
+              Artwork(fadeIn: true, 
                 url: item.coverImgUrl,
                 size: 110,
                 radius: 14,
@@ -323,7 +349,7 @@ class _ToplistCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    KumoneLoadingText(
                       item.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -333,7 +359,7 @@ class _ToplistCard extends StatelessWidget {
                     if (item.updateFrequency != null &&
                         item.updateFrequency!.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text(
+                      KumoneLoadingText(
                         item.updateFrequency!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

@@ -63,6 +63,14 @@ class SettingsStore extends ChangeNotifier {
   double sideNavigationPosition = .8;
   double sideNavigationExpandedPosition = .8;
   bool sideNavigationOnLeft = false;
+  List<int> bottomTabOrder = [0, 1, 2, 3];
+  Future<void> setBottomTabOrder(List<int> order) async {
+    if (order.length != 4 || order.toSet().length != 4 ||
+        !order.every((i) => i >= 0 && i < 4)) { return; }
+    bottomTabOrder = List.of(order);
+    notifyListeners();
+    await prefs.setStringList('bottomTabOrder', order.map((i) => '$i').toList());
+  }
   List<int> sideNavigationOrder = [3, 1, 0];
 
   Future<void> setFreezeOutgoingPage(bool value) async {
@@ -81,6 +89,10 @@ class SettingsStore extends ChangeNotifier {
   }
 
   Future<void> load() async {
+    final tabs = (await prefs.getStringList('bottomTabOrder'))?.map(int.tryParse)
+        .whereType<int>().toList();
+    if (tabs != null && tabs.length == 4 && tabs.toSet().length == 4 &&
+        tabs.every((i) => i >= 0 && i < 4)) { bottomTabOrder = tabs; }
     chromeBackingOpacity = (await prefs.getDouble('chromeBackingOpacity') ??
         await prefs.getDouble('tabBackingOpacity') ??
         await prefs.getDouble('miniBackingOpacity'))?.clamp(0, 1).toDouble();

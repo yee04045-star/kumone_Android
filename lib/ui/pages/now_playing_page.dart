@@ -150,6 +150,20 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     await _load(track);
   }
 
+  String? _preloadedNextCover;
+  void _precacheNextCover(PlayerController player) {
+    final upcoming = player.handler.upcomingItems;
+    if (upcoming.isEmpty) return;
+    final url = upcoming.first.album.picUrl;
+    if (url == null || url.isEmpty || url == _preloadedNextCover) return;
+    _preloadedNextCover = url;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      precacheImage(CachedNetworkImageProvider(url), context,
+        onError: (_, __) { if (_preloadedNextCover == url) _preloadedNextCover = null; });
+    });
+  }
+
   void _scheduleArtworkPalette(Track track) {
     final url = track.album.picUrl?.trim() ?? '';
     final key = '${track.id}|$url';
@@ -383,6 +397,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     }
 
     _scheduleArtworkPalette(track);
+    _precacheNextCover(player);
 
     final useDarkStatusIcons = _artworkColors.primary.computeLuminance() > .52;
     final statusIconBrightness =
@@ -961,9 +976,11 @@ class _ImmersiveMobileContent extends StatelessWidget {
           child: GestureDetector(onTap: onToggleLyrics,
             child: TweenAnimationBuilder<double>(
               tween: Tween(end: showLyrics ? 12 : 22), duration: duration,
-              builder: (context, radius, _) => Artwork(url: track.album.picUrl,
-                size: showLyrics ? 62 : coverSize, radius: radius,
-                shadow: false, border: false)))),
+              builder: (context, radius, _) => AnimatedSwitcher(
+                duration: const Duration(milliseconds: 800),
+                child: Artwork(key: ValueKey(track.id), url: track.album.picUrl,
+                  size: showLyrics ? 62 : coverSize, radius: radius,
+                  shadow: false, border: false))))),
       ]);
     });
   }
@@ -983,6 +1000,7 @@ class _ImmersiveMetadata extends StatelessWidget {
   final bool centered;
 
   const _ImmersiveMetadata({
+    super.key,
     this.centered = false,
     required this.track,
     required this.onOpenArtist,
@@ -2771,8 +2789,9 @@ class _MobilePlayerHeading extends StatelessWidget {
               size: 62, radius: 12, shadow: false, border: false)) : null)),
         Expanded(child: Transform.translate(
           offset: const Offset(0, 9),
-          child: _ImmersiveMetadata(track: track,
-            onOpenArtist: onOpenArtist, onOpenAlbum: onOpenAlbum))),
+          child: AnimatedSwitcher(duration: const Duration(milliseconds: 800),
+            child: _ImmersiveMetadata(key: ValueKey(track.id), track: track,
+              onOpenArtist: onOpenArtist, onOpenAlbum: onOpenAlbum)))),
       ])),
       const SizedBox(width: 6),
       Transform.translate(offset: const Offset(0, -2),
@@ -2846,7 +2865,7 @@ class _PlayerDragDismissState extends State<_PlayerDragDismiss>
   @override Widget build(BuildContext context) => Stack(children: [
     Transform.translate(offset: Offset(0, offset), child: widget.child),
     Positioned(top: MediaQuery.paddingOf(context).top, left: 0, right: 0,
-      height: 44,
+      height: 100,
       child: GestureDetector(behavior: HitTestBehavior.translucent,
         onVerticalDragStart: (_) { animation.stop(); completing = false; },
         onVerticalDragUpdate: (details) {

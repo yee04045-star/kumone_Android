@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../lens/liquid_glass_batch.dart';
 import '../liquid_glass_engine.dart';
 import '../lens/liquid_glass_lens_scope.dart';
 import '../utils/liquid_glass_adaptivity.dart';
@@ -362,20 +361,21 @@ class _LiquidGlassScrollEdgeState extends State<LiquidGlassScrollEdge>
   /// The `ClipRect` is mandatory — a `BackdropFilter` is unbounded, so
   /// without one the blur runs over the entire window.
   ///
-  /// The filter is the batch-aware one: inside a `LiquidGlassBatch` the
-  /// pass carries the batch's key and reads its shared copy. Outside one
-  /// it is a plain `BackdropFilter`.
+  /// This filter is independent of lens batches because its feather mask
+  /// must not modify a backdrop shared by neighboring glass lenses.
   Widget _blurPass(bool top) {
-    return LayoutBuilder(builder: (context, constraints) => ClipRect(
-      child: LiquidGlassBatchBackdropFilter(
-        key: ValueKey('edge-filter-${constraints.maxWidth}-${constraints.maxHeight}'),
+    // This pass carries a destructive dstIn feather. Keep it independent
+    // from the lens batch, and let Flutter own filter/layer invalidation as
+    // a scrolling header changes size or sigma (including zero -> visible).
+    return ClipRect(
+      child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: _sigma(top), sigmaY: _sigma(top),
             tileMode: TileMode.clamp),
         child: widget.style == LiquidGlassScrollEdgeStyle.soft
             ? _featherMask(top)
             : const SizedBox.expand(),
       ),
-    ));
+    );
   }
 
   /// How much the bottom band's sigma is nudged off the top band's while

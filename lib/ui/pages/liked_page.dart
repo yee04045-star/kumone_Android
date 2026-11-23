@@ -1,3 +1,5 @@
+import '../widgets/content_fade.dart';
+import '../widgets/loading_placeholder.dart';
 import '../widgets/track_title.dart';
 import '../widgets/glass_refresh.dart';
 import '../widgets/glass_controls.dart';
@@ -79,7 +81,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                 padding: const EdgeInsets.fromLTRB(24, 18, 24, 22),
                 child: Row(
                   children: [
-                    Artwork(
+                    Artwork(fadeIn: true, 
                       url: tracks.isEmpty ? null : tracks.first.album.picUrl,
                       size: 112,
                       radius: 14,
@@ -96,7 +98,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                                   .titleMedium
                                   ?.copyWith(fontWeight: FontWeight.w800)),
                           const SizedBox(height: 8),
-                          Text(
+                          KumoneLoadingText(
                             loading ? '正在加载喜欢的歌曲…' : '${tracks.length} 首歌曲',
                             style: TextStyle(
                                 color: cs.onSurfaceVariant, fontSize: 13),
@@ -130,7 +132,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
             SliverToBoxAdapter(
                 child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-              child: KumoneGlassSearchField(
+              child: KumoneGlassSearchField(fadeIn: true, 
                 onChanged: (value) => setState(() => _query = value),
                 decoration: const InputDecoration(
                     prefixIcon: Icon(Icons.search), hintText: '搜索此歌单的歌曲、歌手或专辑'),
@@ -139,7 +141,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
             if (loading)
               const SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Center(child: CircularProgressIndicator()))
+                  child: KumoneLoadingPlaceholder())
             else if (visible.isEmpty)
               SliverFillRemaining(
                 hasScrollBody: false,
@@ -158,7 +160,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                     child: ListTile(
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 2),
-                      leading: Artwork(
+                      leading: Artwork(fadeIn: true, 
                           url: track.album.picUrl,
                           size: 48,
                           radius: 8,
@@ -170,7 +172,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      trailing: Text(
+                      trailing: KumoneLoadingText(
                         formatDuration(track.duration),
                         style:
                             TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
@@ -206,7 +208,7 @@ class _LikedEmpty extends StatelessWidget {
         children: [
           const Icon(Icons.favorite_border_rounded, size: 42),
           const SizedBox(height: 10),
-          Text(message),
+          KumoneLoadingText(message),
           const SizedBox(height: 12),
           KumoneLiquidSurface(
               radius: 24,

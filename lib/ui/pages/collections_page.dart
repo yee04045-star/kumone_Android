@@ -1,3 +1,5 @@
+import '../widgets/content_fade.dart';
+import '../widgets/loading_placeholder.dart';
 import '../widgets/glass_refresh.dart';
 import '../widgets/glass_category_chip.dart';
 import 'package:flutter/material.dart';
@@ -65,7 +67,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
               ),
             ),
             if (loading)
-              const SliverFillRemaining(hasScrollBody: false, child: Center(child: CircularProgressIndicator()))
+              const SliverFillRemaining(hasScrollBody: false, child: KumoneLoadingPlaceholder(grid: true))
             else if (tab == 0)
               _albumSliver(account.likedAlbums)
             else
@@ -102,11 +104,11 @@ class _CollectionsPageState extends State<CollectionsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AspectRatio(aspectRatio: 1.08, child: Artwork(url: album.picUrl, radius: 14, shadow: false, size: 190)),
+                AspectRatio(aspectRatio: 1.08, child: Artwork(fadeIn: true, url: album.picUrl, radius: 14, shadow: false, size: 190)),
                 const SizedBox(height: 8),
-                Text(album.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
+                KumoneLoadingText(album.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)),
                 if (album.artistName.isNotEmpty)
-                  Text(album.artistName, maxLines: 1, overflow: TextOverflow.ellipsis,
+                  KumoneLoadingText(album.artistName, maxLines: 1, overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
               ],
             ),
@@ -142,11 +144,11 @@ class _CollectionsPageState extends State<CollectionsPage> {
               children: [
                 Expanded(
                   child: Center(
-                    child: Artwork(url: artist.picUrl, size: 132, radius: 66, circle: true, shadow: false),
+                    child: Artwork(fadeIn: true, url: artist.picUrl, size: 132, radius: 66, circle: true, shadow: false),
                   ),
                 ),
                 const SizedBox(height: 7),
-                Text(artist.name, maxLines: 1, overflow: TextOverflow.ellipsis,
+                KumoneLoadingText(artist.name, maxLines: 1, overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontWeight: FontWeight.w700)),
               ],
             ),
@@ -171,7 +173,7 @@ class _EmptyCollection extends StatelessWidget {
         children: [
           Icon(icon, size: 48, color: color),
           const SizedBox(height: 12),
-          Text(title, style: TextStyle(color: color)),
+          KumoneLoadingText(title, style: TextStyle(color: color)),
         ],
       ),
     );

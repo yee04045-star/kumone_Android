@@ -1,3 +1,5 @@
+import '../widgets/content_fade.dart';
+import '../widgets/loading_placeholder.dart';
 import 'artist_catalog_page.dart';
 import '../../core/storage/app_accent.dart';
 import '../widgets/track_title.dart';
@@ -17,35 +19,33 @@ import '../theme/app_theme.dart';
 class PlaylistPage extends StatefulWidget {
   final int id;
   final String? initialCover;
-  const PlaylistPage({super.key, required this.id, this.initialCover});
+  final bool ownedHeader;
+  const PlaylistPage({super.key, required this.id, this.initialCover, this.ownedHeader = false});
 
   @override
   State<PlaylistPage> createState() => _PlaylistPageState();
 }
 
 class _PlaylistPageState extends State<PlaylistPage>
-    with SingleTickerProviderStateMixin {
+    {
+  static final _recent = <String, ({PlaylistDetail detail, List<Track> tracks})>{};
+  String get _cacheKey => '${context.read<AccountStore>().profile?.userId ?? 0}:${widget.id}';
   PlaylistDetail? detail;
   List<Track> tracks = [];
   bool loading = true;
   String? error;
   bool _busySubscription = false;
   String _query = '';
-  late final AnimationController _intro = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 420),
-  )..forward();
-
   @override
   void initState() {
     super.initState();
-    _load();
-  }
-
-  @override
-  void dispose() {
-    _intro.dispose();
-    super.dispose();
+    final cached = _recent.remove(_cacheKey);
+    if (cached != null) {
+      _recent[_cacheKey] = cached;
+      detail = cached.detail;
+      tracks = List.of(cached.tracks);
+      loading = false;
+    } else { _load(); }
   }
 
   Future<void> _load() async {
@@ -87,6 +87,9 @@ class _PlaylistPageState extends State<PlaylistPage>
         }
       }
       if (!mounted) return;
+      _recent.remove(_cacheKey);
+      _recent[_cacheKey] = (detail: detail!, tracks: List.of(tracks));
+      while (_recent.length > 3) { _recent.remove(_recent.keys.first); }
       setState(() => loading = false);
     } catch (e) {
       if (!mounted) return;
@@ -162,8 +165,10 @@ class _PlaylistPageState extends State<PlaylistPage>
 
     if (loading) {
       return Scaffold(
+        extendBodyBehindAppBar: true,
         appBar: KumoneGlassAppBar(title: const SizedBox.shrink()),
-        body: const _PlaylistLoading(),
+        body: Padding(padding: EdgeInsets.only(top: kumoneToolbarInset(context)),
+          child: _PlaylistLoading(ownedHeader: widget.ownedHeader)),
       );
     }
     if (detail == null) {
@@ -195,17 +200,7 @@ class _PlaylistPageState extends State<PlaylistPage>
           slivers: [
             SliverToBoxAdapter(child: SizedBox(height: kumoneToolbarInset(context))),
             SliverToBoxAdapter(
-              child: FadeTransition(
-                opacity: _intro,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, .04),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: _intro,
-                    curve: Curves.easeOutCubic,
-                  )),
-                  child: Padding(
+              child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 18, 24, 20),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
@@ -215,13 +210,13 @@ class _PlaylistPageState extends State<PlaylistPage>
                             playlist.creator?.userId == account.profile?.userId;
                         if (owned && !isUserLikedPlaylist) {
                           return Row(crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [Artwork(url: playlist.cover,
+                            children: [Artwork(fadeIn: true, url: playlist.cover,
                               resolveUrl: () => NeteaseApi.instance.playlistCover(playlist.id),
                               size: 112, radius: 14, shadow: true),
                               const SizedBox(width: 18),
                               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min, children: [
-                                  Text(playlist.name, style: Theme.of(context).textTheme.titleMedium
+                                  KumoneLoadingText(playlist.name, style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(fontWeight: FontWeight.w800)),
                                   const SizedBox(height: 8),
                                   Text('${tracks.length} 首歌曲', style: TextStyle(
@@ -245,7 +240,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                               children: [
                                 Hero(
                                   tag: 'playlist-cover-${playlist.id}',
-                                  child: Artwork(
+                                  child: Artwork(fadeIn: true, 
                                     url: playlist.cover,
                                     resolveUrl: () => NeteaseApi.instance.playlistCover(playlist.id),
                                     size: coverSize,
@@ -261,7 +256,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                             ),
                             if (description.isNotEmpty) ...[
                               const SizedBox(height: 16),
-                              Text(
+                              KumoneLoadingText(
                                 description,
                                 maxLines: 4,
                                 overflow: TextOverflow.ellipsis,
@@ -299,7 +294,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                                   SizedBox(
                                     width: 40,
                                     height: 40,
-                                    child: KumoneGlassIconButton(
+                                    child: KumoneGlassIconButton(fadeIn: true, 
                                       tooltip: playlist.subscribed ? '取消收藏歌单' : '收藏歌单',
                                       onPressed: _busySubscription ? null : () => _togglePlaylistSubscription(account, playlist),
                                       style: IconButton.styleFrom(
@@ -323,14 +318,12 @@ class _PlaylistPageState extends State<PlaylistPage>
                         );
                       },
                     ),
-                  ),
-                ),
               ),
             ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-                child: KumoneGlassSearchField(
+                child: KumoneGlassSearchField(fadeIn: true, 
                   onChanged: (value) => setState(() => _query = value),
                   decoration: const InputDecoration(
                     prefixIcon: Icon(Icons.search),
@@ -391,7 +384,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                           padding: const EdgeInsets.fromLTRB(24, 8, 20, 8),
                           child: Row(
                             children: [
-                              Artwork(
+                              Artwork(fadeIn: true, 
                                 url: track.album.picUrl,
                                 size: 52,
                                 radius: 9,
@@ -402,7 +395,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    KumoneLoadingText(
                                       track.name,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -426,7 +419,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              Text(
+                              KumoneLoadingText(
                                 formatDuration(track.duration),
                                 style: TextStyle(fontSize: 14, color: cs.onSurfaceVariant),
                               ),
@@ -466,7 +459,7 @@ class _PlaylistHeaderInfo extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        KumoneLoadingText(
           playlist.name,
           maxLines: 3,
           overflow: TextOverflow.ellipsis,
@@ -477,7 +470,7 @@ class _PlaylistHeaderInfo extends StatelessWidget {
         ),
         if (creator != null && creator.nickname.isNotEmpty) ...[
           const SizedBox(height: 8),
-          Text(
+          KumoneLoadingText(
             creator.nickname,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -506,7 +499,7 @@ class _MetaText extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
-      child: Text(
+      child: KumoneLoadingText(
         text,
         style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
       ),
@@ -515,47 +508,41 @@ class _MetaText extends StatelessWidget {
 }
 
 class _PlaylistLoading extends StatelessWidget {
-  const _PlaylistLoading();
+  final bool ownedHeader;
+  const _PlaylistLoading({this.ownedHeader = false});
   @override
   Widget build(BuildContext context) {
     final fill = Theme.of(context).colorScheme.surfaceContainerHighest;
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        Row(
-          children: [
-            Container(width: 176, height: 176, decoration: BoxDecoration(color: fill, borderRadius: BorderRadius.circular(12))),
-            const SizedBox(width: 24),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(width: 220, height: 24, decoration: BoxDecoration(color: fill, borderRadius: BorderRadius.circular(8))),
-                  const SizedBox(height: 12),
-                  Container(width: 130, height: 14, decoration: BoxDecoration(color: fill, borderRadius: BorderRadius.circular(6))),
-                  const SizedBox(height: 18),
-                  Container(width: 120, height: 42, decoration: BoxDecoration(color: fill, borderRadius: BorderRadius.circular(22))),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 28),
-        ...List.generate(
-          8,
-          (i) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Container(
-              height: 52,
-              decoration: BoxDecoration(
-                color: fill.withValues(alpha: .7),
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+    Widget block(double height, {double? width, double radius = 8}) => Container(
+      height: height, width: width,
+      decoration: BoxDecoration(color: fill, borderRadius: BorderRadius.circular(radius)));
+    return LayoutBuilder(builder: (context, constraints) {
+      final cover = ownedHeader || constraints.maxWidth - 48 < 400 ? 112.0 : 140.0;
+      return ListView(padding: const EdgeInsets.fromLTRB(24, 18, 24, 24), children: [
+        Row(children: [block(cover, width: cover, radius: 14),
+          const SizedBox(width: 18), Expanded(child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, children: [
+              block(20), const SizedBox(height: 8), block(14, width: 100),
+              const SizedBox(height: 14),
+              if (ownedHeader) block(40, width: 120, radius: 20)
+              else block(13),
+            ]))]),
+        if (!ownedHeader) ...[
+          const SizedBox(height: 16), block(14), const SizedBox(height: 6), block(14),
+          const SizedBox(height: 18),
+          Row(children: [Expanded(child: block(40, radius: 23)),
+            const SizedBox(width: 10), block(40, width: 40, radius: 20)]),
+        ],
+        const SizedBox(height: 20), block(40, radius: 26), const SizedBox(height: 16),
+        for (var i = 0; i < 8; i++) Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(children: [block(52, width: 52, radius: 9),
+            const SizedBox(width: 14), Expanded(child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, children: [
+                block(15), const SizedBox(height: 7), block(12, width: 130)])),
+            const SizedBox(width: 16), block(12, width: 30)])),
+      ]);
+    });
   }
 }
 
@@ -578,7 +565,7 @@ class _DetailError extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: 12),
-            Text(message, textAlign: TextAlign.center),
+            KumoneLoadingText(message, textAlign: TextAlign.center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
               KumoneLiquidSurface(
@@ -668,7 +655,7 @@ class _AlbumPageState extends State<AlbumPage> {
       return Scaffold(
         appBar: const KumoneGlassAppBar(title: SizedBox.shrink()),
         body: Center(
-          child: error == null ? const CircularProgressIndicator() : Text(error!),
+          child: error == null ? const KumoneLoadingPlaceholder(header: true) : KumoneLoadingText(error!),
         ),
       );
     }
@@ -694,13 +681,13 @@ class _AlbumPageState extends State<AlbumPage> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Artwork(url: album.picUrl, size: 112, radius: 14, shadow: true),
+                    Artwork(fadeIn: true, url: album.picUrl, size: 112, radius: 14, shadow: true),
                     const SizedBox(width: 18),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          KumoneLoadingText(
                             album.name,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -714,7 +701,7 @@ class _AlbumPageState extends State<AlbumPage> {
                             onTap: album.artistId <= 0 || album.artistId == widget.sourceArtistId
                                 ? null : () => Navigator.of(context).push(
                                     kumonePageRoute(ArtistPage(id: album.artistId))),
-                            child: Text(
+                            child: KumoneLoadingText(
                             album.artistName.isEmpty ? '未知歌手' : album.artistName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -753,7 +740,7 @@ class _AlbumPageState extends State<AlbumPage> {
                                 SizedBox(
                                   width: 40,
                                   height: 40,
-                                  child: KumoneGlassIconButton(
+                                  child: KumoneGlassIconButton(fadeIn: true, 
                                     tooltip: subscribed ? '取消收藏专辑' : '收藏专辑',
                                     onPressed: subscriptionBusy ? null : _toggleSubscription,
                                     style: IconButton.styleFrom(
@@ -794,10 +781,10 @@ class _AlbumPageState extends State<AlbumPage> {
                   showButton: false,
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    leading: Artwork(url: track.album.picUrl, size: 52, radius: 9),
+                    leading: Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                     title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    subtitle: Text(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    trailing: Text(
+                    subtitle: KumoneLoadingText(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    trailing: KumoneLoadingText(
                       formatDuration(track.duration),
                       style: TextStyle(color: cs.onSurfaceVariant),
                     ),
@@ -909,7 +896,7 @@ class _ArtistPageState extends State<ArtistPage> {
         appBar: const KumoneGlassAppBar(title: SizedBox.shrink()),
         body: Center(
           child: error == null
-              ? const CircularProgressIndicator()
+              ? const _ArtistLoading()
               : _DetailError(message: error!, onRetry: _load),
         ),
       );
@@ -937,13 +924,13 @@ class _ArtistPageState extends State<ArtistPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Artwork(url: artist.picUrl, size: 112, radius: 56, circle: true, shadow: true),
+                  Artwork(fadeIn: true, url: artist.picUrl, size: 112, radius: 56, circle: true, shadow: true),
                   const SizedBox(width: 18),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        KumoneLoadingText(
                           artist.name,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -991,7 +978,7 @@ class _ArtistPageState extends State<ArtistPage> {
                     SizedBox(
                       width: 40,
                       height: 40,
-                      child: KumoneGlassIconButton(
+                      child: KumoneGlassIconButton(fadeIn: true, 
                         tooltip: followed ? '取消关注' : '关注歌手',
                         onPressed: followBusy ? null : _toggleFollow,
                         style: IconButton.styleFrom(
@@ -1024,10 +1011,10 @@ class _ArtistPageState extends State<ArtistPage> {
                   showButton: false,
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    leading: Artwork(url: track.album.picUrl, size: 52, radius: 9),
+                    leading: Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                     title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    subtitle: Text(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    trailing: Text(
+                    subtitle: KumoneLoadingText(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    trailing: KumoneLoadingText(
                       formatDuration(track.duration),
                       style: TextStyle(color: cs.onSurfaceVariant),
                     ),
@@ -1063,16 +1050,16 @@ class _ArtistPageState extends State<ArtistPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Artwork(url: album.picUrl, size: 138, radius: 12),
+                            Artwork(fadeIn: true, url: album.picUrl, size: 138, radius: 12),
                             const SizedBox(height: 7),
-                            Text(
+                            KumoneLoadingText(
                               album.name,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
                             ),
                             if (album.publishTime > 0)
-                              Text(
+                              KumoneLoadingText(
                                 DateTime.fromMillisecondsSinceEpoch(album.publishTime).year.toString(),
                                 style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
                               ),
@@ -1087,44 +1074,38 @@ class _ArtistPageState extends State<ArtistPage> {
             if (loadingExtras && hotSongs.isEmpty && albums.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(28),
-                child: Center(child: CircularProgressIndicator()),
+                child: SizedBox(height: 600, child: KumoneLoadingPlaceholder()),
               ),
-            if (allSongs.isNotEmpty && allSongs.length > hotSongs.length) ...[
-              const SectionHeader(title: '全部歌曲'),
-              ...allSongs.take(100).map(
-                (track) => TrackActionMenu(
-                  track: track,
-                  showButton: false,
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    leading: Artwork(url: track.album.picUrl, size: 52, radius: 9),
-                    title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    subtitle: Text(
-                      track.album.name.isEmpty
-                          ? track.artistNames
-                          : '${track.artistNames} · ${track.album.name}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: Text(
-                      formatDuration(track.duration),
-                      style: TextStyle(color: cs.onSurfaceVariant),
-                    ),
-                    onTap: () => player.playTracks(allSongs, start: track),
-                  ),
-                  onOpenAlbum: (album) => Navigator.of(context).push(
-                    kumonePageRoute(AlbumPage(id: album.id, sourceArtistId: widget.id)),
-                  ),
-                  onOpenArtist: (artist) => Navigator.of(context).push(
-                    kumonePageRoute(ArtistPage(id: artist.id)),
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),
     );
+  }
+}
+
+class _ArtistLoading extends StatelessWidget {
+  const _ArtistLoading();
+  @override
+  Widget build(BuildContext context) {
+    final fill = Theme.of(context).colorScheme.surfaceContainerHighest;
+    Widget box(double h, {double? w, double radius = 8}) => Container(
+      height: h, width: w, decoration: BoxDecoration(color: fill,
+        borderRadius: BorderRadius.circular(radius)));
+    return ListView(padding: const EdgeInsets.fromLTRB(20, 18, 20, 24), children: [
+      Row(children: [box(112, w: 112, radius: 56), const SizedBox(width: 18),
+        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          box(22), const SizedBox(height: 8), box(14),
+          const SizedBox(height: 8), box(13, w: 110)]))]),
+      const SizedBox(height: 14), Row(children: [Expanded(child: box(40, radius: 20)),
+        const SizedBox(width: 10), box(40, w: 40, radius: 20)]),
+      const SizedBox(height: 22), box(20, w: 100), const SizedBox(height: 12),
+      for (var i = 0; i < 6; i++) Padding(padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(children: [box(52, w: 52, radius: 9), const SizedBox(width: 14),
+          Expanded(child: Column(children: [box(16), const SizedBox(height: 8), box(12)]))])),
+      const SizedBox(height: 20), box(20, w: 70), const SizedBox(height: 16),
+      Row(children: [Expanded(child: AspectRatio(aspectRatio: 1, child: box(140, radius: 14))),
+        const SizedBox(width: 14), Expanded(child: AspectRatio(aspectRatio: 1, child: box(140, radius: 14)))]),
+    ]);
   }
 }
 
@@ -1136,6 +1117,11 @@ class DailyPage extends StatefulWidget {
 }
 
 class _DailyPageState extends State<DailyPage> {
+  static final _dailyCache = <String, List<Track>>{};
+  String get _dailyKey {
+    final now = DateTime.now();
+    return '${context.read<AccountStore>().profile?.userId ?? 0}:${now.year}-${now.month}-${now.day}';
+  }
   List<Track> songs = const [];
   bool loading = true;
   String? error;
@@ -1143,7 +1129,9 @@ class _DailyPageState extends State<DailyPage> {
   @override
   void initState() {
     super.initState();
-    _load();
+    final cached = _dailyCache[_dailyKey];
+    if (cached != null) { songs = List.of(cached); loading = false; }
+    else { _load(); }
   }
 
   Future<void> _load() async {
@@ -1164,6 +1152,10 @@ class _DailyPageState extends State<DailyPage> {
       }
       if (!mounted) return;
       setState(() {
+        if (value.isNotEmpty) {
+          _dailyCache.clear();
+          _dailyCache[_dailyKey] = List.of(value);
+        }
         songs = value;
         loading = false;
         if (value.isEmpty) error = '暂时没有可用的每日推荐';
@@ -1184,7 +1176,8 @@ class _DailyPageState extends State<DailyPage> {
       extendBodyBehindAppBar: true,
       appBar: KumoneGlassAppBar(title: const SizedBox.shrink()),
       body: loading
-          ? const Center(child: CircularProgressIndicator())
+          ? Padding(padding: EdgeInsets.only(top: kumoneToolbarInset(context)),
+              child: const KumoneLoadingPlaceholder())
           : songs.isEmpty
               ? _DetailError(message: error ?? '暂无每日推荐', onRetry: _load)
               : ListView.builder(
@@ -1197,10 +1190,10 @@ class _DailyPageState extends State<DailyPage> {
                       showButton: false,
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-                        leading: Artwork(url: track.album.picUrl, size: 52, radius: 9),
+                        leading: Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                         title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-                        subtitle: Text(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
-                        trailing: Text(
+                        subtitle: KumoneLoadingText(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        trailing: KumoneLoadingText(
                           formatDuration(track.duration),
                           style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),

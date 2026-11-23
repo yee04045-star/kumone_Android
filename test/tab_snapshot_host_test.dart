@@ -7,6 +7,33 @@ import 'package:kumone_flutter/core/storage/settings_store.dart';
 import 'package:kumone_flutter/ui/widgets/tab_snapshot_host.dart';
 
 void main() {
+  testWidgets('tab selected under details stays live during return', (tester) async {
+    SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
+    final selected = ValueNotifier(0);
+    final settings = SettingsStore();
+    final navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(ChangeNotifierProvider.value(value: settings,
+      child: MaterialApp(navigatorKey: navigator,
+        home: KumoneTabSnapshotHost(selected: selected, pages: [
+          for (var i = 0; i < 4; i++) _Page(index: i, created: () {}),
+        ]))));
+    navigator.currentState!.push(MaterialPageRoute<void>(
+      builder: (_) => const Scaffold(body: Text('Detail'))));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    List<SnapshotWidget> snapshots() => tester.widgetList<SnapshotWidget>(
+      find.byType(SnapshotWidget, skipOffstage: false)).toList();
+    expect(snapshots().where((w) => w.controller.allowSnapshotting).length, 1);
+    selected.value = 3;
+    await tester.pump();
+    expect(snapshots().every((w) => !w.controller.allowSnapshotting), isTrue);
+    navigator.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 3'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 3));
+    selected.dispose(); settings.dispose();
+  });
   testWidgets('warmup does not change selection or recreate tab states', (tester) async {
     SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty();
     final selected = ValueNotifier(0);
