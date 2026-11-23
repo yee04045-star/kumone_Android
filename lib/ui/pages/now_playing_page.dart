@@ -1,3 +1,4 @@
+import '../widgets/lyric_viewport.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
@@ -1276,19 +1277,7 @@ class _ImmersiveLyricsColumnState extends State<_ImmersiveLyricsColumn> {
         }
         return false;
       },
-      child: ShaderMask(
-        shaderCallback: (bounds) => const LinearGradient(
-          stops: [0, .12, .84, 1],
-          colors: [
-            Colors.transparent,
-            Colors.white,
-            Colors.white,
-            Colors.transparent,
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ).createShader(bounds),
-        blendMode: BlendMode.dstIn,
+      child: KumoneLyricViewport(
         child: SingleChildScrollView(
           controller: controller,
           clipBehavior: Clip.none,
@@ -1973,8 +1962,9 @@ class _LyricsSideState extends State<_LyricsSide> {
         }
         return false;
       },
-      child: SingleChildScrollView(
+      child: KumoneLyricViewport(child: SingleChildScrollView(
         controller: controller,
+        clipBehavior: Clip.none,
         padding: const EdgeInsets.fromLTRB(14, 44, 14, 80),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2013,7 +2003,7 @@ class _LyricsSideState extends State<_LyricsSide> {
               ),
           ],
         ),
-      ),
+      )),
     );
   }
 }
