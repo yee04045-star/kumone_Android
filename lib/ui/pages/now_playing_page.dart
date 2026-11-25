@@ -1148,7 +1148,14 @@ class _ThreeLineLyricPreview extends StatelessWidget {
                   child: MarqueeText(
                     rows[i]!.text,
                     scrollEnabled: i == 1,
-                    startPause: const Duration(seconds: 1),
+                    playbackProgress: i == 1
+                      ? ((player.position.inMilliseconds - parsed.lines[active].startMs) /
+                          math.max(1, (active + 1 < parsed.lines.length
+                            ? parsed.lines[active + 1].startMs
+                            : player.duration.inMilliseconds) - parsed.lines[active].startMs))
+                          .clamp(0.0, 1.0)
+                      : null,
+                    startPause: Duration.zero,
                     pixelsPerSecond: 46,
                     textAlign: TextAlign.center,
                     style: TextStyle(

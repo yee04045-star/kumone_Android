@@ -11,9 +11,10 @@ class MarqueeText extends StatefulWidget {
   final double pixelsPerSecond;
   final bool scrollEnabled;
   final Duration startPause;
+  final double? playbackProgress;
   const MarqueeText(this.text,
       {super.key, this.style, this.textAlign = TextAlign.start, this.pixelsPerSecond = 28,
-      this.scrollEnabled = true, this.startPause = const Duration(seconds: 3)});
+      this.scrollEnabled = true, this.playbackProgress, this.startPause = const Duration(seconds: 3)});
   @override
   State<MarqueeText> createState() => _MarqueeTextState();
 }
@@ -22,7 +23,6 @@ class _MarqueeTextState extends State<MarqueeText>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(vsync: this);
   Timer? _pause;
-  double _distance = 0;
   String _signature = '';
   int _generation = 0;
 
@@ -33,8 +33,7 @@ class _MarqueeTextState extends State<MarqueeText>
     _pause?.cancel();
     _controller.stop();
     _controller.value = 0;
-    _distance = distance;
-    if (distance <= 0) return;
+    if (distance <= 0 || widget.playbackProgress != null) return;
     void cycle() {
       _pause = Timer(widget.startPause, () async {
         if (!mounted || generation != _generation) return;
@@ -89,6 +88,7 @@ class _MarqueeTextState extends State<MarqueeText>
             child: Text(widget.text, style: style, maxLines: 1,
               overflow: TextOverflow.ellipsis, textAlign: widget.textAlign));
         }
+        final progress = widget.playbackProgress?.clamp(0.0, 1.0);
         return Semantics(
             label: widget.text,
             child: ExcludeSemantics(
@@ -98,14 +98,14 @@ class _MarqueeTextState extends State<MarqueeText>
                   child: AnimatedBuilder(
                     animation: _controller,
                     builder: (_, __) => ScrollTextEdges(
-                      left: (_distance * _controller.value / 14).clamp(0.0, 1.0),
-                      right: (_distance * (1 - _controller.value) / 14).clamp(0.0, 1.0),
+                      left: (distance * (progress ?? _controller.value) / 14).clamp(0.0, 1.0),
+                      right: (distance * (1 - (progress ?? _controller.value)) / 14).clamp(0.0, 1.0),
                       child: OverflowBox(
                       alignment: Alignment.centerLeft,
                       minWidth: width,
                       maxWidth: width,
                       child: Transform.translate(
-                          offset: Offset(-_distance * _controller.value, 0),
+                          offset: Offset(-distance * (progress ?? _controller.value), 0),
                           child: Text(widget.text,
                               style: style, maxLines: 1, softWrap: false)),
                     )), 

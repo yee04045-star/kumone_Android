@@ -284,6 +284,11 @@ class SettingsPage extends StatelessWidget {
                 onChangeEnd: settings.saveQuickEntryBlur),
               const Divider(height: 24),
               const _SettingsHeader('横屏 / 平板 · 浮动功能栏'),
+              KumoneGlassSwitchTile(
+                title: const Text('双击状态栏回顶'),
+                subtitle: const Text('仅当前页面回顶；部分 Android 设备会被系统拦截，可能不生效'),
+                value: settings.statusBarDoubleTapToTop,
+                onChanged: settings.setStatusBarDoubleTapToTop),
               ListTile(title: const Text('mini 播放器与 Tab 间距'),
                 subtitle: const Text('按 1206px 参考截图比例：24～36px'),
                 trailing: Text('${settings.miniTabGap.round()}px')),

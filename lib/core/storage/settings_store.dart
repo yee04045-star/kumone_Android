@@ -11,6 +11,12 @@ enum LyricsAnnotationMode { off, romaji, furigana }
 
 class SettingsStore extends ChangeNotifier {
   final prefs = SharedPreferencesAsync();
+  bool statusBarDoubleTapToTop = true;
+  Future<void> setStatusBarDoubleTapToTop(bool value) async {
+    statusBarDoubleTapToTop = value;
+    notifyListeners();
+    await prefs.setBool('statusBarDoubleTapToTop', value);
+  }
 
   AppAccent accent = AppAccent.appleBlue;
   AppearanceMode appearance = AppearanceMode.system;
@@ -89,6 +95,7 @@ class SettingsStore extends ChangeNotifier {
   }
 
   Future<void> load() async {
+    statusBarDoubleTapToTop = await prefs.getBool('statusBarDoubleTapToTop') ?? true;
     final tabs = (await prefs.getStringList('bottomTabOrder'))?.map(int.tryParse)
         .whereType<int>().toList();
     if (tabs != null && tabs.length == 4 && tabs.toSet().length == 4 &&

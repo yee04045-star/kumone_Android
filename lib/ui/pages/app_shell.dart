@@ -1,6 +1,5 @@
-import '../widgets/tab_hold_to_top.dart';
+import '../widgets/status_bar_scroll_top.dart';
 import 'package:flutter/cupertino.dart';
-import '../widgets/tab_snapshot_host.dart';
 import '../widgets/glass_side_navigation.dart';
 import '../widgets/shell_chrome_transition.dart';
 import '../widgets/first_launch_notice.dart';
@@ -103,13 +102,16 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int tab = 0;
   bool _init = false;
-  final _contentNavigatorKey = GlobalKey<NavigatorState>();
+  final _navigatorKeys = List.generate(4, (_) => GlobalKey<NavigatorState>());
+  GlobalKey<NavigatorState> get _contentNavigatorKey => _navigatorKeys[tab];
+  final _fullscreenByTab = List.filled(4, false);
   late final ValueNotifier<int> _tabNotifier = ValueNotifier<int>(0);
-  late final NavigatorObserver _contentObserver =
-      _ContentNavigatorObserver((hasPushedRoute) {
-    if (!mounted) return;
-    setState(() => _isNowPlayingFullscreen = hasPushedRoute);
-  });
+  late final _contentObservers = List.generate(4, (index) =>
+      _ContentNavigatorObserver((fullscreen) {
+        if (!mounted) return;
+        _fullscreenByTab[index] = fullscreen;
+        if (tab == index) setState(() => _isNowPlayingFullscreen = fullscreen);
+      }));
   bool _isNowPlayingFullscreen = false;
   bool _navigationExpanded = true;
 
@@ -157,23 +159,15 @@ class _AppShellState extends State<AppShell> {
         ),
       );
 
-  bool _tabHoldConsumed = false;
-
   void _setTab(int index) {
-    final navigator = _contentNavigatorKey.currentState;
-    final switchingTab = tab != index;
-    if (switchingTab) {
-      setState(() => tab = index);
-      _tabNotifier.value = index;
-      // Removing (rather than popping) details avoids replaying stacked
-      // reverse transitions when the user switches to a different tab.
-      if (navigator != null) {
-        (_contentObserver as _ContentNavigatorObserver).removeDetailsImmediately(navigator);
-      }
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) navigator?.popUntil((route) => route.isFirst);
+    if (tab != index) {
+      setState(() {
+        tab = index;
+        _isNowPlayingFullscreen = _fullscreenByTab[index];
       });
+      _tabNotifier.value = index;
+    } else {
+      _contentNavigatorKey.currentState?.popUntil((route) => route.isFirst);
     }
   }
 
@@ -307,14 +301,7 @@ class _AppShellState extends State<AppShell> {
             return MediaQuery.removePadding(
               context: context,
               removeBottom: true, // SafeArea above already owns this inset.
-              child: Listener(onPointerDown: (_) => _tabHoldConsumed = false, child: TabHoldToTop(
-                selectedIndex: context.watch<SettingsStore>().bottomTabOrder.indexOf(tab),
-                itemCount: 4,
-                onHold: () {
-                  _tabHoldConsumed = true;
-                  scrollVisibleRouteToTop(_contentNavigatorKey.currentContext);
-                },
-                child: Align(alignment: Alignment.bottomCenter, child: LiquidGlassTabBar(
+              child: Align(alignment: Alignment.bottomCenter, child: LiquidGlassTabBar(
                 width: constraints.maxWidth - 28,
                 height: 60,
                 swell: const LiquidGlassTabBarSwell(
@@ -326,8 +313,8 @@ class _AppShellState extends State<AppShell> {
                             KumoneGlassOptics.backingOpacity(brightness)),
                     blur: context.watch<SettingsStore>().chromeBlur),
                 selectedIndex: context.watch<SettingsStore>().bottomTabOrder.indexOf(tab),
-                onChanged: (index) { if (!_tabHoldConsumed) _setTab(context.read<SettingsStore>().bottomTabOrder[index]); },
-                onReselected: (index) { if (!_tabHoldConsumed) _setTab(context.read<SettingsStore>().bottomTabOrder[index]); },
+                onChanged: (index) => _setTab(context.read<SettingsStore>().bottomTabOrder[index]),
+                onReselected: (index) => _setTab(context.read<SettingsStore>().bottomTabOrder[index]),
                 itemStyle: LiquidGlassTabItemStyle(
                   selectedColor: scheme.primary,
                   unselectedColor: scheme.onSurface,
@@ -342,7 +329,7 @@ class _AppShellState extends State<AppShell> {
                       label: _labels[i],
                     ),
                 ],
-              )))),
+              )),
             );
           }),
         ),
@@ -396,7 +383,13 @@ class _AppShellState extends State<AppShell> {
             }
             SystemNavigator.pop();
           },
-          child: Scaffold(
+          child: StatusBarScrollTop(
+            enabled: context.watch<SettingsStore>().statusBarDoubleTapToTop && !_isNowPlayingFullscreen,
+            onDoubleTap: () {
+              if (ModalRoute.of(context)?.isCurrent != true) return;
+              scrollVisibleRouteToTop(_contentNavigatorKey.currentContext);
+            },
+            child: Scaffold(
             resizeToAvoidBottomInset: false,
             body: NotificationListener<UserScrollNotification>(
               onNotification: (notification) {
@@ -411,14 +404,13 @@ class _AppShellState extends State<AppShell> {
                 KumoneBottomOverlayInset(
                   inset: bottomClearance,
                   child: SafeArea(top: false, bottom: false,
-                    child: Navigator(
-                      key: _contentNavigatorKey,
-                      observers: [_contentObserver],
-                      onGenerateRoute: (_) => CupertinoPageRoute<void>(
-                        builder: (_) => KumoneTabSnapshotHost(
-                          selected: _tabNotifier, pages: _pages),
-                      ),
-                    ),
+                    child: IndexedStack(index: tab, children: [
+                      for (var i = 0; i < 4; i++) TickerMode(enabled: tab == i,
+                        child: Navigator(
+                          key: _navigatorKeys[i], observers: [_contentObservers[i]],
+                          onGenerateRoute: (_) => kumonePageRoute<void>(_pages[i]),
+                        )),
+                    ]),
                   ),
                 ),
                 Positioned(left: 0, right: 0, bottom: 0,
@@ -435,7 +427,7 @@ class _AppShellState extends State<AppShell> {
             ),
             floatingActionButton:
                 _init ? null : const CircularProgressIndicator(),
-          ),
+          )),
         );
       },
     );
