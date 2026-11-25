@@ -29,13 +29,13 @@ class _AutoScrollMetadataState extends State<AutoScrollMetadata> {
       final distance = _scroll.position.maxScrollExtent;
       if (distance <= 1) return;
       await _scroll.animateTo(distance,
-          duration: Duration(milliseconds: (distance / 28 * 1000).round()),
+          duration: Duration(milliseconds: (distance / (28 * .75) * 1000).round()),
           curve: Curves.linear);
       if (!mounted || epoch != _epoch) return;
       _timer = Timer(const Duration(seconds: 2), () async {
         if (!mounted || epoch != _epoch || !_scroll.hasClients || !_enabled) return;
         await _scroll.animateTo(0,
-          duration: Duration(milliseconds: (distance / 28 * 1000).round()),
+          duration: Duration(milliseconds: (distance / (28 * .75) * 1000).round()),
           curve: Curves.linear);
         if (!mounted || epoch != _epoch || !_enabled) return;
         _start();

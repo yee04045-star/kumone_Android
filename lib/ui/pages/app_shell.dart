@@ -1,3 +1,4 @@
+import '../widgets/tab_hold_to_top.dart';
 import 'package:flutter/cupertino.dart';
 import '../widgets/tab_snapshot_host.dart';
 import '../widgets/glass_side_navigation.dart';
@@ -28,6 +29,13 @@ class _ContentNavigatorObserver extends NavigatorObserver {
   final List<Route<dynamic>> _routes = [];
 
   _ContentNavigatorObserver(this.onFullscreenChanged);
+
+  void removeDetailsImmediately(NavigatorState navigator) {
+    final details = _routes.where((route) => !route.isFirst).toList().reversed;
+    for (final route in details) {
+      if (route.navigator == navigator) navigator.removeRoute(route);
+    }
+  }
 
   bool _isFullscreen(Route<dynamic>? route) =>
       route?.settings.name == '/now-playing' ||
@@ -149,15 +157,24 @@ class _AppShellState extends State<AppShell> {
         ),
       );
 
+  bool _tabHoldConsumed = false;
+
   void _setTab(int index) {
     final navigator = _contentNavigatorKey.currentState;
-    // Update the root content before dismissing details. Its snapshot is
-    // keyed by tab so an old tab's frozen texture cannot cover the new tab.
-    if (tab != index) setState(() => tab = index);
-    _tabNotifier.value = index;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) navigator?.popUntil((route) => route.isFirst);
-    });
+    final switchingTab = tab != index;
+    if (switchingTab) {
+      setState(() => tab = index);
+      _tabNotifier.value = index;
+      // Removing (rather than popping) details avoids replaying stacked
+      // reverse transitions when the user switches to a different tab.
+      if (navigator != null) {
+        (_contentObserver as _ContentNavigatorObserver).removeDetailsImmediately(navigator);
+      }
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) navigator?.popUntil((route) => route.isFirst);
+      });
+    }
   }
 
   @override
@@ -290,7 +307,14 @@ class _AppShellState extends State<AppShell> {
             return MediaQuery.removePadding(
               context: context,
               removeBottom: true, // SafeArea above already owns this inset.
-              child: Align(alignment: Alignment.bottomCenter, child: LiquidGlassTabBar(
+              child: Listener(onPointerDown: (_) => _tabHoldConsumed = false, child: TabHoldToTop(
+                selectedIndex: context.watch<SettingsStore>().bottomTabOrder.indexOf(tab),
+                itemCount: 4,
+                onHold: () {
+                  _tabHoldConsumed = true;
+                  scrollVisibleRouteToTop(_contentNavigatorKey.currentContext);
+                },
+                child: Align(alignment: Alignment.bottomCenter, child: LiquidGlassTabBar(
                 width: constraints.maxWidth - 28,
                 height: 60,
                 swell: const LiquidGlassTabBarSwell(
@@ -302,8 +326,8 @@ class _AppShellState extends State<AppShell> {
                             KumoneGlassOptics.backingOpacity(brightness)),
                     blur: context.watch<SettingsStore>().chromeBlur),
                 selectedIndex: context.watch<SettingsStore>().bottomTabOrder.indexOf(tab),
-                onChanged: (index) => _setTab(context.read<SettingsStore>().bottomTabOrder[index]),
-                onReselected: (index) => _setTab(context.read<SettingsStore>().bottomTabOrder[index]),
+                onChanged: (index) { if (!_tabHoldConsumed) _setTab(context.read<SettingsStore>().bottomTabOrder[index]); },
+                onReselected: (index) { if (!_tabHoldConsumed) _setTab(context.read<SettingsStore>().bottomTabOrder[index]); },
                 itemStyle: LiquidGlassTabItemStyle(
                   selectedColor: scheme.primary,
                   unselectedColor: scheme.onSurface,
@@ -318,7 +342,7 @@ class _AppShellState extends State<AppShell> {
                       label: _labels[i],
                     ),
                 ],
-              )),
+              )))),
             );
           }),
         ),

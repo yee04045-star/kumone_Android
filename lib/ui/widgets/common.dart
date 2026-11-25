@@ -882,7 +882,7 @@ class GlassMiniPlayer extends StatelessWidget {
     return TooltipVisibility(visible: false,
       child: RawGestureDetector(
         gestures: {LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-          () => LongPressGestureRecognizer(duration: const Duration(milliseconds: 700)),
+          () => LongPressGestureRecognizer(duration: const Duration(milliseconds: 500)),
           (recognizer) => recognizer.onLongPress = onQueue)},
         child: Material(
       color: Colors.transparent,

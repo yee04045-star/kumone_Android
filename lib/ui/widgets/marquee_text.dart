@@ -38,7 +38,7 @@ class _MarqueeTextState extends State<MarqueeText>
       _pause = Timer(widget.startPause, () async {
         if (!mounted || generation != _generation) return;
         _controller.duration =
-            Duration(milliseconds: (distance / widget.pixelsPerSecond * 1000).round());
+            Duration(milliseconds: (distance / (widget.pixelsPerSecond * .75) * 1000).round());
         await _controller.forward(from: 0).orCancel.catchError((Object _) {});
         if (!mounted || generation != _generation) return;
         _pause = Timer(const Duration(seconds: 2), () async {
