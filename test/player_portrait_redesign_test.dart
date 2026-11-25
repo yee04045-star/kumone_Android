@@ -10,6 +10,7 @@ import 'package:kumone_flutter/core/player/player_controller.dart';
 import 'package:kumone_flutter/core/storage/account_store.dart';
 import 'package:kumone_flutter/core/storage/settings_store.dart';
 import 'package:kumone_flutter/ui/pages/now_playing_page.dart';
+import 'package:kumone_flutter/ui/widgets/common.dart';
 
 const track = Track(id: 1, name: 'Song', artists: [ArtistRef(id: 1, name: 'Artist')],
   album: AlbumRef(id: 1, name: 'Album'), durationMs: 180000);
@@ -30,6 +31,43 @@ class TestPlayer extends ChangeNotifier implements PlayerController {
 }
 void main() {
   setUp(() => SharedPreferencesAsyncPlatform.instance = InMemorySharedPreferencesAsync.empty());
+  testWidgets('cover artwork tracks intermediate animation size in both directions', (tester) async {
+    final player = TestPlayer();
+    final settings = SettingsStore();
+    final account = AccountStore();
+    var lyricsVisible = false;
+    late StateSetter update;
+    await tester.pumpWidget(MultiProvider(providers: [
+      ChangeNotifierProvider.value(value: settings),
+      ChangeNotifierProvider.value(value: account),
+      ChangeNotifierProvider<PlayerController>.value(value: player),
+    ], child: MaterialApp(home: Scaffold(body: StatefulBuilder(builder: (context, setState) {
+      update = setState;
+      return kumonePlayerPortraitForTest(track: track, player: player,
+        showLyrics: lyricsVisible);
+    })))));
+    await tester.pumpAndSettle();
+    double coverSize() => tester.widget<Artwork>(find.byType(Artwork).first).size;
+    final large = coverSize();
+    expect(large, greaterThan(62));
+    update(() => lyricsVisible = true);
+    await tester.pump();
+    expect(coverSize(), closeTo(large, .01));
+    await tester.pump(const Duration(milliseconds: 210));
+    expect(coverSize(), greaterThan(62));
+    expect(coverSize(), lessThan(large));
+    await tester.pumpAndSettle();
+    expect(coverSize(), closeTo(62, .01));
+    update(() => lyricsVisible = false);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 210));
+    expect(coverSize(), greaterThan(62));
+    expect(coverSize(), lessThan(large));
+    await tester.pumpAndSettle();
+    expect(coverSize(), closeTo(large, .01));
+    await tester.pumpWidget(const SizedBox());
+    player.dispose(); settings.dispose(); account.dispose();
+  });
   testWidgets('preview first row stays top aligned for two and three rows', (tester) async {
     final player = TestPlayer();
     const lyrics = ParsedLyrics([

@@ -1,6 +1,6 @@
 name: kumone_flutter
 publish_to: "none"
-version: 0.7.4+64
+version: 0.7.5+65
 
 description: Unofficial Flutter Android behavioral port of Kumone with liquid glass UI and user-configurable audio sources.
 

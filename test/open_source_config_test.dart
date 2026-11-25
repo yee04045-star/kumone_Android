@@ -45,20 +45,12 @@ void main() {
           () => CustomSourceStore.validate('Name', url), throwsFormatException);
     }
   });
-  test('only nine regular icons remain in requested order', () {
+  test('only the red regular icon remains', () {
     expect(AppIconChoice.values.map((e) => e.label).toList(), [
-      '冰霜玻璃',
-      '蓝色晶透',
-      '蓝色水晶',
-      '晶透红粉',
-      '粉彩玻璃',
-      '红粉玻璃',
-      '粉色玻璃',
-      '粉色水晶',
-      '翡翠水晶',
+      '红',
     ]);
     final icons = AppIconStore();
-    expect(icons.visibleChoices.length, 9);
+    expect(icons.visibleChoices.length, 1);
     icons.dispose();
   });
 }

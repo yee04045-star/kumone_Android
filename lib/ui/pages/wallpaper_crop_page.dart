@@ -1,3 +1,4 @@
+import '../widgets/common.dart';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -57,8 +58,7 @@ class _WallpaperCropPageState extends State<WallpaperCropPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: const Color(0xFF15171B),
-    appBar: AppBar(backgroundColor: const Color(0xFF15171B),
-      foregroundColor: Colors.white, title: const Text('裁切背景'),
+    appBar: KumoneGlassAppBar(title: const SizedBox.shrink(),
       actions: [TextButton(onPressed: _saving ? null : _confirm,
         child: Text(_saving ? '保存中…' : '使用此裁切',
           style: const TextStyle(color: Colors.white)))]),

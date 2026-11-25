@@ -1,3 +1,4 @@
+import 'metadata_scroll_sync.dart';
 import 'dart:async';
 import 'scroll_text_edges.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class _MarqueeTextState extends State<MarqueeText>
   String _signature = '';
   int _generation = 0;
 
-  void _configure(String signature, double distance) {
+  void _configure(String signature, double distance, double travelDistance) {
     if (_signature == signature) return;
     _signature = signature;
     final generation = ++_generation;
@@ -38,7 +39,7 @@ class _MarqueeTextState extends State<MarqueeText>
       _pause = Timer(widget.startPause, () async {
         if (!mounted || generation != _generation) return;
         _controller.duration =
-            Duration(milliseconds: (distance / (widget.pixelsPerSecond * .75) * 1000).round());
+            Duration(milliseconds: (travelDistance / (widget.pixelsPerSecond * .75) * 1000).round());
         await _controller.forward(from: 0).orCancel.catchError((Object _) {});
         if (!mounted || generation != _generation) return;
         _pause = Timer(const Duration(seconds: 2), () async {
@@ -72,11 +73,16 @@ class _MarqueeTextState extends State<MarqueeText>
         final distance = constraints.hasBoundedWidth && !reduce
             ? (width - constraints.maxWidth).clamp(0.0, double.infinity)
             : 0.0;
+        final timing = MetadataScrollSync.of(context);
+        final travel = timing == null ? distance : timing.distance.clamp(distance, double.infinity);
         // Configure after layout, without marking widgets dirty during build.
         final signature =
-            '${widget.text}|$style|${constraints.maxWidth}|$reduce|$direction';
+            '${widget.text}|$style|${constraints.maxWidth}|$reduce|$direction|$travel';
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _configure(signature, distance);
+          if (mounted) {
+            timing?.report('title', distance);
+            _configure(signature, distance, travel);
+          }
         });
         if (distance <= 0) {
           return SizedBox(width: constraints.hasBoundedWidth ? constraints.maxWidth : null,

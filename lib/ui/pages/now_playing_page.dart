@@ -1,3 +1,4 @@
+import '../widgets/metadata_scroll_sync.dart';
 import '../widgets/lyric_viewport.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -981,11 +982,14 @@ class _ImmersiveMobileContent extends StatelessWidget {
           child: GestureDetector(onTap: onToggleLyrics,
             child: TweenAnimationBuilder<double>(
               tween: Tween(end: showLyrics ? 12 : 22), duration: duration,
-              builder: (context, radius, _) => AnimatedSwitcher(
-                duration: const Duration(milliseconds: 800),
-                child: Artwork(key: ValueKey(track.id), url: track.album.picUrl,
-                  size: showLyrics ? 62 : coverSize, radius: radius,
-                  shadow: false, border: false))))),
+              builder: (context, radius, _) => LayoutBuilder(
+                builder: (context, frame) => AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 800),
+                  child: Artwork(key: ValueKey(track.id), url: track.album.picUrl,
+                    // Follow AnimatedPositioned's interpolated constraints,
+                    // not the final 62px target on the first animation frame.
+                    size: frame.maxWidth, radius: radius,
+                    shadow: false, border: false)))))),
       ]);
     });
   }
@@ -1014,7 +1018,7 @@ class _ImmersiveMetadata extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return MetadataScrollSync(key: ValueKey(track.id), child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         MarqueeText(
@@ -1095,7 +1099,7 @@ class _ImmersiveMetadata extends StatelessWidget {
           ),
         ),
       ],
-    );
+    ));
   }
 }
 

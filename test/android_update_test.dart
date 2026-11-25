@@ -103,22 +103,18 @@ void main() {
     account.dispose();
   });
 
-  test('icon selection is one native setting and failure does not change it',
-      () async {
+  test('retired icon selection falls back to red', () async {
     final icons = AppIconStore();
-    expect(icons.selected, AppIconChoice.frost);
+    expect(icons.selected, AppIconChoice.red);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(AppIconStore.channel, (call) async {
       if (call.method == 'getIcon') return 'pink';
-      expect(call.arguments, {'icon': 'pastel'});
-      throw PlatformException(code: 'test');
+      return null;
     });
     await icons.load();
-    expect(icons.selected, AppIconChoice.pink);
-    await expectLater(
-        icons.select(AppIconChoice.pastel), throwsA(isA<PlatformException>()));
-    expect(icons.selected, AppIconChoice.pink);
-    expect(icons.busy, false);
+    expect(icons.selected, AppIconChoice.red);
+    expect(icons.selected.label, '红');
+    expect(icons.visibleChoices.map((e) => e.name), ['red']);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(AppIconStore.channel, null);
     icons.dispose();

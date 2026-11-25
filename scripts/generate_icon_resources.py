@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw, ImageOps, ImageChops
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / 'tooling/android_overlay/app/src/main/res'
-CHOICES = ['frost', 'crystal', 'pastel', 'pink', 'emerald', 'clearblue', 'crystalblue', 'redpink', 'clearredpink']
+CHOICES = ['red']
 DENSITIES = {'mdpi': 48, 'hdpi': 72, 'xhdpi': 96, 'xxhdpi': 144, 'xxxhdpi': 192}
 
 for key in CHOICES:
@@ -15,7 +15,7 @@ for key in CHOICES:
         folder = RES / f'mipmap-{density}'
         folder.mkdir(parents=True, exist_ok=True)
         image.resize((size, size), Image.Resampling.LANCZOS).save(folder / f'ic_{key}.png')
-        if key == 'frost':
+        if key == 'red':
             for legacy in ['ic_launcher', 'ic_launcher_round']:
                 image.resize((size, size), Image.Resampling.LANCZOS).save(folder / f'{legacy}.png')
     # Android 12+ masks splash icons inside a circle; keep the full square art

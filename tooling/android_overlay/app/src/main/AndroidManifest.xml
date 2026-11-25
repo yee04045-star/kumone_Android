@@ -22,7 +22,7 @@
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
-            android:theme="@style/LaunchFrost"
+            android:theme="@style/LaunchRed"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
@@ -31,126 +31,42 @@
                 android:resource="@style/NormalTheme" />
         </activity>
 
-        <activity android:name=".FrostActivity" android:exported="true"
+        <activity android:name=".RedActivity" android:exported="true"
             android:launchMode="singleTop" android:taskAffinity=""
-            android:theme="@style/LaunchFrost"
+            android:theme="@style/LaunchRed"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
             <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme" />
         </activity>
-        <activity android:name=".CrystalActivity" android:exported="true"
-            android:launchMode="singleTop" android:taskAffinity=""
-            android:theme="@style/LaunchCrystal"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
-            <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme" />
-        </activity>
-        <activity android:name=".PastelActivity" android:exported="true"
-            android:launchMode="singleTop" android:taskAffinity=""
-            android:theme="@style/LaunchPastel"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
-            <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme" />
-        </activity>
-        <activity android:name=".PinkActivity" android:exported="true"
-            android:launchMode="singleTop" android:taskAffinity=""
-            android:theme="@style/LaunchPink"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
-            <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme" />
-        </activity>
+        
+        
+        
 
-        <activity android:name=".EmeraldActivity" android:exported="true"
-            android:launchMode="singleTop" android:taskAffinity="" android:theme="@style/LaunchEmerald"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
-            <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme" />
-        </activity>
-        <activity android:name=".ClearblueActivity" android:exported="true"
-            android:launchMode="singleTop" android:taskAffinity="" android:theme="@style/LaunchClearblue"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
-            <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme" />
-        </activity>
-        <activity android:name=".CrystalblueActivity" android:exported="true"
-            android:launchMode="singleTop" android:taskAffinity="" android:theme="@style/LaunchCrystalblue"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
-            <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme" />
-        </activity>
+        
+        
+        
 
-        <activity android:name=".RedpinkActivity" android:exported="true"
-            android:launchMode="singleTop" android:taskAffinity="" android:theme="@style/LaunchRedpink"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
-            <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme" />
-        </activity>
-        <activity android:name=".ClearredpinkActivity" android:exported="true"
-            android:launchMode="singleTop" android:taskAffinity="" android:theme="@style/LaunchClearredpink"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true" android:windowSoftInputMode="adjustResize">
-            <meta-data android:name="io.flutter.embedding.android.NormalTheme" android:resource="@style/NormalTheme" />
-        </activity>
+        
+        
 <!-- Stable alias names: keep these across upgrades so Android preserves selection. -->
-        <activity-alias android:name=".IconFrost" android:targetActivity=".FrostActivity"
+        <activity-alias android:name=".IconRed" android:targetActivity=".RedActivity"
             android:enabled="true" android:exported="true" android:label="Kumone"
-            android:icon="@mipmap/ic_frost" android:roundIcon="@mipmap/ic_frost">
+            android:icon="@mipmap/ic_red" android:roundIcon="@mipmap/ic_red">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
-        <activity-alias android:name=".IconCrystal" android:targetActivity=".CrystalActivity"
-            android:enabled="false" android:exported="true" android:label="Kumone"
-            android:icon="@mipmap/ic_crystal" android:roundIcon="@mipmap/ic_crystal">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-        <activity-alias android:name=".IconPastel" android:targetActivity=".PastelActivity"
-            android:enabled="false" android:exported="true" android:label="Kumone"
-            android:icon="@mipmap/ic_pastel" android:roundIcon="@mipmap/ic_pastel">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-        <activity-alias android:name=".IconPink" android:targetActivity=".PinkActivity"
-            android:enabled="false" android:exported="true" android:label="Kumone"
-            android:icon="@mipmap/ic_pink" android:roundIcon="@mipmap/ic_pink">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
+        
+        
+        
 
-        <activity-alias android:name=".IconEmerald" android:targetActivity=".EmeraldActivity"
-            android:enabled="false" android:exported="true" android:label="Kumone"
-            android:icon="@mipmap/ic_emerald" android:roundIcon="@mipmap/ic_emerald">
-            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
-        </activity-alias>
-        <activity-alias android:name=".IconClearblue" android:targetActivity=".ClearblueActivity"
-            android:enabled="false" android:exported="true" android:label="Kumone"
-            android:icon="@mipmap/ic_clearblue" android:roundIcon="@mipmap/ic_clearblue">
-            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
-        </activity-alias>
-        <activity-alias android:name=".IconCrystalblue" android:targetActivity=".CrystalblueActivity"
-            android:enabled="false" android:exported="true" android:label="Kumone"
-            android:icon="@mipmap/ic_crystalblue" android:roundIcon="@mipmap/ic_crystalblue">
-            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
-        </activity-alias>
+        
+        
+        
 
-        <activity-alias android:name=".IconRedpink" android:targetActivity=".RedpinkActivity"
-            android:enabled="false" android:exported="true" android:label="Kumone"
-            android:icon="@mipmap/ic_redpink" android:roundIcon="@mipmap/ic_redpink">
-            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
-        </activity-alias>
-        <activity-alias android:name=".IconClearredpink" android:targetActivity=".ClearredpinkActivity"
-            android:enabled="false" android:exported="true" android:label="Kumone"
-            android:icon="@mipmap/ic_clearredpink" android:roundIcon="@mipmap/ic_clearredpink">
-            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
-        </activity-alias>
+        
+        
 <service
             android:name="com.ryanheise.audioservice.AudioService"
             android:foregroundServiceType="mediaPlayback"

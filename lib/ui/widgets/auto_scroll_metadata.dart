@@ -1,3 +1,4 @@
+import 'metadata_scroll_sync.dart';
 import 'dart:async';
 import 'scroll_text_edges.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class _AutoScrollMetadataState extends State<AutoScrollMetadata> {
   Timer? _timer;
   int _epoch = 0;
   bool _enabled = false;
+  double _travel = 0;
   void _start() {
     final epoch = ++_epoch;
     _timer?.cancel();
@@ -29,13 +31,13 @@ class _AutoScrollMetadataState extends State<AutoScrollMetadata> {
       final distance = _scroll.position.maxScrollExtent;
       if (distance <= 1) return;
       await _scroll.animateTo(distance,
-          duration: Duration(milliseconds: (distance / (28 * .75) * 1000).round()),
+          duration: Duration(milliseconds: ((_travel > distance ? _travel : distance) / (28 * .75) * 1000).round()),
           curve: Curves.linear);
       if (!mounted || epoch != _epoch) return;
       _timer = Timer(const Duration(seconds: 2), () async {
         if (!mounted || epoch != _epoch || !_scroll.hasClients || !_enabled) return;
         await _scroll.animateTo(0,
-          duration: Duration(milliseconds: (distance / (28 * .75) * 1000).round()),
+          duration: Duration(milliseconds: ((_travel > distance ? _travel : distance) / (28 * .75) * 1000).round()),
           curve: Curves.linear);
         if (!mounted || epoch != _epoch || !_enabled) return;
         _start();
@@ -76,6 +78,19 @@ class _AutoScrollMetadataState extends State<AutoScrollMetadata> {
   @override
   Widget build(BuildContext context) =>
       LayoutBuilder(builder: (context, constraints) {
+        final timing = MetadataScrollSync.of(context);
+        final travel = timing?.distance ?? 0;
+        if (_travel != travel) {
+          _travel = travel;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && _enabled) _start();
+          });
+        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _scroll.hasClients) {
+            timing?.report('subtitle', _scroll.position.maxScrollExtent);
+          }
+        });
         return SizedBox(
           width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
           child: AnimatedBuilder(animation: _scroll,

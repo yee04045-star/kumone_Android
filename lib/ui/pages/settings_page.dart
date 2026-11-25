@@ -202,7 +202,7 @@ class SettingsPage extends StatelessWidget {
               const Divider(height: 24),
               const _SettingsHeader('外观'),
               const ListTile(title: Text('主题强调色')),
-              for (final accent in AppAccent.values)
+              for (final accent in AppAccent.values.where((accent) => accent != AppAccent.spotifyGreen && accent != AppAccent.qqGreen))
                 _CheckChoice(selected: settings.accent == accent,
                   title: accent.label,
                   onTap: () => settings.setAccent(accent)),

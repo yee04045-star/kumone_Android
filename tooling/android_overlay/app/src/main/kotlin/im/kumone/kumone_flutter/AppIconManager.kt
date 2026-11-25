@@ -8,22 +8,14 @@ import io.flutter.plugin.common.MethodChannel
 
 /** One preference controls launcher aliases and the launch theme. */
 class AppIconManager(private val activity: Activity) {
-    private val keys = listOf("frost", "crystal", "pastel", "pink", "emerald", "clearblue", "crystalblue", "redpink", "clearredpink")
+    private val keys = listOf("red")
     private val prefs = activity.getSharedPreferences("kumone_icon", 0)
 
-    fun selected(): String = prefs.getString("selected", "frost")
-        ?.takeIf { it in keys } ?: "frost"
+    fun selected(): String = prefs.getString("selected", "red")
+        ?.takeIf { it in keys } ?: "red"
 
     fun theme(): Int = when (selected()) {
-        "crystal" -> R.style.LaunchCrystal
-        "pastel" -> R.style.LaunchPastel
-        "pink" -> R.style.LaunchPink
-        "emerald" -> R.style.LaunchEmerald
-        "clearblue" -> R.style.LaunchClearblue
-        "crystalblue" -> R.style.LaunchCrystalblue
-        "redpink" -> R.style.LaunchRedpink
-        "clearredpink" -> R.style.LaunchClearredpink
-        else -> R.style.LaunchFrost
+        else -> R.style.LaunchRed
     }
 
     private fun component(key: String): ComponentName = ComponentName(
