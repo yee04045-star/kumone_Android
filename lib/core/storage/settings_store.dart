@@ -11,7 +11,7 @@ enum LyricsAnnotationMode { off, romaji, furigana }
 
 class SettingsStore extends ChangeNotifier {
   final prefs = SharedPreferencesAsync();
-  bool listLazyLoading = false;
+  bool listLazyLoading = true;
   Future<void> setListLazyLoading(bool value) async {
     listLazyLoading = value;
     notifyListeners();
@@ -24,7 +24,7 @@ class SettingsStore extends ChangeNotifier {
     await prefs.setBool('statusBarDoubleTapToTop', value);
   }
 
-  AppAccent accent = AppAccent.appleBlue;
+  AppAccent accent = AppAccent.appleRed;
   AppearanceMode appearance = AppearanceMode.system;
   NowPlayingMode nowPlaying = NowPlayingMode.immersive;
   String quality = 'exhigh';
@@ -101,7 +101,7 @@ class SettingsStore extends ChangeNotifier {
   }
 
   Future<void> load() async {
-    listLazyLoading = await prefs.getBool('listLazyLoading') ?? false;
+    listLazyLoading = await prefs.getBool('listLazyLoading') ?? true;
     statusBarDoubleTapToTop = await prefs.getBool('statusBarDoubleTapToTop') ?? true;
     final tabs = (await prefs.getStringList('bottomTabOrder'))?.map(int.tryParse)
         .whereType<int>().toList();
@@ -115,7 +115,7 @@ class SettingsStore extends ChangeNotifier {
     freezeOutgoingPage = true;
     final accentName = await prefs.getString('appAccent');
     accent = AppAccent.values.firstWhere((e) => e.name == accentName,
-      orElse: () => AppAccent.appleBlue);
+      orElse: () => AppAccent.appleRed);
     final appearanceName = await prefs.getString('appearance') ?? 'system';
     appearance = AppearanceMode.values.firstWhere(
       (e) => e.name == appearanceName,

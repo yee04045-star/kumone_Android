@@ -198,7 +198,7 @@ class _PlaylistPageState extends State<PlaylistPage>
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
@@ -521,7 +521,7 @@ class _PlaylistLoading extends StatelessWidget {
     return LayoutBuilder(builder: (context, constraints) {
       final cover = ownedHeader || constraints.maxWidth - 48 < 400 ? 112.0 : 140.0;
       return ListView(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),padding: const EdgeInsets.fromLTRB(24, 18, 24, 24), children: [
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),padding: const EdgeInsets.fromLTRB(24, 18, 24, 24), children: [
         Row(children: [block(cover, width: cover, radius: 14),
           const SizedBox(width: 18), Expanded(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -675,7 +675,7 @@ class _AlbumPageState extends State<AlbumPage> {
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),
           physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
           slivers: [
             SliverToBoxAdapter(child: SizedBox(height: kumoneToolbarInset(context))),
@@ -918,7 +918,7 @@ class _ArtistPageState extends State<ArtistPage> {
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: ListView(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),
           physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
           padding: EdgeInsets.only(
               top: kumoneToolbarInset(context),
@@ -1039,7 +1039,7 @@ class _ArtistPageState extends State<ArtistPage> {
               SizedBox(
                 height: 204,
                 child: ListView.separated(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   scrollDirection: Axis.horizontal,
                   itemCount: albums.length,
@@ -1098,7 +1098,7 @@ class _ArtistLoading extends StatelessWidget {
       height: h, width: w, decoration: BoxDecoration(color: fill,
         borderRadius: BorderRadius.circular(radius)));
     return ListView(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),padding: const EdgeInsets.fromLTRB(20, 18, 20, 24), children: [
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),padding: const EdgeInsets.fromLTRB(20, 18, 20, 24), children: [
       Row(children: [box(112, w: 112, radius: 56), const SizedBox(width: 18),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           box(22), const SizedBox(height: 8), box(14),
@@ -1189,7 +1189,7 @@ class _DailyPageState extends State<DailyPage> {
           : songs.isEmpty
               ? _DetailError(message: error ?? '暂无每日推荐', onRetry: _load)
               : ListView.builder(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),
                   padding: EdgeInsets.only(top: kumoneToolbarInset(context), bottom: KumoneBottomOverlayInset.of(context) + 24),
                   itemCount: songs.length,
                   itemBuilder: (_, i) {

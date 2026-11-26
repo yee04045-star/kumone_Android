@@ -226,7 +226,7 @@ class _ExplorePageState extends State<ExplorePage> {
     return KumoneGlassRefresh(
       onRefresh: () => _load(reset: true),
       child: CustomScrollView(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),
         controller: _scrollController,
         slivers: [
           KumoneScrollingTabHeader(
@@ -237,7 +237,7 @@ class _ExplorePageState extends State<ExplorePage> {
               child: SizedBox(
                 height: 46,
                 child: ListView.separated(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),
                   padding:
                       const EdgeInsets.fromLTRB(16, 6, 16, 10),
                   scrollDirection: Axis.horizontal,

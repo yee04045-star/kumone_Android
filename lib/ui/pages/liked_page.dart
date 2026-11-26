@@ -86,7 +86,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),
           physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics()),
           slivers: [

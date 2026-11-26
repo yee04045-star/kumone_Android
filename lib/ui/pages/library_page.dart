@@ -35,7 +35,7 @@ class LibraryPage extends StatelessWidget {
               icon: const Icon(Icons.settings_outlined)),
         ]),
         body: ListView(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),children: [
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),children: [
           ListTile(
               leading: const Icon(Icons.login),
               title: const Text('登录后查看在线音乐库'),
@@ -49,7 +49,7 @@ class LibraryPage extends StatelessWidget {
     return KumoneGlassRefresh(
       onRefresh: account.refreshLibrary,
       child: CustomScrollView(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           KumoneScrollingTabHeader(
@@ -251,17 +251,8 @@ class _Entry extends StatelessWidget {
             borderRadius: radius,
             child: Row(
               children: [
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: .10),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: SizedBox(
-                    width: 34,
-                    height: 34,
-                    child: Icon(icon, color: Theme.of(context).colorScheme.primary, size: 20),
-                  ),
-                ),
+                SizedBox(width: 34, height: 34,
+                  child: Icon(icon, color: Theme.of(context).colorScheme.primary, size: 34)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: KumoneLoadingText(
@@ -317,7 +308,7 @@ class _PlaylistListPageState extends State<_PlaylistListPage> {
       body: KumoneLoadingReveal(placeholderPadding: EdgeInsets.only(top: kumoneToolbarInset(context)), child: KumoneGlassRefresh.adaptive(
         onRefresh: _refresh,
         child: ListView.separated(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),
           physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics()),
           padding: EdgeInsets.only(

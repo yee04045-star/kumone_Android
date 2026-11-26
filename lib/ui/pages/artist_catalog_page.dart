@@ -68,7 +68,7 @@ class _ArtistCatalogPageState extends State<ArtistCatalogPage> {
     return Scaffold(extendBodyBehindAppBar: true,
       appBar: const KumoneGlassAppBar(title: SizedBox.shrink()),
       body: CustomScrollView(
-          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),controller: scroll, slivers: [
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),controller: scroll, slivers: [
         SliverToBoxAdapter(child: SizedBox(height: kumoneToolbarInset(context))),
         if (widget.albums) SliverPadding(padding: const EdgeInsets.all(16),
           sliver: SliverGrid.builder(

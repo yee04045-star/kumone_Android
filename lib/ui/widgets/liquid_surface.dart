@@ -58,6 +58,7 @@ class KumoneLiquidSurface extends StatelessWidget {
   final double? backingOpacity;
   final double? blur;
   final bool interactive;
+  final bool liteGlass;
   final double revealProgress;
 
   const KumoneLiquidSurface({
@@ -68,6 +69,7 @@ class KumoneLiquidSurface extends StatelessWidget {
     this.backingOpacity,
     this.blur,
     this.interactive = true,
+    this.liteGlass = false,
     this.revealProgress = 1,
   });
 
@@ -81,6 +83,7 @@ class KumoneLiquidSurface extends StatelessWidget {
           reduceMotion || !interactive
               ? null : const LiquidGlassTouch(flex: LiquidGlassFlex()),
       style: LiquidGlassStyle(
+        liteGlass: liteGlass,
         shape:
             LiquidGlassShape.continuousRoundedRectangle(cornerRadius: radius),
         color: backingOpacity == null
