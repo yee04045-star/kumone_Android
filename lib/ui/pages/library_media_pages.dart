@@ -1,3 +1,5 @@
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
+import '../../core/storage/settings_store.dart';
 import '../widgets/content_fade.dart';
 import '../widgets/loading_placeholder.dart';
 import '../widgets/track_title.dart';
@@ -77,6 +79,7 @@ class _RecentPageState extends State<RecentPage> {
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
@@ -232,6 +235,7 @@ class _CloudPageState extends State<CloudPage> {
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),

@@ -1,3 +1,4 @@
+import '../widgets/source_notice.dart';
 import '../widgets/status_bar_scroll_top.dart';
 import 'package:flutter/cupertino.dart';
 import '../widgets/glass_side_navigation.dart';
@@ -218,9 +219,6 @@ class _AppShellState extends State<AppShell> {
     return Consumer<PlayerController>(
       builder: (_, player, __) {
         final notice = player.sourceNotice;
-        if (player.currentTrack == null && notice == null) {
-          return const SizedBox.shrink();
-        }
         return Padding(
           padding: const EdgeInsets.fromLTRB(12, 4, 12, 6),
           child: Material(
@@ -229,37 +227,7 @@ class _AppShellState extends State<AppShell> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (notice != null)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8, bottom: 6),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 220),
-                        child: KumoneLiquidSurface(
-                          key: ValueKey(notice),
-                          radius: 999,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 7),
-                          child: Text(
-                            notice,
-                            style: TextStyle(
-                              fontSize: 11,
-                              // The notice surface follows the normal theme
-                              // surface, so use its foreground instead of the
-                              // inverse-surface foreground. In light mode this
-                              // keeps the text dark; in dark mode it stays light.
-                              color: Theme.of(context).brightness ==
-                                      Brightness.light
-                                  ? Colors.black
-                                  : Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                KumoneSourceNotice(message: notice),
                 if (player.currentTrack != null)
                   GlassMiniPlayer(
                     player: player,

@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import '../widgets/content_fade.dart';
 import '../widgets/loading_reveal.dart';
 import '../../core/player/player_controller.dart';
@@ -32,7 +33,8 @@ class LibraryPage extends StatelessWidget {
                   .push(kumonePageRoute(const SettingsPage(), settings: const RouteSettings(name: '/settings'))),
               icon: const Icon(Icons.settings_outlined)),
         ]),
-        body: ListView(children: [
+        body: ListView(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),children: [
           ListTile(
               leading: const Icon(Icons.login),
               title: const Text('登录后查看在线音乐库'),
@@ -46,6 +48,7 @@ class LibraryPage extends StatelessWidget {
     return KumoneGlassRefresh(
       onRefresh: account.refreshLibrary,
       child: CustomScrollView(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           KumoneScrollingTabHeader(
@@ -313,6 +316,7 @@ class _PlaylistListPageState extends State<_PlaylistListPage> {
       body: KumoneLoadingReveal(placeholderPadding: EdgeInsets.only(top: kumoneToolbarInset(context)), child: KumoneGlassRefresh.adaptive(
         onRefresh: _refresh,
         child: ListView.separated(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
           physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics()),
           padding: EdgeInsets.only(

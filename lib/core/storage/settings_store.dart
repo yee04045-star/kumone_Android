@@ -11,6 +11,12 @@ enum LyricsAnnotationMode { off, romaji, furigana }
 
 class SettingsStore extends ChangeNotifier {
   final prefs = SharedPreferencesAsync();
+  bool listLazyLoading = false;
+  Future<void> setListLazyLoading(bool value) async {
+    listLazyLoading = value;
+    notifyListeners();
+    await prefs.setBool('listLazyLoading', value);
+  }
   bool statusBarDoubleTapToTop = true;
   Future<void> setStatusBarDoubleTapToTop(bool value) async {
     statusBarDoubleTapToTop = value;
@@ -95,6 +101,7 @@ class SettingsStore extends ChangeNotifier {
   }
 
   Future<void> load() async {
+    listLazyLoading = await prefs.getBool('listLazyLoading') ?? false;
     statusBarDoubleTapToTop = await prefs.getBool('statusBarDoubleTapToTop') ?? true;
     final tabs = (await prefs.getStringList('bottomTabOrder'))?.map(int.tryParse)
         .whereType<int>().toList();

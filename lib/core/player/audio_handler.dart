@@ -231,14 +231,15 @@ class KumoneAudioHandler extends BaseAudioHandler
         ...resolved.headers,
       };
 
-  AudioSource _audioSourceFor(ResolvedAudio resolved) {
+  Future<AudioSource> _audioSourceFor(ResolvedAudio resolved, Track track) async {
     if (resolved.isLocalFile) {
       return AudioSource.file(resolved.url.toFilePath());
     }
-    return AudioSource.uri(
-      resolved.url,
-      headers: _headersFor(resolved),
-    );
+    final file = await UnblockService.streamingCacheFile(track, quality, resolved.source, resolved.url);
+    // just_audio experimental streaming cache avoids a second full download.
+    // ignore: experimental_member_use
+    return LockCachingAudioSource(resolved.url,
+      headers: _headersFor(resolved), cacheFile: file);
   }
 
   MediaItem _mediaItem(Track t) => MediaItem(
@@ -342,7 +343,8 @@ class KumoneAudioHandler extends BaseAudioHandler
     final memory = _preloadedAudio[key];
     if (memory != null) {
       try {
-        if (await memory.file.exists() && await memory.file.length() > 0) {
+        if (await memory.file.exists() && await memory.file.length() > 0 &&
+          DateTime.now().difference(await memory.file.lastModified()) <= UnblockService.audioCacheLifetime) {
           if (!_isThirdPartySource(memory.source) || unblock) return memory;
         }
       } catch (_) {}
@@ -399,7 +401,8 @@ class KumoneAudioHandler extends BaseAudioHandler
     final memory = _preloadedAudio[key];
     if (memory != null) {
       try {
-        if (await memory.file.exists() && await memory.file.length() > 0) {
+        if (await memory.file.exists() && await memory.file.length() > 0 &&
+          DateTime.now().difference(await memory.file.lastModified()) <= UnblockService.audioCacheLifetime) {
           if (!_isThirdPartySource(memory.source) || unblock) {
             return ResolvedAudio(Uri.file(memory.file.path), memory.source);
           }
@@ -477,7 +480,7 @@ class KumoneAudioHandler extends BaseAudioHandler
       standby = AudioPlayer();
       _preparing = standby;
       await standby.setVolume(0);
-      await standby.setAudioSource(_audioSourceFor(resolved));
+      await standby.setAudioSource(await _audioSourceFor(resolved, next));
       if (generation != _loadGeneration ||
           exclusiveUsb ||
           !_player.playing ||
@@ -588,9 +591,9 @@ class KumoneAudioHandler extends BaseAudioHandler
         index < _tracks.length &&
         _tracks[index].id == track.id;
 
-    if (track.album.picUrl == null ||
+    if (track.id > 0 && (track.album.picUrl == null ||
         track.album.picUrl!.isEmpty ||
-        track.album.name.isEmpty) {
+        track.album.name.isEmpty)) {
       try {
         final details = await NeteaseApi.instance.songDetails([track.id]);
         if (!current()) return;
@@ -632,7 +635,7 @@ class KumoneAudioHandler extends BaseAudioHandler
     if (resolved.source != 'NetEase') _emitSourceNotice(resolved.source);
     try {
       await _player.setAudioSource(
-        _audioSourceFor(resolved),
+        await _audioSourceFor(resolved, track),
       );
       if (!current()) return;
       mediaItem.add(_mediaItem(track));
@@ -656,7 +659,7 @@ class KumoneAudioHandler extends BaseAudioHandler
             continue;
           }
           try {
-            await _player.setAudioSource(_audioSourceFor(candidate));
+            await _player.setAudioSource(await _audioSourceFor(candidate, track));
             fallback = candidate;
             loaded = true;
             break;
@@ -824,7 +827,12 @@ class KumoneAudioHandler extends BaseAudioHandler
   }
 
   Future<void> setQuality(String value) async {
+    if (quality == value) return;
     quality = value;
+    _preloadGeneration++;
+    _preloadedAudio.clear();
+    _preloadFutures.clear();
+    unawaited(_preloadNext());
   }
 
   Future<void> setUnblock(bool value) async {

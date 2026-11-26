@@ -1,3 +1,5 @@
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
+import '../../core/storage/settings_store.dart';
 import '../widgets/content_fade.dart';
 import '../widgets/loading_placeholder.dart';
 import '../widgets/glass_controls.dart';
@@ -302,6 +304,7 @@ class _Results extends StatelessWidget {
       return KumoneSearchResultGrid(data: data, type: type);
     }
     return ListView(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
       physics: const ClampingScrollPhysics(),
       padding:
           EdgeInsets.only(bottom: KumoneBottomOverlayInset.of(context) + 24),
@@ -470,6 +473,7 @@ class KumoneSearchResultGrid extends StatelessWidget {
     final album = type == SearchType.albums;
     final count = artist ? data.artists.length : album ? data.albums.length : data.playlists.length;
     return GridView.builder(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
       physics: const ClampingScrollPhysics(),
       padding: EdgeInsets.fromLTRB(16, 16, 16,
         KumoneBottomOverlayInset.of(context) + 24),

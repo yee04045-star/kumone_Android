@@ -1,3 +1,5 @@
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
+import '../../core/storage/settings_store.dart';
 import '../widgets/content_fade.dart';
 import '../widgets/loading_placeholder.dart';
 import 'package:flutter/material.dart';
@@ -65,7 +67,8 @@ class _ArtistCatalogPageState extends State<ArtistCatalogPage> {
     final player = context.read<PlayerController>();
     return Scaffold(extendBodyBehindAppBar: true,
       appBar: const KumoneGlassAppBar(title: SizedBox.shrink()),
-      body: CustomScrollView(controller: scroll, slivers: [
+      body: CustomScrollView(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),controller: scroll, slivers: [
         SliverToBoxAdapter(child: SizedBox(height: kumoneToolbarInset(context))),
         if (widget.albums) SliverPadding(padding: const EdgeInsets.all(16),
           sliver: SliverGrid.builder(

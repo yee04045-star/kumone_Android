@@ -1,3 +1,4 @@
+import 'package:path/path.dart' as p;
 import 'dart:convert';
 import '../storage/custom_source_store.dart';
 import 'dart:io';
@@ -39,6 +40,17 @@ class UnblockService {
     final dir = Directory('${root.path}/kumone_audio_cache');
     await dir.create(recursive: true);
     return dir;
+  }
+
+  static const audioCacheLifetime = Duration(days: 3);
+  static Future<File> streamingCacheFile(Track track, String quality, String source, Uri url) async {
+    final dir = await _audioCacheDirectory();
+    final file = File(p.join(dir.path,
+      '${track.id}_${_encodedCacheKey(quality, source)}.${_safeExtension(url)}'));
+    if (await file.exists() && DateTime.now().difference(await file.lastModified()) > audioCacheLifetime) {
+      await file.delete();
+    }
+    return file;
   }
 
   static String _encodedCacheKey(String quality, String source) =>
@@ -96,6 +108,10 @@ class UnblockService {
         try {
           if (await entity.length() <= 0) continue;
           final modified = await entity.lastModified();
+          if (DateTime.now().difference(modified) > audioCacheLifetime) {
+            await entity.delete();
+            continue;
+          }
           if (newest == null || modified.isAfter(newestTime)) {
             newest = CachedAudio(file: entity, source: source);
             newestTime = modified;

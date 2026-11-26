@@ -1,3 +1,5 @@
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
+import '../../core/storage/settings_store.dart';
 import '../widgets/cached_entry_snapshot.dart';
 import '../widgets/content_fade.dart';
 import '../widgets/loading_placeholder.dart';
@@ -84,6 +86,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
           physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics()),
           slivers: [

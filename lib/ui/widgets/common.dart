@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'route_snapshot.dart';
 import 'package:flutter/gestures.dart';
 import 'dart:math' as math;
@@ -435,21 +436,14 @@ class _ArtworkState extends State<Artwork> with AutomaticKeepAliveClientMixin {
     }
 
     final values = <String>[];
-    final originalHost = uri.replace(host: hosts.first);
-    values.add(originalHost.toString());
-    for (final size in const [512, 300]) {
-      final params = Map<String, String>.from(originalHost.queryParameters);
-      params['param'] = '${size}y$size';
-      values.add(originalHost.replace(queryParameters: params).toString());
-    }
-    // Try the alternate p1..p4 CDN edges with one standard-size request each.
-    // This keeps recovery bounded while covering the common Android-only CDN
-    // edge failures seen with NetEase artwork.
-    for (final host in hosts.skip(1)) {
-      final alt = uri.replace(host: host);
-      final params = Map<String, String>.from(alt.queryParameters);
-      params['param'] = '512y512';
-      values.add(alt.replace(queryParameters: params).toString());
+    final thumb = widget.size <= 64;
+    final requestSize = thumb ? 192 : 768;
+    for (final host in hosts) {
+      final image = uri.replace(host: host);
+      final isNetease = host.endsWith('.music.126.net');
+      values.add(isNetease ? image.replace(queryParameters: {
+        ...image.queryParameters, 'param': '${requestSize}y$requestSize',
+      }).toString() : image.toString());
     }
     return values.toSet().toList(growable: false);
   }
@@ -536,7 +530,11 @@ class _ArtworkState extends State<Artwork> with AutomaticKeepAliveClientMixin {
     );
 
     Widget child = fallback;
-    if (urls.isNotEmpty) {
+    if (urls.isNotEmpty && Uri.tryParse(urls[_candidate])?.scheme == 'file') {
+      child = Image.file(File.fromUri(Uri.parse(urls[_candidate])), fit: BoxFit.cover,
+        cacheWidth: (widget.size * MediaQuery.devicePixelRatioOf(context)).ceil().clamp(64, 768),
+        errorBuilder: (_, __, ___) => fallback);
+    } else if (urls.isNotEmpty) {
       child = CachedNetworkImage(
         imageUrl: urls[_candidate],
         memCacheWidth: (widget.size * MediaQuery.devicePixelRatioOf(context)).ceil().clamp(64, 768),
@@ -1061,8 +1059,8 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
       style: const TextStyle(fontSize: 15.5, height: 1.2, fontWeight: FontWeight.w500)),
       textDirection: Directionality.of(context),
       textScaler: MediaQuery.textScalerOf(context), maxLines: 1)
-      ..layout(maxWidth: math.max(1, panelWidth - 46));
-    final needsWrap = painter.didExceedMaxLines;
+      ..layout();
+    final needsWrap = painter.width > math.max(1, panelWidth - 46);
     painter.dispose();
     return needsWrap ? '查看歌手：${String.fromCharCode(10)}$name' : label;
   }
@@ -1154,7 +1152,7 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
         child: SizedBox(height: _menuRowHeight(label, panelWidth),
           child: Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Align(alignment: Alignment.centerLeft,
-              child: Text(label, softWrap: true,
+              child: Text(label, softWrap: true, maxLines: null, overflow: TextOverflow.visible,
                 style: TextStyle(fontSize: 15.5, height: 1.2,
                   fontWeight: FontWeight.w500, color: foreground)))))));
     }

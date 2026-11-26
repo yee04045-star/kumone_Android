@@ -1,8 +1,9 @@
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
+import '../../core/storage/settings_store.dart';
 import '../widgets/cached_entry_snapshot.dart';
 import '../widgets/content_fade.dart';
 import '../widgets/loading_placeholder.dart';
 import 'artist_catalog_page.dart';
-import '../../core/storage/app_accent.dart';
 import '../widgets/track_title.dart';
 import '../widgets/glass_refresh.dart';
 import '../widgets/glass_controls.dart';
@@ -197,6 +198,7 @@ class _PlaylistPageState extends State<PlaylistPage>
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),
@@ -518,7 +520,8 @@ class _PlaylistLoading extends StatelessWidget {
       decoration: BoxDecoration(color: fill, borderRadius: BorderRadius.circular(radius)));
     return LayoutBuilder(builder: (context, constraints) {
       final cover = ownedHeader || constraints.maxWidth - 48 < 400 ? 112.0 : 140.0;
-      return ListView(padding: const EdgeInsets.fromLTRB(24, 18, 24, 24), children: [
+      return ListView(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),padding: const EdgeInsets.fromLTRB(24, 18, 24, 24), children: [
         Row(children: [block(cover, width: cover, radius: 14),
           const SizedBox(width: 18), Expanded(child: Column(
             crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -672,6 +675,7 @@ class _AlbumPageState extends State<AlbumPage> {
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: CustomScrollView(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
           physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
           slivers: [
             SliverToBoxAdapter(child: SizedBox(height: kumoneToolbarInset(context))),
@@ -914,6 +918,7 @@ class _ArtistPageState extends State<ArtistPage> {
       body: KumoneGlassRefresh.adaptive(
         onRefresh: _load,
         child: ListView(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
           physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
           padding: EdgeInsets.only(
               top: kumoneToolbarInset(context),
@@ -1034,6 +1039,7 @@ class _ArtistPageState extends State<ArtistPage> {
               SizedBox(
                 height: 204,
                 child: ListView.separated(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   scrollDirection: Axis.horizontal,
                   itemCount: albums.length,
@@ -1091,7 +1097,8 @@ class _ArtistLoading extends StatelessWidget {
     Widget box(double h, {double? w, double radius = 8}) => Container(
       height: h, width: w, decoration: BoxDecoration(color: fill,
         borderRadius: BorderRadius.circular(radius)));
-    return ListView(padding: const EdgeInsets.fromLTRB(20, 18, 20, 24), children: [
+    return ListView(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),padding: const EdgeInsets.fromLTRB(20, 18, 20, 24), children: [
       Row(children: [box(112, w: 112, radius: 56), const SizedBox(width: 18),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           box(22), const SizedBox(height: 8), box(14),
@@ -1182,6 +1189,7 @@ class _DailyPageState extends State<DailyPage> {
           : songs.isEmpty
               ? _DetailError(message: error ?? '暂无每日推荐', onRetry: _load)
               : ListView.builder(
+          scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? false) ? 0 : 1000),
                   padding: EdgeInsets.only(top: kumoneToolbarInset(context), bottom: KumoneBottomOverlayInset.of(context) + 24),
                   itemCount: songs.length,
                   itemBuilder: (_, i) {

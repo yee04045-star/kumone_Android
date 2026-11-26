@@ -403,6 +403,10 @@ class SettingsPage extends StatelessWidget {
               ),
               const Divider(height: 24),
               const _SettingsHeader('存储'),
+              KumoneGlassSwitchTile(title: const Text('列表按需加载'),
+                subtitle: const Text('开启后减少屏幕外封面预加载；关闭时提前准备附近内容，优先保证滑动流畅。不会预加载歌曲音频'),
+                value: settings.listLazyLoading,
+                onChanged: settings.setListLazyLoading),
               ListTile(
                 leading: const Icon(Icons.delete_sweep_outlined),
                 title: const Text('清理缓存'),
