@@ -329,7 +329,7 @@ class SettingsPage extends StatelessWidget {
                 title: Text(const ['推荐', '精选', '搜索', '我的'][settings.bottomTabOrder[position]]),
                 trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                   for (final delta in [-1, 1]) IconButton(
-                    icon: Icon(delta < 0 ? CupertinoIcons.chevron_left : CupertinoIcons.chevron_right),
+                    icon: RotatedBox(quarterTurns: delta < 0 ? 0 : 2, child: const Icon(CupertinoIcons.chevron_back)),
                     onPressed: position + delta < 0 || position + delta > 3 ? null : () {
                       final order = List<int>.of(settings.bottomTabOrder);
                       final item = order.removeAt(position);
@@ -496,7 +496,7 @@ class SettingsPage extends StatelessWidget {
               const _SettingsHeader('补源与账户'),
               ListTile(leading: const Icon(Icons.settings_input_component),
                 title: const Text('音源配置'), subtitle: const Text('添加、启停及排序 · 最多 7 个自定义音源'),
-                trailing: const Icon(CupertinoIcons.chevron_right),
+                trailing: const KumoneForwardChevron(),
                 onTap: () => Navigator.of(context).push(kumonePageRoute(const SourceSettingsPage(), settings: const RouteSettings(name: '/settings')))),
               KumoneGlassSwitchTile(
                 value: settings.unblock,
@@ -548,7 +548,7 @@ class SettingsPage extends StatelessWidget {
       decoration: BoxDecoration(border: Border(bottom: BorderSide(
         color: Theme.of(context).dividerColor.withValues(alpha: .16), width: .5))),
       child: ListTile(
-      title: Text(name), trailing: const Icon(CupertinoIcons.chevron_right),
+      title: Text(name), trailing: const KumoneForwardChevron(),
       onTap: () => Navigator.of(context).push(kumonePageRoute(SettingsPage(category: name), settings: const RouteSettings(name: '/settings'))),
     ))];
   }

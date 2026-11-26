@@ -265,9 +265,7 @@ class _HomePageState extends State<HomePage> {
           KumoneLoadingText(title, style: titleStyle),
           const Spacer(),
           if (showChevron)
-            Icon(
-              CupertinoIcons.chevron_right,
-              size: 20,
+            KumoneForwardChevron(size: 20,
               color: cs.onSurfaceVariant,
             ),
         ],

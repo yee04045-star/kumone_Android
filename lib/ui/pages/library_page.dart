@@ -252,7 +252,7 @@ class _Entry extends StatelessWidget {
             child: Row(
               children: [
                 SizedBox(width: 34, height: 34,
-                  child: Icon(icon, color: Theme.of(context).colorScheme.primary, size: 34)),
+                  child: Icon(icon, color: Theme.of(context).colorScheme.primary, size: 26)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: KumoneLoadingText(
@@ -262,8 +262,7 @@ class _Entry extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
-                Icon(CupertinoIcons.chevron_right,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant),
+                KumoneForwardChevron(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ],
             ),
           ),

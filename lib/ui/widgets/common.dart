@@ -582,6 +582,16 @@ class _ArtworkState extends State<Artwork> with AutomaticKeepAliveClientMixin {
   }
 }
 
+// Mirror the back-button glyph without changing the icon's layout box.
+class KumoneForwardChevron extends StatelessWidget {
+  final double? size;
+  final Color? color;
+  const KumoneForwardChevron({super.key, this.size, this.color});
+  @override
+  Widget build(BuildContext context) => RotatedBox(quarterTurns: 2,
+    child: Icon(CupertinoIcons.chevron_back, size: size, color: color));
+}
+
 class SectionHeader extends StatelessWidget {
   final String title;
   final String? trailing;
@@ -613,7 +623,7 @@ class SectionHeader extends StatelessWidget {
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Text(title, style: titleStyle), const SizedBox(width: 5),
                 Transform.translate(offset: const Offset(0, 1.5),
-                  child: Icon(CupertinoIcons.chevron_right, size: 23, color: cs.onSurfaceVariant)),
+                  child: KumoneForwardChevron(size: 23, color: cs.onSurfaceVariant)),
               ])))));
     }
     return Padding(
@@ -634,8 +644,7 @@ class SectionHeader extends StatelessWidget {
               child: Text(trailing!),
             ),
           if (showChevron)
-            Icon(CupertinoIcons.chevron_right,
-                size: 20, color: cs.onSurfaceVariant),
+            KumoneForwardChevron(size: 20, color: cs.onSurfaceVariant),
         ],
       ),
     );
