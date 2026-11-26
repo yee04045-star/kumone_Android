@@ -266,7 +266,7 @@ class _HomePageState extends State<HomePage> {
           const Spacer(),
           if (showChevron)
             Icon(
-              Icons.chevron_right_rounded,
+              CupertinoIcons.chevron_right,
               size: 20,
               color: cs.onSurfaceVariant,
             ),

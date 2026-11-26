@@ -1,3 +1,4 @@
+import '../../core/models/artwork_url.dart';
 import 'dart:io';
 import 'route_snapshot.dart';
 import 'package:flutter/gestures.dart';
@@ -437,13 +438,10 @@ class _ArtworkState extends State<Artwork> with AutomaticKeepAliveClientMixin {
 
     final values = <String>[];
     final thumb = widget.size <= 64;
-    final requestSize = thumb ? 192 : 768;
     for (final host in hosts) {
       final image = uri.replace(host: host);
       final isNetease = host.endsWith('.music.126.net');
-      values.add(isNetease ? image.replace(queryParameters: {
-        ...image.queryParameters, 'param': '${requestSize}y$requestSize',
-      }).toString() : image.toString());
+      values.add(isNetease ? artworkUrl(image.toString(), thumbnail: thumb) : image.toString());
     }
     return values.toSet().toList(growable: false);
   }
@@ -615,7 +613,7 @@ class SectionHeader extends StatelessWidget {
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Text(title, style: titleStyle), const SizedBox(width: 5),
                 Transform.translate(offset: const Offset(0, 1.5),
-                  child: Icon(Icons.chevron_right_rounded, size: 23, color: cs.onSurfaceVariant)),
+                  child: Icon(CupertinoIcons.chevron_right, size: 23, color: cs.onSurfaceVariant)),
               ])))));
     }
     return Padding(
@@ -636,7 +634,7 @@ class SectionHeader extends StatelessWidget {
               child: Text(trailing!),
             ),
           if (showChevron)
-            Icon(Icons.chevron_right_rounded,
+            Icon(CupertinoIcons.chevron_right,
                 size: 20, color: cs.onSurfaceVariant),
         ],
       ),

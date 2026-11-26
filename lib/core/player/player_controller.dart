@@ -1,3 +1,5 @@
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import '../models/artwork_url.dart';
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:audio_service/audio_service.dart';
@@ -71,6 +73,21 @@ class PlayerController extends ChangeNotifier {
     });
   }
 
+  String? _requestedClearCover;
+  void _warmCurrentCover() {
+    final raw = currentTrack?.album.picUrl;
+    if (raw == null || raw.isEmpty) return;
+    final url = artworkUrl(raw, thumbnail: false);
+    final uri = Uri.tryParse(url);
+    if (uri == null || !const ['http', 'https'].contains(uri.scheme) ||
+        url == _requestedClearCover) { return; }
+    _requestedClearCover = url;
+    unawaited(DefaultCacheManager().getSingleFile(url).then<void>((_) {},
+      onError: (Object error, StackTrace stack) {
+        if (_requestedClearCover == url) _requestedClearCover = null;
+      }));
+  }
+
   void _syncFromHandler({bool notify = true}) {
     queue = handler.tracks;
     playNext = handler.playNext;
@@ -79,6 +96,7 @@ class PlayerController extends ChangeNotifier {
         ? queue[currentIndex]
         : null;
     duration = currentTrack?.duration ?? Duration.zero;
+    _warmCurrentCover();
     if (notify) notifyListeners();
   }
 

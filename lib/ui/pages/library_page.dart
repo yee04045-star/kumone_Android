@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import '../widgets/content_fade.dart';
 import '../widgets/loading_reveal.dart';
@@ -130,7 +131,7 @@ class LibraryPage extends StatelessWidget {
                         SizedBox(
                           width: itemWidth,
                           child: _Entry(
-                            icon: Icons.favorite,
+                            icon: CupertinoIcons.heart_fill,
                             title: '我喜欢的音乐',
                             onTap: () => Navigator.of(context).push(
                               kumonePageRoute(const LikedSongsPage()),
@@ -140,7 +141,7 @@ class LibraryPage extends StatelessWidget {
                         SizedBox(
                             width: itemWidth,
                             child: _Entry(
-                              icon: Icons.calendar_month_outlined,
+                              icon: CupertinoIcons.calendar,
                               title: '每日推荐',
                               onTap: () => Navigator.of(context)
                                   .push(kumonePageRoute(const DailyPage())),
@@ -148,7 +149,7 @@ class LibraryPage extends StatelessWidget {
                         SizedBox(
                           width: itemWidth,
                           child: _Entry(
-                            icon: Icons.collections_bookmark_outlined,
+                            icon: CupertinoIcons.square_stack,
                             title: '我的收藏',
                             onTap: () => Navigator.of(context).push(
                               kumonePageRoute(const CollectionsPage()),
@@ -158,7 +159,7 @@ class LibraryPage extends StatelessWidget {
                         SizedBox(
                           width: itemWidth,
                           child: _Entry(
-                            icon: Icons.library_music_outlined,
+                            icon: CupertinoIcons.music_albums,
                             title: '收藏的歌单',
                             onTap: () => Navigator.of(context).push(
                               kumonePageRoute(
@@ -170,7 +171,7 @@ class LibraryPage extends StatelessWidget {
                         SizedBox(
                           width: itemWidth,
                           child: _Entry(
-                            icon: Icons.history,
+                            icon: CupertinoIcons.clock,
                             title: '最近播放',
                             onTap: () => Navigator.of(context).push(
                               kumonePageRoute(const RecentPage()),
@@ -180,7 +181,7 @@ class LibraryPage extends StatelessWidget {
                         SizedBox(
                           width: itemWidth,
                           child: _Entry(
-                            icon: Icons.cloud_outlined,
+                            icon: CupertinoIcons.cloud,
                             title: '音乐云盘',
                             onTap: () => Navigator.of(context).push(
                               kumonePageRoute(const CloudPage()),
@@ -190,7 +191,7 @@ class LibraryPage extends StatelessWidget {
                         SizedBox(
                           width: itemWidth,
                           child: _Entry(
-                            icon: Icons.queue_music,
+                            icon: CupertinoIcons.music_note_list,
                             title: '创建的歌单',
                             onTap: () => Navigator.of(context).push(
                               kumonePageRoute(
@@ -270,7 +271,7 @@ class _Entry extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded,
+                Icon(CupertinoIcons.chevron_right,
                     color: Theme.of(context).colorScheme.onSurfaceVariant),
               ],
             ),

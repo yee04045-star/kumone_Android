@@ -1,3 +1,4 @@
+import '../../core/models/artwork_url.dart';
 import '../widgets/metadata_scroll_sync.dart';
 import '../widgets/lyric_viewport.dart';
 import 'dart:async';
@@ -161,7 +162,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     _preloadedNextCover = url;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      precacheImage(CachedNetworkImageProvider(url), context,
+      precacheImage(CachedNetworkImageProvider(artworkUrl(url, thumbnail: false)), context,
         onError: (_, __) { if (_preloadedNextCover == url) _preloadedNextCover = null; });
     });
   }
@@ -340,14 +341,26 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     );
   }
 
+  bool _openingDetail = false;
+  Future<void> _leavePlayerFor(Widget page) async {
+    if (_openingDetail || !mounted) return;
+    final navigator = Navigator.of(context);
+    final route = ModalRoute.of(context);
+    if (route == null || !route.isCurrent || !navigator.canPop()) return;
+    _openingDetail = true;
+    navigator.pop();
+    await route.completed;
+    if (navigator.mounted) navigator.push(kumonePageRoute(page));
+  }
+
   void _openArtist(ArtistRef artist) {
     if (artist.id <= 0) return;
-    Navigator.of(context).push(kumonePageRoute(ArtistPage(id: artist.id)));
+    unawaited(_leavePlayerFor(ArtistPage(id: artist.id)));
   }
 
   void _openAlbum(AlbumRef album) {
     if (album.id <= 0) return;
-    Navigator.of(context).push(kumonePageRoute(AlbumPage(id: album.id)));
+    unawaited(_leavePlayerFor(AlbumPage(id: album.id)));
   }
 
   void _requestStatusBarAppearance(

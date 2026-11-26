@@ -35,7 +35,7 @@ class _NoticeState extends State<KumoneSourceNotice> with SingleTickerProviderSt
     final brightness = Theme.of(context).brightness;
     return FadeTransition(opacity: fade, child: SnapshotWidget(
       controller: snapshot, mode: SnapshotMode.permissive,
-      child: Padding(padding: const EdgeInsets.only(left: 8, bottom: 6),
+      child: Padding(padding: const EdgeInsets.only(bottom: 6),
         child: Align(alignment: Alignment.centerLeft, child: KumoneLiquidSurface(
           radius: 999, blur: settings.chromeBlur,
           backingOpacity: settings.chromeBackingOpacity ?? KumoneGlassOptics.backingOpacity(brightness),
