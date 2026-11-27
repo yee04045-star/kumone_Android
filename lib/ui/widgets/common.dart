@@ -906,8 +906,9 @@ class GlassMiniPlayer extends StatelessWidget {
             InkWell(
               borderRadius: BorderRadius.circular(8),
               onTap: onOpen,
-              child: Artwork(
-                  url: track.album.picUrl, size: tablet ? 48 : 34, radius: 7, shadow: false),
+              child: SizedBox(width: tablet ? 48 : 34, height: tablet ? 48 : 34,
+                child: Center(child: Artwork(
+                  url: track.album.picUrl, size: tablet ? 40 : 34, radius: 7, shadow: false))),
             ),
             const SizedBox(width: 10),
             Expanded(
