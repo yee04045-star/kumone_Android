@@ -216,6 +216,9 @@ class _AppShellState extends State<AppShell> {
   Widget _miniPlayer(BuildContext context) {
     return Consumer<PlayerController>(
       builder: (_, player, __) {
+        player.onOpenCurrentTrack = () {
+          if (mounted && !_isNowPlayingFullscreen) push(const NowPlayingPage(), fullscreen: true);
+        };
         final notice = player.sourceNotice;
         return Padding(
           padding: const EdgeInsets.fromLTRB(12, 4, 12, 6),

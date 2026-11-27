@@ -135,12 +135,12 @@ class _RecentPageState extends State<RecentPage> {
                       leading: Artwork(fadeIn: true, url: record.song.album.picUrl, size: 52, radius: 9),
                       title: KumoneTrackTitle(trackId: record.song.id, title: record.song.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                       subtitle: Text(
-                        '${record.song.artistNames.isEmpty ? '未知歌手' : record.song.artistNames}${record.song.album.name.isEmpty ? '' : ' · ${record.song.album.name}'} · ${record.playCount} 次',
+                        '${record.song.artistNames.isEmpty ? '未知歌手' : record.song.artistNames}${record.song.album.name.isEmpty ? '' : ' · ${record.song.album.name}'}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       trailing: KumoneLoadingText(
-                        formatDuration(record.song.duration),
+                        '${record.playCount} 次',
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                       onTap: () => player.playTracks(tracks, start: record.song),

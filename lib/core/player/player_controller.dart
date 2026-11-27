@@ -100,6 +100,9 @@ class PlayerController extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
+  VoidCallback? onOpenCurrentTrack;
+  bool isCurrentTrack(int id) => currentTrack?.id == id;
+
   Future<void> playTracks(List<Track> tracks, {int index = 0, Track? start}) async {
     if (tracks.isEmpty) return;
     var selected = index.clamp(0, tracks.length - 1).toInt();
@@ -107,11 +110,16 @@ class PlayerController extends ChangeNotifier {
       final found = tracks.indexWhere((e) => e.id == start.id);
       if (found >= 0) selected = found;
     }
+    if (isCurrentTrack(tracks[selected].id)) {
+      onOpenCurrentTrack?.call();
+      return;
+    }
     await handler.setTracks(tracks, index: selected, autoplay: true);
     _syncFromHandler();
   }
 
   Future<void> playTrack(Track track) async {
+    if (isCurrentTrack(track.id)) { onOpenCurrentTrack?.call(); return; }
     await handler.playTrack(track);
     _syncFromHandler();
   }

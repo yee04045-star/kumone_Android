@@ -951,20 +951,22 @@ class GlassMiniPlayer extends StatelessWidget {
 
 class _SongFocusPainter extends CustomPainter {
   final Rect row;
-  const _SongFocusPainter(this.row);
+  final bool circular;
+  const _SongFocusPainter(this.row, {this.circular = false});
   @override
   void paint(Canvas canvas, Size size) {
     final path = Path()..fillType = PathFillType.evenOdd
       ..addRect(Offset.zero & size)
-      ..addRRect(RRect.fromRectAndRadius(row, const Radius.circular(12)));
+      ..addRRect(RRect.fromRectAndRadius(row, Radius.circular(circular ? row.shortestSide / 2 : 12)));
     canvas.drawPath(path, Paint()..color = Colors.black.withValues(alpha: .24));
   }
   @override
-  bool shouldRepaint(_SongFocusPainter oldDelegate) => row != oldDelegate.row;
+  bool shouldRepaint(_SongFocusPainter oldDelegate) => row != oldDelegate.row || circular != oldDelegate.circular;
 }
 
 class TrackActionMenu extends StatefulWidget {
   final Track track;
+  final bool circularFocus;
   final Map<String, Future<void> Function()>? collectionActions;
   final bool allowRemoveFromPlaylist;
   final Future<void> Function()? onRemoveFromPlaylist;
@@ -984,6 +986,7 @@ class TrackActionMenu extends StatefulWidget {
   const TrackActionMenu({
     super.key,
     required this.track,
+    this.circularFocus = false,
     this.collectionActions,
     this.allowRemoveFromPlaylist = false,
     this.onRemoveFromPlaylist,
@@ -1474,7 +1477,7 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: _removeOverlay,
-              child: focus ? CustomPaint(painter: _SongFocusPainter(rowRect))
+              child: focus ? CustomPaint(painter: _SongFocusPainter(rowRect, circular: widget.circularFocus))
                   : const SizedBox.expand(),
             ),
           ),
@@ -1752,8 +1755,8 @@ class FeatureCard extends StatelessWidget {
               ),
               const DecoratedBox(decoration: BoxDecoration(
                 gradient: LinearGradient(begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter, stops: [0, .45, 1],
-                  colors: [Colors.transparent, Colors.transparent, Color(0x59000000)]))),
+                  end: Alignment.bottomCenter, stops: [0, .3, 1],
+                  colors: [Colors.transparent, Colors.transparent, Color(0x99000000)]))),
             ],
             Positioned(
               left: 16,
@@ -1910,10 +1913,11 @@ class KumonePlayAllIcon extends StatelessWidget {
 
 class CollectionActionMenu extends StatelessWidget {
   final int id;
+  final bool circularFocus;
   final bool playlist;
   final ValueChanged<int>? onOpenArtist;
   final Widget child;
-  const CollectionActionMenu({super.key, required this.id, this.playlist = false,
+  const CollectionActionMenu({super.key, required this.id, this.playlist = false, this.circularFocus = false,
     this.onOpenArtist, required this.child});
   @override Widget build(BuildContext context) {
     PlayerController player() => context.read<PlayerController>();
@@ -1925,9 +1929,9 @@ class CollectionActionMenu extends StatelessWidget {
     }
     final kind = playlist ? '歌单' : '专辑';
     return TrackActionMenu(track: Track(id: id, name: '', artists: const [],
-      album: const AlbumRef(id: 0, name: ''), durationMs: 0), showButton: false,
+      album: const AlbumRef(id: 0, name: ''), durationMs: 0), showButton: false, circularFocus: circularFocus,
       collectionActions: {
-        '下一首播放': () async {
+        '加入播放': () async {
           final tracks = await songs();
           for (final track in tracks.reversed) { player().insertAsNext(track); }
           player().showNotice('已加入下一首播放');

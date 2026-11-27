@@ -300,7 +300,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                                   SizedBox(
                                     width: 40,
                                     height: 40,
-                                    child: CollectionActionMenu(id: widget.id, playlist: true, child: KumoneGlassIconButton(fadeIn: true, 
+                                    child: CollectionActionMenu(id: widget.id, playlist: true, circularFocus: true, child: KumoneGlassIconButton(fadeIn: true, 
                                       tooltip: playlist.subscribed ? '取消收藏歌单' : '收藏歌单',
                                       onPressed: _busySubscription ? null : () => _togglePlaylistSubscription(account, playlist),
                                       style: IconButton.styleFrom(
@@ -745,7 +745,7 @@ class _AlbumPageState extends State<AlbumPage> {
                                 SizedBox(
                                   width: 40,
                                   height: 40,
-                                  child: CollectionActionMenu(id: widget.id, playlist: false, child: KumoneGlassIconButton(fadeIn: true, 
+                                  child: CollectionActionMenu(id: widget.id, playlist: false, circularFocus: true, child: KumoneGlassIconButton(fadeIn: true, 
                                     tooltip: subscribed ? '取消收藏专辑' : '收藏专辑',
                                     onPressed: subscriptionBusy ? null : _toggleSubscription,
                                     style: IconButton.styleFrom(
@@ -1239,8 +1239,8 @@ class _DailyRecommendationHero extends StatelessWidget {
           size: bounds.maxWidth, radius: 0, shadow: false)),
         const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(
           begin: Alignment.topCenter, end: Alignment.bottomCenter,
-          stops: [0, .45, 1],
-          colors: [Colors.transparent, Colors.transparent, Color(0x59000000)]))),
+          stops: [0, .3, 1],
+          colors: [Colors.transparent, Colors.transparent, Color(0x99000000)]))),
         Padding(padding: const EdgeInsets.all(20), child: Align(
           alignment: Alignment.bottomLeft,
           child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [

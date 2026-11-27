@@ -14,7 +14,7 @@ class KumoneTrackTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final active = context.select<PlayerController, bool>(
-      (player) => player.currentTrack?.id == trackId);
+      (player) => player.isCurrentTrack(trackId));
     return KumoneLoadingText(title, maxLines: maxLines, overflow: overflow,
       style: active ? TextStyle(color: Theme.of(context).colorScheme.primary,
         fontWeight: FontWeight.w700) : null);
