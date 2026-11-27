@@ -198,8 +198,13 @@ class _SearchPageState extends State<SearchPage> {
                 child: LayoutBuilder(builder: (context, constraints) =>
                   SingleChildScrollView(scrollDirection: Axis.horizontal,
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                      constraints: BoxConstraints(minWidth:
+                        MediaQuery.sizeOf(context).width >= 600 &&
+                            (context.watch<SettingsStore?>()?.wideTopTabs ?? false)
+                          ? 0 : constraints.maxWidth),
                       child: Row(mainAxisSize: MainAxisSize.min,
+                        spacing: MediaQuery.sizeOf(context).width >= 600 &&
+                            (context.watch<SettingsStore?>()?.wideTopTabs ?? false) ? 20 : 0,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [for (final value in SearchType.values)
                           Builder(builder: (context) {

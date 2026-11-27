@@ -83,6 +83,13 @@ class SettingsStore extends ChangeNotifier {
   double sideNavigationPosition = .8;
   double sideNavigationExpandedPosition = .8;
   bool sideNavigationOnLeft = false;
+  bool wideTopTabs = true;
+  Future<void> setWideTopTabs(bool value) async {
+    wideTopTabs = value;
+    notifyListeners();
+    await prefs.setBool('wideTopTabs', value);
+  }
+
   List<int> bottomTabOrder = [0, 1, 2, 3];
   Future<void> setBottomTabOrder(List<int> order) async {
     if (order.length != 4 || order.toSet().length != 4 ||
@@ -109,6 +116,7 @@ class SettingsStore extends ChangeNotifier {
   }
 
   Future<void> load() async {
+    wideTopTabs = await prefs.getBool('wideTopTabs') ?? true;
     final custom = await prefs.getInt('customAccent');
     customAccent = custom == null ? null : Color(custom).withValues(alpha: 1);
     listLazyLoading = await prefs.getBool('listLazyLoading') ?? true;

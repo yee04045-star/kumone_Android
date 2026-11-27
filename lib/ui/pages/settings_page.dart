@@ -294,6 +294,9 @@ class SettingsPage extends StatelessWidget {
                 onChangeEnd: settings.saveQuickEntryBlur),
               const Divider(height: 24),
               const _SettingsHeader('横屏 / 平板 · 浮动功能栏'),
+              SwitchListTile.adaptive(title: const Text('右上角液态玻璃导航'),
+                subtitle: const Text('横屏及平板使用常驻顶部 Tab；关闭后恢复侧边功能栏'),
+                value: settings.wideTopTabs, onChanged: settings.setWideTopTabs),
               KumoneGlassSwitchTile(
                 title: const Text('双击状态栏回顶'),
                 subtitle: const Text('仅当前页面回顶；部分 Android 设备会被系统拦截，可能不生效'),

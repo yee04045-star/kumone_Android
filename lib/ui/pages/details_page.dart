@@ -300,7 +300,15 @@ class _PlaylistPageState extends State<PlaylistPage>
                                   SizedBox(
                                     width: 40,
                                     height: 40,
-                                    child: CollectionActionMenu(id: widget.id, playlist: true, circularFocus: true, child: KumoneGlassIconButton(fadeIn: true, 
+                                    child: CollectionActionMenu(id: widget.id, playlist: true, circularFocus: true,
+                                      onCollect: () async {
+                                        if (_busySubscription) return;
+                                        if (playlist.subscribed || account.subscribedPlaylists.any((item) => item.id == playlist.id)) {
+                                          context.read<PlayerController>().showNotice('已收藏歌单');
+                                          return;
+                                        }
+                                        await _togglePlaylistSubscription(account, playlist);
+                                      }, child: KumoneGlassIconButton(fadeIn: true, 
                                       tooltip: playlist.subscribed ? '取消收藏歌单' : '收藏歌单',
                                       onPressed: _busySubscription ? null : () => _togglePlaylistSubscription(account, playlist),
                                       style: IconButton.styleFrom(
@@ -745,7 +753,15 @@ class _AlbumPageState extends State<AlbumPage> {
                                 SizedBox(
                                   width: 40,
                                   height: 40,
-                                  child: CollectionActionMenu(id: widget.id, playlist: false, circularFocus: true, child: KumoneGlassIconButton(fadeIn: true, 
+                                  child: CollectionActionMenu(id: widget.id, playlist: false, circularFocus: true,
+                                    onCollect: () async {
+                                      if (subscriptionBusy) return;
+                                      if (subscribed) {
+                                        context.read<PlayerController>().showNotice('已收藏专辑');
+                                        return;
+                                      }
+                                      await _toggleSubscription();
+                                    }, child: KumoneGlassIconButton(fadeIn: true, 
                                     tooltip: subscribed ? '取消收藏专辑' : '收藏专辑',
                                     onPressed: subscriptionBusy ? null : _toggleSubscription,
                                     style: IconButton.styleFrom(
@@ -789,10 +805,7 @@ class _AlbumPageState extends State<AlbumPage> {
                     leading: Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                     title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                     subtitle: KumoneLoadingText(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    trailing: KumoneLoadingText(
-                      formatDuration(track.duration),
-                      style: TextStyle(color: cs.onSurfaceVariant),
-                    ),
+                    trailing: KumoneTrackTrailing(album: track.album.name, duration: KumoneLoadingText(formatDuration(track.duration), style: TextStyle(color: cs.onSurfaceVariant))),
                     onTap: () => player.playTracks(songs, start: track),
                   ),
                   onOpenAlbum: (ref) => Navigator.of(context).push(
@@ -1020,10 +1033,7 @@ class _ArtistPageState extends State<ArtistPage> {
                     leading: Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                     title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                     subtitle: KumoneLoadingText(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    trailing: KumoneLoadingText(
-                      formatDuration(track.duration),
-                      style: TextStyle(color: cs.onSurfaceVariant),
-                    ),
+                    trailing: KumoneTrackTrailing(album: track.album.name, duration: KumoneLoadingText(formatDuration(track.duration), style: TextStyle(color: cs.onSurfaceVariant))),
                     onTap: () => player.playTracks(hotSongs, start: track),
                   ),
                   onOpenAlbum: (album) => Navigator.of(context).push(
@@ -1208,10 +1218,7 @@ class _DailyPageState extends State<DailyPage> {
                         leading: Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                         title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                         subtitle: KumoneLoadingText(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
-                        trailing: KumoneLoadingText(
-                          formatDuration(track.duration),
-                          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                        ),
+                        trailing: KumoneTrackTrailing(album: track.album.name, duration: KumoneLoadingText(formatDuration(track.duration), style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))),
                         onTap: () => player.playTracks(songs, start: track),
                       )),
                       onOpenAlbum: (album) => Navigator.of(context).push(
@@ -1233,7 +1240,7 @@ class _DailyRecommendationHero extends StatelessWidget {
   const _DailyRecommendationHero({required this.songs, required this.onPlay});
   @override Widget build(BuildContext context) {
     final now = DateTime.now();
-    return AspectRatio(aspectRatio: 1.62, child: ClipRRect(
+    return SizedBox(height: dailyHeroHeight(MediaQuery.sizeOf(context)), child: ClipRRect(
       borderRadius: BorderRadius.circular(18), child: Stack(fit: StackFit.expand, children: [
         LayoutBuilder(builder: (_, bounds) => Artwork(url: songs.first.album.picUrl,
           size: bounds.maxWidth, radius: 0, shadow: false)),
@@ -1279,7 +1286,7 @@ class _DailyLoading extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius)));
     return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       physics: const NeverScrollableScrollPhysics(), children: [
-        AspectRatio(aspectRatio: 1.62, child: block(double.infinity, radius: 18)),
+        SizedBox(height: dailyHeroHeight(MediaQuery.sizeOf(context)), child: block(double.infinity, radius: 18)),
         const SizedBox(height: 20),
         for (var i = 0; i < 8; i++) Padding(
           padding: const EdgeInsets.symmetric(vertical: 8), child: Row(children: [
@@ -1290,4 +1297,10 @@ class _DailyLoading extends StatelessWidget {
           ])),
       ]);
   }
+}
+
+double dailyHeroHeight(Size window) {
+  final availableWidth = window.width - 40;
+  if (window.width < 600 && window.width <= window.height) return availableWidth / 1.62;
+  return (window.height * .27).clamp(170.0, 260.0);
 }

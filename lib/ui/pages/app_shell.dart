@@ -1,3 +1,4 @@
+import 'settings_page.dart';
 import '../widgets/source_notice.dart';
 import '../widgets/status_bar_scroll_top.dart';
 import 'package:flutter/cupertino.dart';
@@ -36,6 +37,8 @@ class _ContentNavigatorObserver extends NavigatorObserver {
       if (route.navigator == navigator) navigator.removeRoute(route);
     }
   }
+
+  bool get atRoot => _routes.whereType<PageRoute<dynamic>>().length <= 1;
 
   bool _isFullscreen(Route<dynamic>? route) =>
       route?.settings.name == '/now-playing' ||
@@ -306,6 +309,37 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
+  Widget _wideTopNavigation(BuildContext context) {
+    final settings = context.watch<SettingsStore>();
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    const order = [2, 0, 1, 3];
+    final libraryRoot = tab == 3 && _contentObservers[3].atRoot;
+    void select(int index) {
+      if (index == 3 && libraryRoot) {
+        _contentNavigatorKey.currentState?.push(kumonePageRoute(const SettingsPage(),
+          settings: const RouteSettings(name: '/settings')));
+      } else { _setTab(index); }
+    }
+    return LiquidGlassTabBar(width: wideTabWidth(MediaQuery.sizeOf(context)), height: 50, margin: EdgeInsets.zero,
+      swell: const LiquidGlassTabBarSwell(grip: 0, damping: 36, releaseDamping: 36),
+      style: KumoneGlassOptics.applyTo(dark ? LiquidGlassTabBar.defaultDarkStyle : LiquidGlassTabBar.defaultStyle,
+        Theme.of(context).brightness).copyWith(blur: settings.chromeBlur,
+        color: (dark ? Colors.black : Colors.white).withValues(alpha:
+          settings.chromeBackingOpacity ?? KumoneGlassOptics.backingOpacity(Theme.of(context).brightness))),
+      selectedIndex: order.indexOf(tab),
+      onChanged: (i) => select(order[i]), onReselected: (i) => select(order[i]),
+      itemStyle: LiquidGlassTabItemStyle(selectedColor: cs.primary,
+        unselectedColor: cs.onSurface, iconSize: 28, underGlassIconSize: 30),
+      items: [for (final i in order) LiquidGlassTabBarItem(
+        icon: i == 3 && libraryRoot ? CupertinoIcons.gear_alt : _selectedIcon(i),
+        iconBuilder: i == 3 && !libraryRoot ? (context, glyph) {
+          final url = context.watch<AccountStore>().profile?.avatarUrl;
+          return Artwork(url: url, size: 30, radius: 15, circle: true, shadow: false);
+        } : null)],
+    );
+  }
+
   Widget _compactBottomLayer(BuildContext context) {
     final requested = context.watch<SettingsStore>().bottomChromeOffset;
     // The tab owns a 10px bottom margin; keep at least 4px above system UI.
@@ -329,12 +363,14 @@ class _AppShellState extends State<AppShell> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= 600;
+        final topTabs = wide && context.watch<SettingsStore>().wideTopTabs;
+        final tablet = constraints.maxWidth >= 600 && constraints.maxHeight >= 600;
         final player = context.watch<PlayerController>();
         final hasTrack = player.currentTrack != null;
         final hasNotice = player.sourceNotice != null;
         // The underlying list must not relayout when the player is dismissed.
         final bottomClearance = wide
-            ? (hasTrack ? (hasNotice ? 94.0 : 78.0) : 0.0)
+            ? (hasTrack ? (hasNotice ? (tablet ? 112.0 : 94.0) : (tablet ? 96.0 : 78.0)) : 0.0)
             : (hasTrack ? (hasNotice ? 214.0 : 186.0) : 104.0);
         final wideBottom = _miniPlayer(context);
         return PopScope<void>(
@@ -362,7 +398,7 @@ class _AppShellState extends State<AppShell> {
             resizeToAvoidBottomInset: false,
             body: NotificationListener<UserScrollNotification>(
               onNotification: (notification) {
-                if (wide && !_isNowPlayingFullscreen && _navigationExpanded &&
+                if (wide && !topTabs && !_isNowPlayingFullscreen && _navigationExpanded &&
                     notification.metrics.axis == Axis.vertical &&
                     notification.direction == ScrollDirection.reverse) {
                   setState(() => _navigationExpanded = false);
@@ -373,20 +409,25 @@ class _AppShellState extends State<AppShell> {
                 KumoneBottomOverlayInset(
                   inset: bottomClearance,
                   child: SafeArea(top: false, bottom: false,
+                    child: Padding(padding: EdgeInsets.zero,
                     child: IndexedStack(index: tab, children: [
                       for (var i = 0; i < 4; i++) TickerMode(enabled: tab == i,
                         child: Navigator(
                           key: _navigatorKeys[i], observers: [_contentObservers[i]],
                           onGenerateRoute: (_) => kumonePageRoute<void>(_pages[i]),
                         )),
-                    ]),
+                    ])),
                   ),
                 ),
                 Positioned(left: 0, right: 0, bottom: 0,
                   child: KumoneShellChromeTransition(
                     visible: !_isNowPlayingFullscreen,
                     child: wide ? wideBottom : _compactBottomLayer(context))),
-                if (wide)
+                if (topTabs)
+                  Positioned(right: 16, top: MediaQuery.paddingOf(context).top + 6,
+                    child: KumoneShellChromeTransition(visible: !_isNowPlayingFullscreen,
+                      child: _wideTopNavigation(context))),
+                if (wide && !topTabs)
                   Positioned.fill(
                     bottom: hasTrack ? (hasNotice ? 102 : 82) : 0,
                     child: KumoneShellChromeTransition(

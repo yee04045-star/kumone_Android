@@ -32,7 +32,7 @@ class LibraryPage extends StatelessWidget {
           IconButton(
               onPressed: () => Navigator.of(context)
                   .push(kumonePageRoute(const SettingsPage(), settings: const RouteSettings(name: '/settings'))),
-              icon: const Icon(Icons.settings_outlined)),
+              icon: const Icon(CupertinoIcons.gear_alt)),
         ]),
         body: ListView(
           scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),children: [
@@ -69,7 +69,7 @@ class LibraryPage extends StatelessWidget {
                 onPressed: () => Navigator.of(context).push(
                   kumonePageRoute(const SettingsPage(), settings: const RouteSettings(name: '/settings')),
                 ),
-                icon: const Icon(Icons.settings_outlined, size: 24),
+                icon: const Icon(CupertinoIcons.gear_alt, size: 24),
               )))),
             ],
           ),

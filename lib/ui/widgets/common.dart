@@ -887,6 +887,7 @@ class GlassMiniPlayer extends StatelessWidget {
     final track = player.currentTrack;
     if (track == null) return const SizedBox.shrink();
 
+    final tablet = MediaQuery.sizeOf(context).shortestSide >= 600;
     final cs = Theme.of(context).colorScheme;
     return TooltipVisibility(visible: false,
       child: RawGestureDetector(
@@ -899,14 +900,14 @@ class GlassMiniPlayer extends StatelessWidget {
         radius: 999,
         backingOpacity: context.watch<SettingsStore>().chromeBackingOpacity,
         blur: context.watch<SettingsStore>().chromeBlur,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+        padding: EdgeInsets.symmetric(horizontal: tablet ? 14 : 10, vertical: tablet ? 6 : 1),
         child: Row(
           children: [
             InkWell(
               borderRadius: BorderRadius.circular(8),
               onTap: onOpen,
               child: Artwork(
-                  url: track.album.picUrl, size: 34, radius: 7, shadow: false),
+                  url: track.album.picUrl, size: tablet ? 48 : 34, radius: 7, shadow: false),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -921,12 +922,12 @@ class GlassMiniPlayer extends StatelessWidget {
                     children: [
                       MarqueeText(
                         track.name,
-                        style: const TextStyle(fontSize: 13, height: 1.15, fontWeight: FontWeight.w700),
+                        style: TextStyle(fontSize: tablet ? 16 : 13, height: 1.15, fontWeight: FontWeight.w700),
                       ),
                       MarqueeText(
                         track.artistNames,
                         style:
-                            TextStyle(fontSize: 10, height: 1.15, color: cs.onSurfaceVariant),
+                            TextStyle(fontSize: tablet ? 12 : 10, height: 1.15, color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -1526,15 +1527,20 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
         onPointerCancel: (_) => setState(() => _rowPressed = false),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onLongPressStart: (details) => _showStandardMenuAt(details.globalPosition),
+          onLongPressStart: (details) {
+            setState(() => _rowPressed = false);
+            _showStandardMenuAt(details.globalPosition);
+          },
           child: AnimatedScale(
             scale: _rowPressed ? .985 : 1,
             duration: const Duration(milliseconds: 120),
             child: Material(type: MaterialType.transparency,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 120),
-                color: _rowPressed ? Theme.of(context).colorScheme.onSurface
-                    .withValues(alpha: .08) : Colors.transparent,
+                decoration: BoxDecoration(
+                  shape: widget.circularFocus ? BoxShape.circle : BoxShape.rectangle,
+                  color: _rowPressed ? Theme.of(context).colorScheme.onSurface
+                      .withValues(alpha: .08) : Colors.transparent),
                 child: widget.child)),
           ),
         ),
@@ -1818,27 +1824,34 @@ class KumoneScrollingTabHeader extends StatelessWidget {
     this.actions = const [], this.bottom, this.contentScrolled = false,
     this.rightInset = 8});
   @override
-  Widget build(BuildContext context) => ScrollConfiguration(
-    behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
-    child: SliverPersistentHeader(pinned: true,
-      delegate: _TabHeaderDelegate(title, actions, bottom,
-        MediaQuery.paddingOf(context).top, contentScrolled, rightInset)));
+  Widget build(BuildContext context) {
+    final fixed = MediaQuery.sizeOf(context).width >= 600 &&
+        (context.watch<SettingsStore?>()?.wideTopTabs ?? false);
+    final topBarWidth = wideTabWidth(MediaQuery.sizeOf(context));
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
+      child: SliverPersistentHeader(pinned: true,
+        delegate: _TabHeaderDelegate(title, fixed ? const [] : actions, bottom,
+          MediaQuery.paddingOf(context).top, contentScrolled,
+          fixed ? topBarWidth + 32 : rightInset, fixed)));
+  }
 }
 class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Widget title;
   final List<Widget> actions;
   final PreferredSizeWidget? bottom;
   final double top;
+  final bool fixed;
   final bool contentScrolled;
   final double rightInset;
   _TabHeaderDelegate(this.title, this.actions, this.bottom, this.top,
-    this.contentScrolled, this.rightInset);
-  @override double get minExtent => top + (bottom?.preferredSize.height ?? 0);
-  @override double get maxExtent => minExtent + kToolbarHeight;
+    this.contentScrolled, this.rightInset, this.fixed);
+  @override double get minExtent => top + (bottom?.preferredSize.height ?? 0) + (fixed ? kToolbarHeight : 0);
+  @override double get maxExtent => fixed ? minExtent : minExtent + kToolbarHeight;
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final progress = (shrinkOffset / kToolbarHeight).clamp(0.0, 1.0);
-    final blurProgress = contentScrolled ? 1.0 : progress;
+    final progress = fixed ? 0.0 : (shrinkOffset / kToolbarHeight).clamp(0.0, 1.0);
+    final blurProgress = contentScrolled || (fixed && overlapsContent) ? 1.0 : progress;
     return AnnotatedRegion<SystemUiOverlayStyle>(value: kumoneGlassStatusBarStyle(context),
       child: Stack(clipBehavior: Clip.none, children: [
         Positioned.fill(child: _KumoneGlassBarSurface(
@@ -1913,11 +1926,12 @@ class KumonePlayAllIcon extends StatelessWidget {
 
 class CollectionActionMenu extends StatelessWidget {
   final int id;
+  final Future<void> Function()? onCollect;
   final bool circularFocus;
   final bool playlist;
   final ValueChanged<int>? onOpenArtist;
   final Widget child;
-  const CollectionActionMenu({super.key, required this.id, this.playlist = false, this.circularFocus = false,
+  const CollectionActionMenu({super.key, required this.id, this.playlist = false, this.circularFocus = false, this.onCollect,
     this.onOpenArtist, required this.child});
   @override Widget build(BuildContext context) {
     PlayerController player() => context.read<PlayerController>();
@@ -1942,6 +1956,7 @@ class CollectionActionMenu extends StatelessWidget {
           else { player().showNotice('暂无歌手信息'); }
         },
         '收藏$kind': () async {
+          if (onCollect != null) { await onCollect!(); return; }
           if (playlist) { await NeteaseApi.instance.subscribePlaylist(id, true); }
           else { await NeteaseApi.instance.subscribeAlbum(id, true); }
           player().showNotice('已收藏$kind');
@@ -1949,3 +1964,5 @@ class CollectionActionMenu extends StatelessWidget {
       }, child: child);
   }
 }
+
+double wideTabWidth(Size window) => (window.width * .27).clamp(248.0, 340.0);

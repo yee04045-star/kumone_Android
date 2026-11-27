@@ -312,10 +312,7 @@ class _CloudPageState extends State<CloudPage> {
                       leading: Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                       title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                       subtitle: KumoneLoadingText(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
-                      trailing: KumoneLoadingText(
-                        formatDuration(track.duration),
-                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                      ),
+                      trailing: KumoneTrackTrailing(album: track.album.name, duration: KumoneLoadingText(formatDuration(track.duration), style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))),
                       onTap: () => player.playTracks(tracks, start: track),
                     )),
                     onOpenAlbum: (album) => Navigator.of(context).push(

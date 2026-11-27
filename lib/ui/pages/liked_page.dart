@@ -186,11 +186,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      trailing: KumoneLoadingText(
-                        formatDuration(track.duration),
-                        style:
-                            TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
-                      ),
+                      trailing: KumoneTrackTrailing(album: track.album.name, duration: KumoneLoadingText(formatDuration(track.duration), style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12))),
                       onTap: () => player.playTracks(tracks, start: track),
                     )),
                     onOpenAlbum: (album) => Navigator.of(context).push(
