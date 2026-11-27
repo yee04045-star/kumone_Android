@@ -311,7 +311,7 @@ class _Results extends StatelessWidget {
       children: [
         if (type == SearchType.all) ...[
           if (data.songs.isNotEmpty) ...[
-            SectionHeader(title: '单曲', showChevron: true, onTap: () => onSelectType(SearchType.songs)),
+            SectionHeader(title: '单曲', topSpacing: 0, bottomSpacing: 4, showChevron: true, onTap: () => onSelectType(SearchType.songs)),
             ...data.songs.take(20).map(
                   (track) => TrackActionMenu(
                     track: track,
@@ -339,20 +339,20 @@ class _Results extends StatelessWidget {
                 ),
           ],
           if (data.albums.isNotEmpty) ...[
-            SectionHeader(title: '专辑', showChevron: true, onTap: () => onSelectType(SearchType.albums)),
+            SectionHeader(title: '专辑', topSpacing: 20, bottomSpacing: 4, showChevron: true, onTap: () => onSelectType(SearchType.albums)),
             ...data.albums.take(8).map(
-                  (album) => ListTile(
+                  (album) => CollectionActionMenu(id: album.id, onOpenArtist: (id) => Navigator.of(context).push(kumonePageRoute(ArtistPage(id: id))), child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                     leading: Artwork(fadeIn: true, url: album.picUrl, size: 52, radius: 9),
-                    title: KumoneLoadingText(album.name),
-                    subtitle: KumoneLoadingText(album.artistName),
+                    title: KumoneLoadingText(album.name, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    subtitle: KumoneLoadingText(album.artistName, maxLines: 1, overflow: TextOverflow.ellipsis),
                     onTap: () => Navigator.of(context)
                         .push(kumonePageRoute(AlbumPage(id: album.id))),
-                  ),
+                  )),
                 ),
           ],
           if (data.artists.isNotEmpty) ...[
-            SectionHeader(title: '歌手', showChevron: true, onTap: () => onSelectType(SearchType.artists)),
+            SectionHeader(title: '歌手', topSpacing: 20, bottomSpacing: 4, showChevron: true, onTap: () => onSelectType(SearchType.artists)),
             ...data.artists.take(8).map(
                   (artist) => ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -360,14 +360,14 @@ class _Results extends StatelessWidget {
                     minVerticalPadding: 8,
                     leading: Artwork(fadeIn: true, 
                         url: artist.picUrl, size: 52, radius: 26, circle: true),
-                    title: KumoneLoadingText(artist.name),
+                    title: KumoneLoadingText(artist.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                     onTap: () => Navigator.of(context)
                         .push(kumonePageRoute(ArtistPage(id: artist.id))),
                   ),
                 ),
           ],
           if (data.playlists.isNotEmpty) ...[
-            SectionHeader(title: '歌单', showChevron: true, onTap: () => onSelectType(SearchType.playlists)),
+            SectionHeader(title: '歌单', topSpacing: 20, bottomSpacing: 4, showChevron: true, onTap: () => onSelectType(SearchType.playlists)),
             ...data.playlists.take(8).map(
                   (playlist) => ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -380,7 +380,7 @@ class _Results extends StatelessWidget {
                       size: 52,
                       radius: 9,
                     ),
-                    title: KumoneLoadingText(playlist.name),
+                    title: KumoneLoadingText(playlist.name, maxLines: 2, overflow: TextOverflow.ellipsis),
                     subtitle: Text('${playlist.trackCount} 首'),
                     onTap: () => Navigator.of(context).push(kumonePageRoute(
                         PlaylistPage(
@@ -418,7 +418,7 @@ class _Results extends StatelessWidget {
           ),
         if (type == SearchType.albums)
           ...data.albums.map(
-            (album) => ListTile(
+            (album) => CollectionActionMenu(id: album.id, onOpenArtist: (id) => Navigator.of(context).push(kumonePageRoute(ArtistPage(id: id))), child: ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 20),
               leading: Artwork(fadeIn: true, url: album.picUrl, size: 52, radius: 9),
               title: KumoneLoadingText(album.name),
@@ -426,7 +426,7 @@ class _Results extends StatelessWidget {
               onTap: () => Navigator.of(context).push(
                 kumonePageRoute(AlbumPage(id: album.id)),
               ),
-            ),
+            )),
           ),
         if (type == SearchType.artists)
           ...data.artists.map(
@@ -492,7 +492,7 @@ class KumoneSearchResultGrid extends StatelessWidget {
         final picture = artist ? data.artists[index].picUrl
             : album ? data.albums[index].picUrl : data.playlists[index].coverUrl;
         final imageSize = artist ? cell.maxWidth.clamp(0.0, 128.0) : cell.maxWidth;
-        return KumoneInteractive(
+        final tile = KumoneInteractive(
           borderRadius: BorderRadius.circular(14),
           onTap: () => Navigator.of(context).push(kumonePageRoute(
             artist ? ArtistPage(id: data.artists[index].id)
@@ -518,6 +518,9 @@ class KumoneSearchResultGrid extends StatelessWidget {
                   color: Theme.of(context).colorScheme.onSurfaceVariant)),
             ],
           ]));
+        return album ? CollectionActionMenu(id: data.albums[index].id,
+          onOpenArtist: (id) => Navigator.of(context).push(kumonePageRoute(ArtistPage(id: id))),
+          child: tile) : tile;
       }),
     );
   }

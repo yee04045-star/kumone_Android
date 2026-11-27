@@ -598,6 +598,8 @@ class SectionHeader extends StatelessWidget {
   final VoidCallback? onTap;
   final bool showChevron;
   final double horizontalPadding;
+  final double topSpacing;
+  final double bottomSpacing;
 
   const SectionHeader({
     super.key,
@@ -606,6 +608,8 @@ class SectionHeader extends StatelessWidget {
     this.onTap,
     this.showChevron = false,
     this.horizontalPadding = 24,
+    this.topSpacing = 0,
+    this.bottomSpacing = 14,
   });
 
   @override
@@ -616,7 +620,7 @@ class SectionHeader extends StatelessWidget {
           letterSpacing: -.25,
         );
     if (showChevron && onTap != null && trailing == null) {
-      return Padding(padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 14),
+      return Padding(padding: EdgeInsets.fromLTRB(horizontalPadding, topSpacing, horizontalPadding, bottomSpacing),
         child: Align(alignment: Alignment.centerLeft,
           child: InkWell(onTap: onTap, borderRadius: BorderRadius.circular(8),
             child: Padding(padding: const EdgeInsets.symmetric(vertical: 6),
@@ -627,7 +631,7 @@ class SectionHeader extends StatelessWidget {
               ])))));
     }
     return Padding(
-      padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 14),
+      padding: EdgeInsets.fromLTRB(horizontalPadding, topSpacing, horizontalPadding, bottomSpacing),
       child: Row(
         children: [
           Text(title, style: titleStyle),
@@ -961,6 +965,7 @@ class _SongFocusPainter extends CustomPainter {
 
 class TrackActionMenu extends StatefulWidget {
   final Track track;
+  final Map<String, Future<void> Function()>? collectionActions;
   final bool allowRemoveFromPlaylist;
   final Future<void> Function()? onRemoveFromPlaylist;
   final Future<void> Function()? onDeleteFromCloud;
@@ -979,6 +984,7 @@ class TrackActionMenu extends StatefulWidget {
   const TrackActionMenu({
     super.key,
     required this.track,
+    this.collectionActions,
     this.allowRemoveFromPlaylist = false,
     this.onRemoveFromPlaylist,
     this.onDeleteFromCloud,
@@ -1051,6 +1057,7 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
   }
 
   int get _glassMenuItemCount {
+    if (widget.collectionActions != null) return widget.collectionActions!.length;
     var count = 3; // next, like, add
     if (widget.onOpenAlbum != null) count += 1;
     count += widget.track.artists.take(3).length;
@@ -1166,6 +1173,11 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
                   fontWeight: FontWeight.w500, color: foreground)))))));
     }
 
+    if (widget.collectionActions != null) {
+      for (final label in widget.collectionActions!.keys) {
+        add(CupertinoIcons.music_note_list, label, label);
+      }
+    } else {
     add(CupertinoIcons.arrow_down, '下一首播放', 'next');
     add(
       CupertinoIcons.heart,
@@ -1190,6 +1202,8 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
     }
     if (widget.onRecommendationReduced != null) {
       add(CupertinoIcons.minus_circle, '减少推荐', 'reduce');
+    }
+
     }
 
     return Theme(data: theme, child: Consumer<SettingsStore>(
@@ -1235,6 +1249,13 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
   }
 
   Future<void> _selectGlass(String value) async {
+    if (widget.collectionActions != null) {
+      _removeOverlay();
+      try { await widget.collectionActions![value]?.call(); }
+      catch (_) { if (mounted) context.read<PlayerController>().showNotice('操作失败，请重试'); }
+      return;
+    }
+
     _removeOverlay();
     final player = context.read<PlayerController>();
     final messenger = ScaffoldMessenger.maybeOf(context);
@@ -1864,10 +1885,63 @@ class _TopBlurProgress extends InheritedNotifier<ValueNotifier<double>> {
       context.dependOnInheritedWidgetOfExactType<_TopBlurProgress>()?.notifier;
 }
 
+class KumoneCenteredPlayAllLabel extends StatelessWidget {
+  final bool compact;
+  const KumoneCenteredPlayAllLabel({super.key, this.compact = false});
+  @override
+  Widget build(BuildContext context) => Transform.translate(
+    offset: const Offset(-2, 0),
+    child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(CupertinoIcons.play_fill, size: compact ? 16 : 18),
+        SizedBox(width: compact ? 6 : 8),
+        Text('播放全部', style: TextStyle(fontSize: compact ? 12 : 14,
+          fontWeight: FontWeight.w600)),
+      ]));
+}
+
 class KumonePlayAllIcon extends StatelessWidget {
   final double size;
   const KumonePlayAllIcon({super.key, this.size = 24});
   @override
   Widget build(BuildContext context) => Transform.translate(
     offset: const Offset(1, 1), child: Icon(Icons.play_arrow_rounded, size: size));
+}
+
+class CollectionActionMenu extends StatelessWidget {
+  final int id;
+  final bool playlist;
+  final ValueChanged<int>? onOpenArtist;
+  final Widget child;
+  const CollectionActionMenu({super.key, required this.id, this.playlist = false,
+    this.onOpenArtist, required this.child});
+  @override Widget build(BuildContext context) {
+    PlayerController player() => context.read<PlayerController>();
+    Future<List<Track>> songs() async {
+      final tracks = playlist ? await NeteaseApi.instance.playlistTracksAll(id)
+        : (await NeteaseApi.instance.album(id)).songs;
+      if (tracks.isEmpty) throw StateError('empty collection');
+      return tracks;
+    }
+    final kind = playlist ? '歌单' : '专辑';
+    return TrackActionMenu(track: Track(id: id, name: '', artists: const [],
+      album: const AlbumRef(id: 0, name: ''), durationMs: 0), showButton: false,
+      collectionActions: {
+        '下一首播放': () async {
+          final tracks = await songs();
+          for (final track in tracks.reversed) { player().insertAsNext(track); }
+          player().showNotice('已加入下一首播放');
+        },
+        if (onOpenArtist != null) '查看歌手': () async {
+          final album = (await NeteaseApi.instance.album(id)).album;
+          if (album.artistId > 0) { onOpenArtist!(album.artistId); }
+          else { player().showNotice('暂无歌手信息'); }
+        },
+        '收藏$kind': () async {
+          if (playlist) { await NeteaseApi.instance.subscribePlaylist(id, true); }
+          else { await NeteaseApi.instance.subscribeAlbum(id, true); }
+          player().showNotice('已收藏$kind');
+        },
+      }, child: child);
+  }
 }

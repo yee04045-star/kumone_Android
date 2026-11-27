@@ -109,7 +109,8 @@ class KumoneApp extends StatelessWidget {
       theme: KumoneTheme.light(color: settings.accentColor),
       darkTheme: KumoneTheme.dark(color: settings.accentColor),
       themeMode: mode,
-      builder: (context, child) => WallpaperScope(child: child!),
+      builder: (context, child) => TooltipVisibility(
+        visible: false, child: WallpaperScope(child: child!)), 
       home: const AppShell(),
     );
   }

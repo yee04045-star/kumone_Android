@@ -300,7 +300,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                                   SizedBox(
                                     width: 40,
                                     height: 40,
-                                    child: KumoneGlassIconButton(fadeIn: true, 
+                                    child: CollectionActionMenu(id: widget.id, playlist: true, child: KumoneGlassIconButton(fadeIn: true, 
                                       tooltip: playlist.subscribed ? '取消收藏歌单' : '收藏歌单',
                                       onPressed: _busySubscription ? null : () => _togglePlaylistSubscription(account, playlist),
                                       style: IconButton.styleFrom(
@@ -315,7 +315,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                                               child: CircularProgressIndicator(strokeWidth: 2),
                                             )
                                           : Icon(playlist.subscribed ? Icons.check_rounded : Icons.add_rounded),
-                                    ),
+                                    )),
                                   ),
                                 ],
                               ],
@@ -745,7 +745,7 @@ class _AlbumPageState extends State<AlbumPage> {
                                 SizedBox(
                                   width: 40,
                                   height: 40,
-                                  child: KumoneGlassIconButton(fadeIn: true, 
+                                  child: CollectionActionMenu(id: widget.id, playlist: false, child: KumoneGlassIconButton(fadeIn: true, 
                                     tooltip: subscribed ? '取消收藏专辑' : '收藏专辑',
                                     onPressed: subscriptionBusy ? null : _toggleSubscription,
                                     style: IconButton.styleFrom(
@@ -765,7 +765,7 @@ class _AlbumPageState extends State<AlbumPage> {
                                                 : Icons.favorite_border_rounded,
                                             color: subscribed ? AppAccent.appleRed.color : cs.onSurface,
                                           ),
-                                  ),
+                                  )),
                                 ),
                               ],
                             ],
@@ -1010,7 +1010,7 @@ class _ArtistPageState extends State<ArtistPage> {
               ),
             ),
             if (hotSongs.isNotEmpty) ...[
-              SectionHeader(title: '热门歌曲', showChevron: true, onTap: () => Navigator.of(context).push(kumonePageRoute(ArtistCatalogPage(artistId: widget.id)))),
+              SectionHeader(title: '热门歌曲', topSpacing: 0, bottomSpacing: 4, showChevron: true, onTap: () => Navigator.of(context).push(kumonePageRoute(ArtistCatalogPage(artistId: widget.id)))),
               ...hotSongs.take(20).map(
                 (track) => TrackActionMenu(
                   track: track,
@@ -1036,7 +1036,7 @@ class _ArtistPageState extends State<ArtistPage> {
               ),
             ],
             if (albums.isNotEmpty) ...[
-              SectionHeader(title: '专辑', showChevron: true, onTap: () => Navigator.of(context).push(kumonePageRoute(ArtistCatalogPage(artistId: widget.id, albums: true)))),
+              SectionHeader(title: '专辑', topSpacing: 20, bottomSpacing: 12, showChevron: true, onTap: () => Navigator.of(context).push(kumonePageRoute(ArtistCatalogPage(artistId: widget.id, albums: true)))),
               SizedBox(
                 height: 204,
                 child: ListView.separated(
@@ -1049,7 +1049,7 @@ class _ArtistPageState extends State<ArtistPage> {
                     final album = albums[i];
                     return SizedBox(
                       width: 138,
-                      child: InkWell(
+                      child: CollectionActionMenu(id: album.id, onOpenArtist: (id) => Navigator.of(context).push(kumonePageRoute(ArtistPage(id: id))), child: InkWell(
                         borderRadius: BorderRadius.circular(12),
                         onTap: () => Navigator.of(context).push(
                           kumonePageRoute(AlbumPage(id: album.id, sourceArtistId: widget.id)),
@@ -1072,7 +1072,7 @@ class _ArtistPageState extends State<ArtistPage> {
                               ),
                           ],
                         ),
-                      ),
+                      )),
                     );
                   },
                 ),
@@ -1241,21 +1241,31 @@ class _DailyRecommendationHero extends StatelessWidget {
           begin: Alignment.topCenter, end: Alignment.bottomCenter,
           stops: [0, .45, 1],
           colors: [Colors.transparent, Colors.transparent, Color(0x59000000)]))),
-        Padding(padding: const EdgeInsets.all(20), child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.end,
-          children: [Row(children: [const Icon(CupertinoIcons.calendar, color: Colors.white, size: 24),
-            const SizedBox(width: 8), Text('${now.month}月${now.day}日', style: const TextStyle(color: Colors.white))]),
-            const SizedBox(height: 8),
-            const Text('每日推荐', style: TextStyle(color: Colors.white, fontSize: 27, fontWeight: FontWeight.w900)),
-            const SizedBox(height: 8),
-            Wrap(spacing: 12, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
-              const Text('根据你的音乐口味 · 每天 6:00 更新', style: TextStyle(color: Colors.white70, fontSize: 12)),
-              FilledButton.icon(onPressed: onPlay, icon: const KumonePlayAllIcon(size: 20),
-                label: const Text('播放全部'), style: FilledButton.styleFrom(
-                  foregroundColor: Colors.white, backgroundColor: Theme.of(context).colorScheme.primary,
-                  minimumSize: const Size(0, 36), padding: const EdgeInsets.symmetric(horizontal: 14))),
-            ]),
-          ])),
+        Padding(padding: const EdgeInsets.all(20), child: Align(
+          alignment: Alignment.bottomLeft,
+          child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            Expanded(child: Column(mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [const Icon(CupertinoIcons.calendar, color: Colors.white, size: 24),
+                  const SizedBox(width: 8), Flexible(child: Text('${now.month}月${now.day}日',
+                    style: const TextStyle(color: Colors.white, fontSize: 13)))]),
+                const SizedBox(height: 8),
+                const Text('每日推荐', style: TextStyle(color: Colors.white,
+                  fontSize: 27, fontWeight: FontWeight.w900)),
+                const SizedBox(height: 6),
+                const Text('根据你的音乐口味 · 每天 6:00 更新',
+                  style: TextStyle(color: Colors.white70, fontSize: 11)),
+              ])),
+            const SizedBox(width: 10),
+            FilledButton(onPressed: onPlay,
+              style: FilledButton.styleFrom(
+                foregroundColor: Colors.white, backgroundColor: Theme.of(context).colorScheme.primary,
+                minimumSize: const Size(0, 34),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                shape: const StadiumBorder()),
+              child: const KumoneCenteredPlayAllLabel(compact: true)),
+          ]))),
       ])));
   }
 }

@@ -134,12 +134,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            child: Row(mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center, children: [
-                                Transform.translate(offset: const Offset(1, 0),
-                                  child: const Icon(Icons.play_arrow_rounded, size: 24)),
-                                const SizedBox(width: 6), const Text('播放全部'),
-                              ]),
+                            child: const KumoneCenteredPlayAllLabel(),
                           )))),
                         ],
                       ),
