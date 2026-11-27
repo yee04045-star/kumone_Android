@@ -321,7 +321,7 @@ class _AppShellState extends State<AppShell> {
           settings: const RouteSettings(name: '/settings')));
       } else { _setTab(index); }
     }
-    return LiquidGlassTabBar(width: wideTabWidth(MediaQuery.sizeOf(context)), height: 50, margin: EdgeInsets.zero,
+    return LiquidGlassTabBar(width: wideTabWidth(MediaQuery.sizeOf(context)), height: 42, margin: EdgeInsets.zero,
       swell: const LiquidGlassTabBarSwell(grip: 0, damping: 36, releaseDamping: 36),
       style: KumoneGlassOptics.applyTo(dark ? LiquidGlassTabBar.defaultDarkStyle : LiquidGlassTabBar.defaultStyle,
         Theme.of(context).brightness).copyWith(blur: settings.chromeBlur,
@@ -330,12 +330,12 @@ class _AppShellState extends State<AppShell> {
       selectedIndex: order.indexOf(tab),
       onChanged: (i) => select(order[i]), onReselected: (i) => select(order[i]),
       itemStyle: LiquidGlassTabItemStyle(selectedColor: cs.primary,
-        unselectedColor: cs.onSurface, iconSize: 28, underGlassIconSize: 30),
+        unselectedColor: cs.onSurface, iconSize: 24, underGlassIconSize: 26),
       items: [for (final i in order) LiquidGlassTabBarItem(
         icon: i == 3 && libraryRoot ? CupertinoIcons.gear_alt : _selectedIcon(i),
         iconBuilder: i == 3 && !libraryRoot ? (context, glyph) {
           final url = context.watch<AccountStore>().profile?.avatarUrl;
-          return Artwork(url: url, size: 30, radius: 15, circle: true, shadow: false);
+          return Artwork(url: url, size: 26, radius: 13, circle: true, shadow: false);
         } : null)],
     );
   }
@@ -424,12 +424,13 @@ class _AppShellState extends State<AppShell> {
                     visible: !_isNowPlayingFullscreen,
                     child: wide ? wideBottom : _compactBottomLayer(context))),
                 if (topTabs)
-                  Positioned(right: 16, top: MediaQuery.paddingOf(context).top + 6,
-                    width: wideTabWidth(MediaQuery.sizeOf(context)), height: 58,
+                  Positioned(right: 16, top: MediaQuery.paddingOf(context).top + (kToolbarHeight - 42) / 2,
+                    width: wideTabWidth(MediaQuery.sizeOf(context)), height: 42,
                     child: MediaQuery.removePadding(context: context,
                       removeTop: true, removeBottom: true,
                       child: KumoneShellChromeTransition(visible: !_isNowPlayingFullscreen,
-                        child: _wideTopNavigation(context)))) ,
+                        child: ClipRRect(borderRadius: BorderRadius.circular(21),
+                          child: _wideTopNavigation(context))))) ,
                 if (wide && !topTabs)
                   Positioned.fill(
                     bottom: hasTrack ? (hasNotice ? 102 : 82) : 0,

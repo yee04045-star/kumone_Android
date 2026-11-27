@@ -1833,7 +1833,7 @@ class KumoneScrollingTabHeader extends StatelessWidget {
       child: SliverPersistentHeader(pinned: true,
         delegate: _TabHeaderDelegate(title, fixed ? const [] : actions, bottom,
           MediaQuery.paddingOf(context).top, contentScrolled,
-          fixed ? topBarWidth + 32 : rightInset, fixed)));
+          fixed ? topBarWidth + 32 : rightInset, false)));
   }
 }
 class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
@@ -1965,4 +1965,4 @@ class CollectionActionMenu extends StatelessWidget {
   }
 }
 
-double wideTabWidth(Size window) => (window.width * .27).clamp(248.0, 340.0);
+double wideTabWidth(Size window) => (window.width * .22).clamp(224.0, 256.0);
