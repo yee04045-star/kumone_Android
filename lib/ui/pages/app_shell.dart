@@ -425,8 +425,11 @@ class _AppShellState extends State<AppShell> {
                     child: wide ? wideBottom : _compactBottomLayer(context))),
                 if (topTabs)
                   Positioned(right: 16, top: MediaQuery.paddingOf(context).top + 6,
-                    child: KumoneShellChromeTransition(visible: !_isNowPlayingFullscreen,
-                      child: _wideTopNavigation(context))),
+                    width: wideTabWidth(MediaQuery.sizeOf(context)), height: 58,
+                    child: MediaQuery.removePadding(context: context,
+                      removeTop: true, removeBottom: true,
+                      child: KumoneShellChromeTransition(visible: !_isNowPlayingFullscreen,
+                        child: _wideTopNavigation(context)))) ,
                 if (wide && !topTabs)
                   Positioned.fill(
                     bottom: hasTrack ? (hasNotice ? 102 : 82) : 0,
