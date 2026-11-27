@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import '../../core/storage/settings_store.dart';
 import '../widgets/cached_entry_snapshot.dart';
@@ -1124,6 +1125,7 @@ class DailyPage extends StatefulWidget {
 }
 
 class _DailyPageState extends State<DailyPage> {
+  static const _sideInset = 20.0;
   static final _dailyCache = <String, List<Track>>{};
   String get _dailyKey {
     final now = DateTime.now();
@@ -1185,20 +1187,24 @@ class _DailyPageState extends State<DailyPage> {
       appBar: KumoneGlassAppBar(title: const SizedBox.shrink()),
       body: loading
           ? Padding(padding: EdgeInsets.only(top: kumoneToolbarInset(context)),
-              child: const KumoneLoadingPlaceholder())
+              child: const _DailyLoading())
           : songs.isEmpty
               ? _DetailError(message: error ?? '暂无每日推荐', onRetry: _load)
               : ListView.builder(
           scrollCacheExtent: ScrollCacheExtent.pixels((context.watch<SettingsStore?>()?.listLazyLoading ?? true) ? 0 : 1000),
                   padding: EdgeInsets.only(top: kumoneToolbarInset(context), bottom: KumoneBottomOverlayInset.of(context) + 24),
-                  itemCount: songs.length,
+                  itemCount: songs.length + 1,
                   itemBuilder: (_, i) {
-                    final track = songs[i];
+                    if (i == 0) { return Padding(
+                      padding: const EdgeInsets.fromLTRB(_sideInset, 12, _sideInset, 20),
+                      child: _DailyRecommendationHero(songs: songs,
+                        onPlay: () => player.playTracks(songs))); }
+                    final track = songs[i - 1];
                     return TrackActionMenu(
                       track: track,
                       showButton: false,
                       child: HomeAppear(index: i, enabled: _animateSongs, child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: _sideInset),
                         leading: Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                         title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                         subtitle: KumoneLoadingText(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -1218,5 +1224,60 @@ class _DailyPageState extends State<DailyPage> {
                   },
                 ),
     ));
+  }
+}
+
+class _DailyRecommendationHero extends StatelessWidget {
+  final List<Track> songs;
+  final VoidCallback onPlay;
+  const _DailyRecommendationHero({required this.songs, required this.onPlay});
+  @override Widget build(BuildContext context) {
+    final now = DateTime.now();
+    return AspectRatio(aspectRatio: 1.62, child: ClipRRect(
+      borderRadius: BorderRadius.circular(18), child: Stack(fit: StackFit.expand, children: [
+        LayoutBuilder(builder: (_, bounds) => Artwork(url: songs.first.album.picUrl,
+          size: bounds.maxWidth, radius: 0, shadow: false)),
+        const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(
+          begin: Alignment.topCenter, end: Alignment.bottomCenter,
+          stops: [0, .45, 1],
+          colors: [Colors.transparent, Colors.transparent, Color(0x59000000)]))),
+        Padding(padding: const EdgeInsets.all(20), child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.end,
+          children: [Row(children: [const Icon(CupertinoIcons.calendar, color: Colors.white, size: 24),
+            const SizedBox(width: 8), Text('${now.month}月${now.day}日', style: const TextStyle(color: Colors.white))]),
+            const SizedBox(height: 8),
+            const Text('每日推荐', style: TextStyle(color: Colors.white, fontSize: 27, fontWeight: FontWeight.w900)),
+            const SizedBox(height: 8),
+            Wrap(spacing: 12, runSpacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+              const Text('根据你的音乐口味 · 每天 6:00 更新', style: TextStyle(color: Colors.white70, fontSize: 12)),
+              FilledButton.icon(onPressed: onPlay, icon: const KumonePlayAllIcon(size: 20),
+                label: const Text('播放全部'), style: FilledButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Theme.of(context).colorScheme.primary,
+                  minimumSize: const Size(0, 36), padding: const EdgeInsets.symmetric(horizontal: 14))),
+            ]),
+          ])),
+      ])));
+  }
+}
+
+class _DailyLoading extends StatelessWidget {
+  const _DailyLoading();
+  @override Widget build(BuildContext context) {
+    final fill = Theme.of(context).colorScheme.surfaceContainerHighest;
+    Widget block(double height, {double? width, double radius = 8}) => Container(
+      height: height, width: width, decoration: BoxDecoration(color: fill,
+        borderRadius: BorderRadius.circular(radius)));
+    return ListView(padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      physics: const NeverScrollableScrollPhysics(), children: [
+        AspectRatio(aspectRatio: 1.62, child: block(double.infinity, radius: 18)),
+        const SizedBox(height: 20),
+        for (var i = 0; i < 8; i++) Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8), child: Row(children: [
+            block(52, width: 52, radius: 9), const SizedBox(width: 16),
+            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              block(16), const SizedBox(height: 8), block(13, width: 120)])),
+            const SizedBox(width: 16), block(12, width: 30),
+          ])),
+      ]);
   }
 }

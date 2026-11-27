@@ -102,7 +102,6 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int tab = 0;
-  bool _init = false;
   final _navigatorKeys = List.generate(4, (_) => GlobalKey<NavigatorState>());
   GlobalKey<NavigatorState> get _contentNavigatorKey => _navigatorKeys[tab];
   final _fullscreenByTab = List.filled(4, false);
@@ -149,7 +148,6 @@ class _AppShellState extends State<AppShell> {
     await account.bootstrap();
     await player.setQuality(settings.quality);
     await player.setUnblock(settings.unblock);
-    if (mounted) setState(() => _init = true);
   }
 
   void push(Widget page, {bool fullscreen = false}) =>
@@ -393,8 +391,6 @@ class _AppShellState extends State<AppShell> {
                       child: _adaptiveNavigation(context))),
               ]),
             ),
-            floatingActionButton:
-                _init ? null : const CircularProgressIndicator(),
           )),
         );
       },

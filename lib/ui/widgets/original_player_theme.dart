@@ -14,7 +14,7 @@ class OriginalPlayerTheme extends StatelessWidget {
         (appearance == AppearanceMode.system &&
             MediaQuery.platformBrightnessOf(context) == Brightness.dark);
     return Theme(
-        data: dark ? KumoneTheme.dark(color: settings.accent.color)
-            : KumoneTheme.light(color: settings.accent.color), child: child);
+        data: dark ? KumoneTheme.dark(color: settings.accentColor)
+            : KumoneTheme.light(color: settings.accentColor), child: child);
   }
 }

@@ -255,7 +255,7 @@ class _HomePageState extends State<HomePage> {
   Widget _homeSectionHeader(String title, bool showChevron) {
     final cs = Theme.of(context).colorScheme;
     final titleStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w900,
           letterSpacing: -.25,
         );
     return Padding(
@@ -365,13 +365,12 @@ class _HomePageState extends State<HomePage> {
                       0 => FeatureCard(
                           title: '每日推荐',
                           subtitle: '根据你的口味生成',
-                          icon: CupertinoIcons.calendar,
+                          icon: CupertinoIcons.calendar_today,
                           colors: const [
                             Color(0xFF9F5C4D),
                             Color(0xFF4D3B31),
                           ],
                           imageUrl: dailyCover,
-                          showsDate: true,
                           onTap: () => Navigator.of(context).push(
                             kumonePageRoute(const DailyPage()),
                           ),
@@ -379,7 +378,7 @@ class _HomePageState extends State<HomePage> {
                       1 => FeatureCard(
                           title: '私人漫游',
                           subtitle: '从喜欢的歌开始漫游',
-                          icon: CupertinoIcons.waveform,
+                          icon: CupertinoIcons.dot_radiowaves_right,
                           colors: const [
                             Color(0xFF29325F),
                             Color(0xFF5D4095),

@@ -106,8 +106,8 @@ class KumoneApp extends StatelessWidget {
     return MaterialApp(
       title: 'Kumone',
       debugShowCheckedModeBanner: false,
-      theme: KumoneTheme.light(color: settings.accent.color),
-      darkTheme: KumoneTheme.dark(color: settings.accent.color),
+      theme: KumoneTheme.light(color: settings.accentColor),
+      darkTheme: KumoneTheme.dark(color: settings.accentColor),
       themeMode: mode,
       builder: (context, child) => WallpaperScope(child: child!),
       home: const AppShell(),

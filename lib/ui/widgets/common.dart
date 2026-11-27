@@ -612,7 +612,7 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final titleStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w900,
           letterSpacing: -.25,
         );
     if (showChevron && onTap != null && trailing == null) {
@@ -1063,21 +1063,23 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
   String _artistMenuLabel(String name, double panelWidth) {
     final label = '查看歌手：$name';
     final painter = TextPainter(text: TextSpan(text: label,
-      style: const TextStyle(fontSize: 15.5, height: 1.2, fontWeight: FontWeight.w500)),
+      style: DefaultTextStyle.of(context).style.merge(
+        const TextStyle(fontSize: 15.5, height: 1.2, fontWeight: FontWeight.w500))),
       textDirection: Directionality.of(context),
       textScaler: MediaQuery.textScalerOf(context), maxLines: 1)
       ..layout();
-    final needsWrap = painter.width > math.max(1, panelWidth - 46);
+    final needsWrap = painter.width > math.max(1, panelWidth - 48);
     painter.dispose();
     return needsWrap ? '查看歌手：${String.fromCharCode(10)}$name' : label;
   }
 
   double _menuRowHeight(String label, double panelWidth) {
     final painter = TextPainter(text: TextSpan(text: label,
-      style: const TextStyle(fontSize: 15.5, height: 1.2, fontWeight: FontWeight.w500)),
+      style: DefaultTextStyle.of(context).style.merge(
+        const TextStyle(fontSize: 15.5, height: 1.2, fontWeight: FontWeight.w500))),
       textDirection: Directionality.of(context),
       textScaler: MediaQuery.textScalerOf(context))
-      ..layout(maxWidth: math.max(1, panelWidth - 46));
+      ..layout(maxWidth: math.max(1, panelWidth - 48));
     final height = math.max(48.0, painter.height + 20);
     painter.dispose();
     return height;
@@ -1722,27 +1724,20 @@ class FeatureCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (imageUrl != null && imageUrl!.isNotEmpty)
-              Opacity(
-                opacity: .34,
-                child: CachedNetworkImage(
-                  imageUrl: resizedImageUrl(imageUrl!, 600),
-                  fit: BoxFit.cover,
-                ),
+            if (imageUrl != null && imageUrl!.isNotEmpty) ...[
+              CachedNetworkImage(
+                imageUrl: resizedImageUrl(imageUrl!, 600),
+                fit: BoxFit.cover,
               ),
+              const DecoratedBox(decoration: BoxDecoration(
+                gradient: LinearGradient(begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter, stops: [0, .45, 1],
+                  colors: [Colors.transparent, Colors.transparent, Color(0x59000000)]))),
+            ],
             Positioned(
-              right: 12,
-              top: 12,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .16),
-                  shape: BoxShape.circle,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Icon(icon, color: Colors.white, size: 21),
-                ),
-              ),
+              left: 16,
+              top: 16,
+              child: Icon(icon, color: Colors.white, size: 25),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -1764,7 +1759,7 @@ class FeatureCard extends StatelessWidget {
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 17,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w900,
                       letterSpacing: -.2,
                     ),
                   ),
@@ -1832,7 +1827,7 @@ class _TabHeaderDelegate extends SliverPersistentHeaderDelegate {
               minHeight: kToolbarHeight, maxHeight: kToolbarHeight,
               child: Row(children: [Expanded(child: DefaultTextStyle(
                 style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  fontSize: 26, fontWeight: FontWeight.w800), child: title)), ...actions]))))),
+                  fontSize: 26, fontWeight: FontWeight.w900), child: title)), ...actions]))))),
         if (bottom != null) Positioned(left: 0, right: 0, bottom: 0,
           height: bottom!.preferredSize.height, child: bottom!),
       ]));

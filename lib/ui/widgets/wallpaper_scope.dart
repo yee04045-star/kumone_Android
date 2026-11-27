@@ -43,8 +43,8 @@ class WallpaperScope extends StatelessWidget {
       );
     }
 
-    final base = dark ? KumoneTheme.dark(color: settings.accent.color)
-        : KumoneTheme.light(color: settings.accent.color);
+    final base = dark ? KumoneTheme.dark(color: settings.accentColor)
+        : KumoneTheme.light(color: settings.accentColor);
     final topInset = MediaQuery.paddingOf(context).top;
     final sampled = statusColor ?? base.scaffoldBackgroundColor;
     final statusTint = statusColor == null ? sampled : Color.alphaBlend(

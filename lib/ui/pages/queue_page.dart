@@ -110,9 +110,6 @@ class _GlassQueueSurface extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: KumoneLiquidSurface(
-        // Queue-wide refraction is expensive while scrolling. Retain frost,
-        // tint and rim, without the multi-tap refractive shader.
-        liteGlass: true,
         interactive: false,
         radius: 28,
         backingOpacity: opacity,

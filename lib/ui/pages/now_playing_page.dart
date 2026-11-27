@@ -119,24 +119,28 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
     _load(player.currentTrack);
   }
 
+  int _lyricsRequest = 0;
+
   Future<void> _load(Track? track) async {
     if (track == null || loadedId == track.id) return;
     loadedId = track.id;
+    final request = ++_lyricsRequest;
     setState(() {
       lyrics = null;
       lyricLoading = true;
       lyricFailed = false;
     });
     try {
-      final parsed = await context.read<PlayerController>().lyrics(track);
-      if (!mounted || loadedId != track.id) return;
+      final parsed = await context.read<PlayerController>().lyrics(track)
+          .timeout(const Duration(seconds: 25), onTimeout: () => null);
+      if (!mounted || request != _lyricsRequest || loadedId != track.id) return;
       setState(() {
         lyrics = parsed;
         lyricLoading = false;
         lyricFailed = parsed == null;
       });
     } catch (_) {
-      if (!mounted || loadedId != track.id) return;
+      if (!mounted || request != _lyricsRequest || loadedId != track.id) return;
       setState(() {
         lyrics = null;
         lyricLoading = false;
@@ -405,7 +409,7 @@ class _NowPlayingPageState extends State<NowPlayingPage> {
         body: Center(child: Text('暂无播放')),
       );
     }
-    if (loadedId != track.id && !lyricLoading) {
+    if (loadedId != track.id) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _load(track);
       });

@@ -16,14 +16,14 @@ void main() {
     FlutterSecureStorage.setMockInitialValues({});
   });
 
-  test('all five accents survive settings reload and apply to both themes',
+  test('saved accents reload with retired NetEase red migrated to Apple red',
       () async {
     for (final accent in AppAccent.values) {
       final settings = SettingsStore();
       await settings.setAccent(accent);
       final restored = SettingsStore();
       await restored.load();
-      expect(restored.accent, accent);
+      expect(restored.accent, accent == AppAccent.neteaseRed ? AppAccent.appleRed : accent);
       expect(KumoneTheme.light(color: accent.color).colorScheme.primary,
           accent.color);
       expect(KumoneTheme.dark(color: accent.color).colorScheme.primary,

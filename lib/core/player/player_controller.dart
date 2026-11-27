@@ -242,8 +242,12 @@ class PlayerController extends ChangeNotifier {
     return CupertinoIcons.repeat;
   }
 
+  final _lyricEpochs = <int, int>{};
+
   void invalidateLyrics(int trackId) {
+    _lyricEpochs[trackId] = (_lyricEpochs[trackId] ?? 0) + 1;
     _lyricsCache.remove(trackId);
+    _lyricsInflight.remove(trackId);
   }
 
   Future<ParsedLyrics?> lyrics(Track track) {
@@ -251,9 +255,10 @@ class PlayerController extends ChangeNotifier {
     if (_lyricsCache.containsKey(track.id)) return Future.value(cached);
     final existing = _lyricsInflight[track.id];
     if (existing != null) return existing;
+    final epoch = _lyricEpochs[track.id] ?? 0;
     final future = () async {
       try {
-        final r = await NeteaseApi.instance.lyric(track.id);
+        final r = await NeteaseApi.instance.lyric(track.id).timeout(const Duration(seconds: 15));
         final parsed = LyricsParser.parse(
           r.lrc,
           tlyric: r.tlyric,
@@ -262,14 +267,16 @@ class PlayerController extends ChangeNotifier {
           yromalrc: r.yromalrc,
           yrc: r.yrc,
         );
-        final enriched = await LyricsParser.enrichJapanese(parsed);
+        final enriched = await LyricsParser.enrichJapanese(parsed)
+            .timeout(const Duration(seconds: 4), onTimeout: () => parsed);
+        if ((_lyricEpochs[track.id] ?? 0) != epoch) return null;
         _lyricsCache[track.id] = enriched;
         return enriched;
       } catch (_) {
-        _lyricsCache.remove(track.id);
+        if ((_lyricEpochs[track.id] ?? 0) == epoch) _lyricsCache.remove(track.id);
         return null;
       } finally {
-        _lyricsInflight.remove(track.id);
+        if ((_lyricEpochs[track.id] ?? 0) == epoch) _lyricsInflight.remove(track.id);
       }
     }();
     _lyricsInflight[track.id] = future;

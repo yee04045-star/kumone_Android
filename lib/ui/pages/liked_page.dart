@@ -119,7 +119,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                                 color: cs.onSurfaceVariant, fontSize: 13),
                           ),
                           const SizedBox(height: 14),
-                          SizedBox(height: 48, child: Padding(padding: const EdgeInsets.only(bottom: 2), child: Align(alignment: Alignment.bottomLeft, child: FilledButton.icon(
+                          SizedBox(height: 48, child: Padding(padding: const EdgeInsets.only(bottom: 2), child: Align(alignment: Alignment.bottomLeft, child: FilledButton(
                             onPressed: tracks.isEmpty
                                 ? null
                                 : () => player.playTracks(tracks),
@@ -134,8 +134,12 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            icon: const KumonePlayAllIcon(),
-                            label: const Text('播放全部'),
+                            child: Row(mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center, children: [
+                                Transform.translate(offset: const Offset(1, 0),
+                                  child: const Icon(Icons.play_arrow_rounded, size: 24)),
+                                const SizedBox(width: 6), const Text('播放全部'),
+                              ]),
                           )))),
                         ],
                       ),

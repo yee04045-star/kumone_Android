@@ -356,6 +356,8 @@ class _Results extends StatelessWidget {
             ...data.artists.take(8).map(
                   (artist) => ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                    minTileHeight: 68,
+                    minVerticalPadding: 8,
                     leading: Artwork(fadeIn: true, 
                         url: artist.picUrl, size: 52, radius: 26, circle: true),
                     title: KumoneLoadingText(artist.name),
@@ -369,6 +371,8 @@ class _Results extends StatelessWidget {
             ...data.playlists.take(8).map(
                   (playlist) => ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                    minTileHeight: 68,
+                    minVerticalPadding: 8,
                     leading: Artwork(fadeIn: true, 
                       url: playlist.coverUrl,
                       resolveUrl: () =>

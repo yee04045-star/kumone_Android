@@ -1,3 +1,4 @@
+import '../widgets/accent_color_picker.dart';
 import 'package:flutter/cupertino.dart';
 import '../widgets/liquid_surface.dart';
 import 'package:flutter/material.dart';
@@ -203,10 +204,18 @@ class SettingsPage extends StatelessWidget {
               const Divider(height: 24),
               const _SettingsHeader('外观'),
               const ListTile(title: Text('主题强调色')),
-              for (final accent in AppAccent.values.where((accent) => accent != AppAccent.spotifyGreen && accent != AppAccent.qqGreen))
-                _CheckChoice(selected: settings.accent == accent,
+              for (final accent in AppAccent.values.where((accent) => accent != AppAccent.spotifyGreen && accent != AppAccent.qqGreen && accent != AppAccent.neteaseRed))
+                _CheckChoice(selected: settings.customAccent == null && settings.accent == accent,
                   title: accent.label,
                   onTap: () => settings.setAccent(accent)),
+              ListTile(title: const Text('自定义颜色'),
+                leading: CircleAvatar(radius: 12, backgroundColor: settings.accentColor),
+                trailing: settings.customAccent != null ? const Icon(Icons.check) : null,
+                onTap: () async {
+                  final color = await kumoneDialog<Color>(context: context,
+                    builder: (_) => AccentColorPicker(initial: settings.accentColor));
+                  if (color != null) await settings.setCustomAccent(color);
+                }),
               RadioGroup<AppearanceMode>(
                 groupValue: settings.appearance,
                 onChanged: (value) {

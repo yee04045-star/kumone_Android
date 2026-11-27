@@ -1,3 +1,4 @@
+import 'dart:ui' show Color;
 import 'app_accent.dart';
 export 'app_accent.dart';
 import 'package:flutter/foundation.dart';
@@ -25,6 +26,13 @@ class SettingsStore extends ChangeNotifier {
   }
 
   AppAccent accent = AppAccent.appleRed;
+  Color? customAccent;
+  Color get accentColor => customAccent ?? accent.color;
+  Future<void> setCustomAccent(Color value) async {
+    customAccent = value.withValues(alpha: 1);
+    notifyListeners();
+    await prefs.setInt('customAccent', customAccent!.toARGB32());
+  }
   AppearanceMode appearance = AppearanceMode.system;
   NowPlayingMode nowPlaying = NowPlayingMode.immersive;
   String quality = 'exhigh';
@@ -101,6 +109,8 @@ class SettingsStore extends ChangeNotifier {
   }
 
   Future<void> load() async {
+    final custom = await prefs.getInt('customAccent');
+    customAccent = custom == null ? null : Color(custom).withValues(alpha: 1);
     listLazyLoading = await prefs.getBool('listLazyLoading') ?? true;
     statusBarDoubleTapToTop = await prefs.getBool('statusBarDoubleTapToTop') ?? true;
     final tabs = (await prefs.getStringList('bottomTabOrder'))?.map(int.tryParse)
@@ -113,7 +123,11 @@ class SettingsStore extends ChangeNotifier {
     miniTabGap = (await prefs.getDouble('miniTabGap') ?? 24).clamp(24, 36).toDouble();
     bottomChromeOffset = (await prefs.getDouble('bottomChromeOffset') ?? 6).clamp(-24, 6).toDouble();
     freezeOutgoingPage = true;
-    final accentName = await prefs.getString('appAccent');
+    var accentName = await prefs.getString('appAccent');
+    if (accentName == AppAccent.neteaseRed.name) {
+      accentName = AppAccent.appleRed.name;
+      await prefs.setString('appAccent', accentName);
+    }
     accent = AppAccent.values.firstWhere((e) => e.name == accentName,
       orElse: () => AppAccent.appleRed);
     final appearanceName = await prefs.getString('appearance') ?? 'system';
@@ -256,7 +270,9 @@ class SettingsStore extends ChangeNotifier {
 
   Future<void> setAccent(AppAccent value) async {
     accent = value;
+    customAccent = null;
     notifyListeners();
+    await prefs.remove('customAccent');
     await prefs.setString('appAccent', value.name);
   }
 
