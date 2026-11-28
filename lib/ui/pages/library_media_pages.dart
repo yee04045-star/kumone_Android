@@ -91,13 +91,13 @@ class _RecentPageState extends State<RecentPage> {
                 child: Padding(
                   padding: const EdgeInsets.all(4),
                   child: Row(children: [
-                    Expanded(child: GlassCategoryChip(menuOptics: true, label: '所有时间', selected: !week,
+                    Expanded(child: GlassCategoryChip(menuOptics: true, height: 32, label: '所有时间', selected: !week,
                       onTap: () { if (week) { setState(() => week = false); _load(); } })),
                     const SizedBox(width: 8),
-                    Expanded(child: GlassCategoryChip(menuOptics: true, label: '最近一周', selected: week,
+                    Expanded(child: GlassCategoryChip(menuOptics: true, height: 32, label: '最近一周', selected: week,
                       onTap: () { if (!week) { setState(() => week = true); _load(); } })),
                     const SizedBox(width: 8),
-                    Expanded(child: SizedBox(height: 38, child: FilledButton(
+                    Expanded(child: SizedBox(height: 32, child: FilledButton(
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
@@ -247,7 +247,7 @@ class _CloudPageState extends State<CloudPage> {
                 padding: const EdgeInsets.fromLTRB(20, 14, 20, 12),
                 child: KumoneLiquidSurface(
                   radius: 22,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                   child: Row(
                     children: [
                       Expanded(
@@ -259,6 +259,9 @@ class _CloudPageState extends State<CloudPage> {
                       FilledButton.icon(
                         onPressed: tracks.isEmpty ? null : () => player.playTracks(tracks),
                         style: FilledButton.styleFrom(
+                          minimumSize: const Size(0, 32),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                           backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(

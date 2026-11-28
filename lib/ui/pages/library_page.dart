@@ -1,3 +1,4 @@
+import '../widgets/glass_controls.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import '../widgets/content_fade.dart';
@@ -196,7 +197,7 @@ class LibraryPage extends StatelessWidget {
                             title: '创建的歌单',
                             onTap: () => Navigator.of(context).push(
                               kumonePageRoute(
-                                const _PlaylistListPage(subscribed: false),
+                                const _PlaylistListPage(subscribed: false), settings: const RouteSettings(name: '/created-playlists'),
                               ),
                             ),
                           ),
@@ -297,12 +298,11 @@ class _PlaylistListPageState extends State<_PlaylistListPage> {
       appBar: KumoneGlassAppBar(
         title: const SizedBox.shrink(),
         actions: [
-          if (!widget.subscribed)
-            IconButton(
-              tooltip: '新建歌单',
-              onPressed: () => _createPlaylistFromList(context, account),
-              icon: const Icon(Icons.add_rounded),
-            ),
+          if (!widget.subscribed && !(MediaQuery.sizeOf(context).width >= 600 && context.watch<SettingsStore>().wideTopTabs))
+            Padding(padding: const EdgeInsets.only(right: 14), child: Center(
+              child: SizedBox(width: 42, height: 42, child: KumoneGlassIconButton(
+                onPressed: () => createPlaylistFromList(context, account),
+                icon: const Icon(CupertinoIcons.add, size: 24))))),
         ],
       ),
       body: KumoneLoadingReveal(placeholderPadding: EdgeInsets.only(top: kumoneToolbarInset(context)), child: KumoneGlassRefresh.adaptive(
@@ -376,7 +376,7 @@ class _PlaylistListPageState extends State<_PlaylistListPage> {
   }
 }
 
-Future<void> _createPlaylistFromList(
+Future<void> createPlaylistFromList(
   BuildContext context,
   AccountStore account,
 ) async {

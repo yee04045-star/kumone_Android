@@ -76,7 +76,8 @@ class _ChromeRevealClipper extends CustomClipper<Rect> {
 
   @override
   Rect getClip(Size size) =>
-      Rect.fromLTRB(0, size.height * (1 - progress), size.width, size.height);
+      Rect.fromLTRB(0, size.height * (1 - progress) - 32 * progress,
+          size.width, size.height + 8 * progress);
 
   @override
   bool shouldReclip(_ChromeRevealClipper oldClipper) =>

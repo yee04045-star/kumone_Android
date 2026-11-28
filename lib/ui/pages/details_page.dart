@@ -229,8 +229,8 @@ class _PlaylistPageState extends State<PlaylistPage>
                                     color: cs.onSurfaceVariant, fontSize: 13)),
                                   const SizedBox(height: 14),
                                   FilledButton.icon(onPressed: tracks.isEmpty ? null : () => player.playTracks(tracks),
-                                    style: FilledButton.styleFrom(fixedSize: const Size.fromHeight(40),
-                                      minimumSize: const Size(0, 40),
+                                    style: FilledButton.styleFrom(fixedSize: const Size.fromHeight(34),
+                                      minimumSize: const Size(0, 34),
                                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                       padding: const EdgeInsets.symmetric(horizontal: 16),
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
@@ -285,7 +285,7 @@ class _PlaylistPageState extends State<PlaylistPage>
                                       backgroundColor: Theme.of(context).colorScheme.primary,
                                       disabledBackgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: .28),
                                       foregroundColor: Colors.white,
-                                      minimumSize: const Size.fromHeight(40),
+                                      minimumSize: const Size.fromHeight(34),
                                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                                       shape: RoundedRectangleBorder(
@@ -298,8 +298,8 @@ class _PlaylistPageState extends State<PlaylistPage>
                                 if (!isUserLikedPlaylist && account.isLoggedIn && playlist.creator?.userId != account.profile?.userId) ...[
                                   const SizedBox(width: 10),
                                   SizedBox(
-                                    width: 40,
-                                    height: 40,
+                                    width: 36,
+                                    height: 36,
                                     child: CollectionActionMenu(id: widget.id, playlist: true, circularFocus: true,
                                       onCollect: () async {
                                         if (_busySubscription) return;
@@ -535,14 +535,14 @@ class _PlaylistLoading extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start, children: [
               block(20), const SizedBox(height: 8), block(14, width: 100),
               const SizedBox(height: 14),
-              if (ownedHeader) block(40, width: 120, radius: 20)
+              if (ownedHeader) block(34, width: 120, radius: 17)
               else block(13),
             ]))]),
         if (!ownedHeader) ...[
           const SizedBox(height: 16), block(14), const SizedBox(height: 6), block(14),
           const SizedBox(height: 18),
-          Row(children: [Expanded(child: block(40, radius: 23)),
-            const SizedBox(width: 10), block(40, width: 40, radius: 20)]),
+          Row(children: [Expanded(child: block(34, radius: 17)),
+            const SizedBox(width: 10), block(36, width: 36, radius: 18)]),
         ],
         const SizedBox(height: 20), block(40, radius: 26), const SizedBox(height: 16),
         for (var i = 0; i < 8; i++) Padding(
@@ -651,7 +651,7 @@ class _AlbumPageState extends State<AlbumPage> {
   ButtonStyle _playButtonStyle() => FilledButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        minimumSize: const Size(0, 40),
+        minimumSize: const Size(0, 34),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
@@ -708,7 +708,7 @@ class _AlbumPageState extends State<AlbumPage> {
                                   height: 1.08,
                                 ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 4),
                           InkWell(
                             onTap: album.artistId <= 0 || album.artistId == widget.sourceArtistId
                                 ? null : () => Navigator.of(context).push(
@@ -723,7 +723,7 @@ class _AlbumPageState extends State<AlbumPage> {
                               fontWeight: FontWeight.w700,
                             ),
                           )),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 4),
                           Text(
                             [
                               if (songs.isNotEmpty) '${songs.length} 首',
@@ -736,7 +736,7 @@ class _AlbumPageState extends State<AlbumPage> {
                               fontSize: 13,
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 4),
                           Row(
                             children: [
                               Expanded(
@@ -750,8 +750,8 @@ class _AlbumPageState extends State<AlbumPage> {
                               if (context.read<AccountStore>().isLoggedIn) ...[
                                 const SizedBox(width: 10),
                                 SizedBox(
-                                  width: 40,
-                                  height: 40,
+                                  width: 36,
+                                  height: 36,
                                   child: CollectionActionMenu(id: widget.id, playlist: false, circularFocus: true,
                                     onCollect: () async {
                                       if (subscriptionBusy) return;
@@ -807,9 +807,7 @@ class _AlbumPageState extends State<AlbumPage> {
                     trailing: KumoneLoadingText(formatDuration(track.duration), style: TextStyle(color: cs.onSurfaceVariant)),
                     onTap: () => player.playTracks(songs, start: track),
                   ),
-                  onOpenAlbum: (ref) => Navigator.of(context).push(
-                    kumonePageRoute(AlbumPage(id: ref.id)),
-                  ),
+
 
                 );
               },
@@ -895,7 +893,7 @@ class _ArtistPageState extends State<ArtistPage> {
   ButtonStyle _playButtonStyle() => FilledButton.styleFrom(
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        minimumSize: const Size.fromHeight(40),
+        minimumSize: const Size.fromHeight(34),
                                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
@@ -992,8 +990,8 @@ class _ArtistPageState extends State<ArtistPage> {
                   if (context.read<AccountStore>().isLoggedIn) ...[
                     const SizedBox(width: 10),
                     SizedBox(
-                      width: 40,
-                      height: 40,
+                      width: 36,
+                      height: 36,
                       child: KumoneGlassIconButton(fadeIn: true, 
                         tooltip: followed ? '取消关注' : '关注歌手',
                         onPressed: followBusy ? null : _toggleFollow,
@@ -1108,8 +1106,8 @@ class _ArtistLoading extends StatelessWidget {
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           box(22), const SizedBox(height: 8), box(14),
           const SizedBox(height: 8), box(13, w: 110)]))]),
-      const SizedBox(height: 14), Row(children: [Expanded(child: box(40, radius: 20)),
-        const SizedBox(width: 10), box(40, w: 40, radius: 20)]),
+      const SizedBox(height: 14), Row(children: [Expanded(child: box(34, radius: 17)),
+        const SizedBox(width: 10), box(36, w: 36, radius: 18)]),
       const SizedBox(height: 22), box(20, w: 100), const SizedBox(height: 12),
       for (var i = 0; i < 6; i++) Padding(padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(children: [box(52, w: 52, radius: 9), const SizedBox(width: 14),
@@ -1201,7 +1199,7 @@ class _DailyPageState extends State<DailyPage> {
                   itemBuilder: (_, i) {
                     if (i == 0) { return Padding(
                       padding: const EdgeInsets.fromLTRB(_sideInset, 12, _sideInset, 20),
-                      child: _DailyRecommendationHero(songs: songs,
+                      child: RecommendationHero(songs: songs,
                         onPlay: () => player.playTracks(songs))); }
                     final track = songs[i - 1];
                     return TrackActionMenu(
@@ -1228,15 +1226,16 @@ class _DailyPageState extends State<DailyPage> {
   }
 }
 
-class _DailyRecommendationHero extends StatelessWidget {
+class RecommendationHero extends StatelessWidget {
   final List<Track> songs;
+  final bool liked;
   final VoidCallback onPlay;
-  const _DailyRecommendationHero({required this.songs, required this.onPlay});
+  const RecommendationHero({super.key, required this.songs, required this.onPlay, this.liked = false});
   @override Widget build(BuildContext context) {
     final now = DateTime.now();
-    return SizedBox(height: dailyHeroHeight(MediaQuery.sizeOf(context)), child: ClipRRect(
+    return SizedBox(height: liked ? (dailyHeroHeight(MediaQuery.sizeOf(context)) - 40).clamp(160.0, 260.0) : dailyHeroHeight(MediaQuery.sizeOf(context)), child: ClipRRect(
       borderRadius: BorderRadius.circular(18), child: Stack(fit: StackFit.expand, children: [
-        LayoutBuilder(builder: (_, bounds) => Artwork(url: songs.first.album.picUrl,
+        LayoutBuilder(builder: (_, bounds) => Artwork(url: songs.firstOrNull?.album.picUrl,
           size: bounds.maxWidth, radius: 0, shadow: false)),
         const DecoratedBox(decoration: BoxDecoration(gradient: LinearGradient(
           begin: Alignment.topCenter, end: Alignment.bottomCenter,
@@ -1247,14 +1246,14 @@ class _DailyRecommendationHero extends StatelessWidget {
           child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
             Expanded(child: Column(mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [const Icon(CupertinoIcons.calendar, color: Colors.white, size: 24),
+                Row(children: [Icon(liked ? CupertinoIcons.heart_fill : CupertinoIcons.calendar, color: Colors.white, size: 24),
                   const SizedBox(width: 8), Flexible(child: Text('${now.month}月${now.day}日',
                     style: const TextStyle(color: Colors.white, fontSize: 13)))]),
                 const SizedBox(height: 8),
-                const Text('每日推荐', style: TextStyle(color: Colors.white,
+                Text(liked ? '我喜欢的音乐' : '每日推荐', style: TextStyle(color: Colors.white,
                   fontSize: 27, fontWeight: FontWeight.w900)),
                 const SizedBox(height: 6),
-                const Text('根据你的音乐口味 · 每天 6:00 更新',
+                Text(liked ? '${songs.length} 首歌曲' : '根据你的音乐口味 · 每天 6:00 更新',
                   style: TextStyle(color: Colors.white70, fontSize: 11)),
               ])),
             const SizedBox(width: 10),

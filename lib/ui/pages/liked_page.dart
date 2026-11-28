@@ -91,58 +91,13 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
               parent: BouncingScrollPhysics()),
           slivers: [
             SliverToBoxAdapter(child: SizedBox(height: kumoneToolbarInset(context))),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 18, 24, 22),
-                child: Row(
-                  children: [
-                    Artwork(fadeIn: true, 
-                      url: tracks.isEmpty ? null : tracks.first.album.picUrl,
-                      size: 112,
-                      radius: 14,
-                      shadow: true,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('我喜欢的音乐',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.w800)),
-                          const SizedBox(height: 8),
-                          KumoneLoadingText(
-                            loading ? '正在加载喜欢的歌曲…' : '${tracks.length} 首歌曲',
-                            style: TextStyle(
-                                color: cs.onSurfaceVariant, fontSize: 13),
-                          ),
-                          const SizedBox(height: 14),
-                          SizedBox(height: 48, child: Padding(padding: const EdgeInsets.only(bottom: 2), child: Align(alignment: Alignment.bottomLeft, child: FilledButton(
-                            onPressed: tracks.isEmpty
-                                ? null
-                                : () => player.playTracks(tracks),
-                            style: FilledButton.styleFrom(
-                              fixedSize: const Size.fromHeight(40),
-                              minimumSize: const Size(0, 40),
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              backgroundColor: Theme.of(context).colorScheme.primary,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                            child: const KumoneCenteredPlayAllLabel(),
-                          )))),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            SliverToBoxAdapter(child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+              child: loading ? Container(
+                height: (dailyHeroHeight(MediaQuery.sizeOf(context)) - 40).clamp(160.0, 260.0),
+                decoration: BoxDecoration(color: cs.surfaceContainerHighest, borderRadius: BorderRadius.circular(18)))
+                : RecommendationHero(songs: tracks, liked: true,
+                  onPlay: () { if (tracks.isNotEmpty) player.playTracks(tracks); }))),
             SliverToBoxAdapter(
                 child: Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),

@@ -38,6 +38,8 @@ class _ContentNavigatorObserver extends NavigatorObserver {
     }
   }
 
+  bool get createdPlaylists => _routes.whereType<PageRoute<dynamic>>().lastOrNull?.settings.name == '/created-playlists';
+
   bool get atRoot => _routes.whereType<PageRoute<dynamic>>().length <= 1;
 
   bool _isFullscreen(Route<dynamic>? route) =>
@@ -315,7 +317,13 @@ class _AppShellState extends State<AppShell> {
     final cs = Theme.of(context).colorScheme;
     const order = [2, 0, 1, 3];
     final libraryRoot = tab == 3 && _contentObservers[3].atRoot;
+    final creating = _contentObservers[tab].createdPlaylists;
     void select(int index) {
+      if (index == 3 && creating) {
+        final pageContext = _contentNavigatorKey.currentContext!;
+        createPlaylistFromList(pageContext, context.read<AccountStore>());
+        return;
+      }
       if (index == 3 && libraryRoot) {
         _contentNavigatorKey.currentState?.push(kumonePageRoute(const SettingsPage(),
           settings: const RouteSettings(name: '/settings')));
@@ -330,10 +338,10 @@ class _AppShellState extends State<AppShell> {
       selectedIndex: order.indexOf(tab),
       onChanged: (i) => select(order[i]), onReselected: (i) => select(order[i]),
       itemStyle: LiquidGlassTabItemStyle(selectedColor: cs.primary,
-        unselectedColor: cs.onSurface, iconSize: 24, underGlassIconSize: 26),
+        unselectedColor: cs.onSurface, iconSize: 26, underGlassIconSize: 28),
       items: [for (final i in order) LiquidGlassTabBarItem(
-        icon: i == 3 && libraryRoot ? CupertinoIcons.gear_alt : _selectedIcon(i),
-        iconBuilder: i == 3 && !libraryRoot ? (context, glyph) {
+        icon: i == 3 && creating ? CupertinoIcons.add : i == 3 && libraryRoot ? CupertinoIcons.gear_alt : _selectedIcon(i),
+        iconBuilder: i == 3 && !libraryRoot && !creating ? (context, glyph) {
           final url = context.watch<AccountStore>().profile?.avatarUrl;
           return Artwork(url: url, size: 26, radius: 13, circle: true, shadow: false);
         } : null)],
