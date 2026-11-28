@@ -119,9 +119,15 @@ void main() {
     expect(visibleRect().height, 0);
     await tester.pump(const Duration(milliseconds: 120));
     expect(visibleRect().height, greaterThan(0));
-    expect(visibleRect().height, lessThan(100));
+    expect(visibleRect().height, lessThan(140));
     await tester.pumpAndSettle();
-    expect(visibleRect().height, 100);
+    expect(visibleRect(), const Rect.fromLTRB(0, -32, 200, 108));
+    // The full -24..6 vertical-offset range must fit without clipping.
+    final bounds = visibleRect();
+    for (final offset in [-24.0, -12.0, -7.0, 0.0, 6.0]) {
+      expect(bounds.top, lessThanOrEqualTo(offset));
+      expect(bounds.bottom, greaterThanOrEqualTo(100 + offset));
+    }
     visible.value = false;
     await tester.pump();
     expect(visibleRect().height, 0);

@@ -35,7 +35,8 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     final account = _LibraryAccount();
-    final settings = SettingsStore();
+    // Exercise the standalone add button; top navigation is hosted by AppShell.
+    final settings = SettingsStore()..wideTopTabs = false;
     await tester.pumpWidget(MultiProvider(providers: [
       ChangeNotifierProvider<AccountStore>.value(value: account),
       ChangeNotifierProvider.value(value: settings),

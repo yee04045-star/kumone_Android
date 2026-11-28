@@ -301,6 +301,7 @@ class _PlaylistListPageState extends State<_PlaylistListPage> {
           if (!widget.subscribed && !(MediaQuery.sizeOf(context).width >= 600 && context.watch<SettingsStore>().wideTopTabs))
             Padding(padding: const EdgeInsets.only(right: 14), child: Center(
               child: SizedBox(width: 42, height: 42, child: KumoneGlassIconButton(
+                tooltip: '新建歌单',
                 onPressed: () => createPlaylistFromList(context, account),
                 icon: const Icon(CupertinoIcons.add, size: 24))))),
         ],

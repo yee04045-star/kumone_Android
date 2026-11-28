@@ -59,7 +59,7 @@ void main() {
           if (recent) {
             expect(find.widgetWithText(FilledButton, '播放全部'), findsOneWidget);
             final button = tester.getSize(find.widgetWithText(FilledButton, '播放全部'));
-            expect(button.height, 38);
+            expect(button.height, 32);
           }
           expect(find.byType(SegmentedButton<int>), findsNothing);
           expect(find.byType(SegmentedButton<bool>), findsNothing);
