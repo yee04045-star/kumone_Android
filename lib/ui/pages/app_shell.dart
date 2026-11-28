@@ -422,7 +422,7 @@ class _AppShellState extends State<AppShell> {
                 Positioned(left: 0, right: 0, bottom: 0,
                   child: KumoneShellChromeTransition(
                     visible: !_isNowPlayingFullscreen,
-                    child: wide ? wideBottom : _compactBottomLayer(context))),
+                    child: wide ? Transform.translate(offset: Offset(0, context.watch<SettingsStore>().bottomChromeOffset.clamp(-24.0, 6.0)), child: wideBottom) : _compactBottomLayer(context))),
                 if (topTabs)
                   Positioned(right: 16, top: MediaQuery.paddingOf(context).top + (kToolbarHeight - 42) / 2,
                     width: wideTabWidth(MediaQuery.sizeOf(context)), height: 42,

@@ -421,7 +421,6 @@ class _PlaylistPageState extends State<PlaylistPage>
                                     Text(
                                       [
                                         if (track.artistNames.isNotEmpty) track.artistNames,
-                                        if (track.album.name.isNotEmpty) track.album.name,
                                       ].join(' · '),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -431,10 +430,10 @@ class _PlaylistPageState extends State<PlaylistPage>
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              KumoneLoadingText(
+                              KumoneTrackTrailing(album: track.album.name, duration: KumoneLoadingText(
                                 formatDuration(track.duration),
                                 style: TextStyle(fontSize: 14, color: cs.onSurfaceVariant),
-                              ),
+                              )),
                             ],
                           ),
                         ),
@@ -805,15 +804,13 @@ class _AlbumPageState extends State<AlbumPage> {
                     leading: Artwork(fadeIn: true, url: track.album.picUrl, size: 52, radius: 9),
                     title: KumoneTrackTitle(trackId: track.id, title: track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                     subtitle: KumoneLoadingText(track.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    trailing: KumoneTrackTrailing(album: track.album.name, duration: KumoneLoadingText(formatDuration(track.duration), style: TextStyle(color: cs.onSurfaceVariant))),
+                    trailing: KumoneLoadingText(formatDuration(track.duration), style: TextStyle(color: cs.onSurfaceVariant)),
                     onTap: () => player.playTracks(songs, start: track),
                   ),
                   onOpenAlbum: (ref) => Navigator.of(context).push(
                     kumonePageRoute(AlbumPage(id: ref.id)),
                   ),
-                  onOpenArtist: (artist) => Navigator.of(context).push(
-                    kumonePageRoute(ArtistPage(id: artist.id)),
-                  ),
+
                 );
               },
             ),
@@ -1039,9 +1036,6 @@ class _ArtistPageState extends State<ArtistPage> {
                   onOpenAlbum: (album) => Navigator.of(context).push(
                     kumonePageRoute(AlbumPage(id: album.id, sourceArtistId: widget.id)),
                   ),
-                  onOpenArtist: (artist) => Navigator.of(context).push(
-                    kumonePageRoute(ArtistPage(id: artist.id)),
-                  ),
                 ),
               ),
             ],
@@ -1059,7 +1053,7 @@ class _ArtistPageState extends State<ArtistPage> {
                     final album = albums[i];
                     return SizedBox(
                       width: 138,
-                      child: CollectionActionMenu(id: album.id, onOpenArtist: (id) => Navigator.of(context).push(kumonePageRoute(ArtistPage(id: id))), child: InkWell(
+                      child: CollectionActionMenu(id: album.id, child: InkWell(
                         borderRadius: BorderRadius.circular(12),
                         onTap: () => Navigator.of(context).push(
                           kumonePageRoute(AlbumPage(id: album.id, sourceArtistId: widget.id)),

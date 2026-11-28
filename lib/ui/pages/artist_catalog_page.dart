@@ -77,7 +77,7 @@ class _ArtistCatalogPageState extends State<ArtistCatalogPage> {
               mainAxisSpacing: 18, childAspectRatio: .74),
             itemCount: albums.length, itemBuilder: (context, i) {
               final album = albums[i];
-              return KumoneInteractive(borderRadius: BorderRadius.circular(14),
+              return CollectionActionMenu(id: album.id, child: KumoneInteractive(borderRadius: BorderRadius.circular(14),
                 onTap: () => Navigator.of(context).push(kumonePageRoute(
                   AlbumPage(id: album.id, sourceArtistId: widget.artistId))),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -90,18 +90,17 @@ class _ArtistCatalogPageState extends State<ArtistCatalogPage> {
                     KumoneLoadingText(album.artistName, maxLines: 1, overflow: TextOverflow.ellipsis,
                       style: TextStyle(fontSize: 12,
                         color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                  ]));
+                  ])));
             }))
         else SliverList.builder(itemCount: songs.length, itemBuilder: (context, i) {
           final song = songs[i];
           return TrackActionMenu(track: song, showButton: false,
             onOpenAlbum: (a) => Navigator.of(context).push(kumonePageRoute(AlbumPage(id: a.id))),
-            onOpenArtist: (a) => Navigator.of(context).push(kumonePageRoute(ArtistPage(id: a.id))),
             child: HomeAppear(index: i, child: ListTile(leading: Artwork(fadeIn: true, url: song.album.picUrl, size: 52, radius: 9),
               title: KumoneTrackTitle(trackId: song.id, title: song.name,
                 maxLines: 1, overflow: TextOverflow.ellipsis),
               subtitle: KumoneLoadingText(song.artistNames, maxLines: 1, overflow: TextOverflow.ellipsis),
-              trailing: KumoneLoadingText(formatDuration(song.duration)),
+              trailing: KumoneTrackTrailing(album: song.album.name, duration: KumoneLoadingText(formatDuration(song.duration))),
               onTap: () => player.playTracks(songs, index: i))));
         }),
         if (busy && songs.isEmpty && albums.isEmpty) SliverToBoxAdapter(

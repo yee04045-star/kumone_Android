@@ -182,7 +182,7 @@ class _LikedSongsPageState extends State<LikedSongsPage> {
                       title: KumoneTrackTitle(trackId: track.id, title: track.name,
                           maxLines: 1, overflow: TextOverflow.ellipsis),
                       subtitle: Text(
-                        '${track.artistNames.isEmpty ? '未知歌手' : track.artistNames}${track.album.name.isEmpty ? '' : ' · ${track.album.name}'}',
+                        track.artistNames.isEmpty ? '未知歌手' : track.artistNames,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

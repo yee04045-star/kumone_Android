@@ -319,6 +319,7 @@ class SettingsPage extends StatelessWidget {
 
 
 
+              if (!settings.wideTopTabs) ...[
               KumoneGlassSwitchTile(
                 title: const Text('功能栏位于左侧'),
                 subtitle: const Text('关闭时位于右侧；搜索始终单独显示'),
@@ -336,6 +337,7 @@ class SettingsPage extends StatelessWidget {
               KumoneGlassSlider(value: settings.sideNavigationPosition,
                 onChanged: settings.previewSideNavigationPosition,
                 onChangeEnd: settings.saveSideNavigationPosition),
+              ],
               const ListTile(title: Text('底部 Tab 顺序（从左到右）')),
               for (var position = 0; position < 4; position++) ListTile(
                 title: Text(const ['推荐', '精选', '搜索', '我的'][settings.bottomTabOrder[position]]),
@@ -349,6 +351,7 @@ class SettingsPage extends StatelessWidget {
                       settings.setBottomTabOrder(order);
                     }),
                 ])),
+              if (!settings.wideTopTabs) ...[
               const ListTile(title: Text('功能顺序（从上到下）'),
                 subtitle: Text('使用上移 / 下移调整，搜索不参与排序')),
               for (var position = 0; position < settings.sideNavigationOrder.length; position++)
@@ -361,6 +364,7 @@ class SettingsPage extends StatelessWidget {
                       onPressed: position == 2 ? null : () => _moveNavigation(settings, position, 1)),
                   ]),
                 ),
+              ],
             ],
             ...[
               const _SettingsHeader('播放音质'),

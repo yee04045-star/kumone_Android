@@ -1186,7 +1186,7 @@ class _TrackActionMenuState extends State<TrackActionMenu> {
     add(CupertinoIcons.arrow_down, '下一首播放', 'next');
     add(
       CupertinoIcons.heart,
-      context.read<AccountStore>().liked(widget.track.id) ? '取消喜欢' : '喜欢',
+      context.read<AccountStore>().liked(widget.track.id) ? '取消喜欢' : '加入喜欢',
       'like',
     );
     add(CupertinoIcons.music_note_list, '添加到歌单', 'add');

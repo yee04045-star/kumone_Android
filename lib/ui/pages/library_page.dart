@@ -29,6 +29,7 @@ class LibraryPage extends StatelessWidget {
     if (!account.isLoggedIn) {
       return Scaffold(
         appBar: KumoneGlassAppBar(title: const Text('我的'), actions: [
+          if (!(MediaQuery.sizeOf(context).width >= 600 && context.watch<SettingsStore>().wideTopTabs))
           IconButton(
               onPressed: () => Navigator.of(context)
                   .push(kumonePageRoute(const SettingsPage(), settings: const RouteSettings(name: '/settings'))),
