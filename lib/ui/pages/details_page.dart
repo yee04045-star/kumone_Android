@@ -740,11 +740,10 @@ class _AlbumPageState extends State<AlbumPage> {
                           Row(
                             children: [
                               Expanded(
-                                child: FilledButton.icon(
+                                child: FilledButton(
                                   onPressed: songs.isEmpty ? null : () => player.playTracks(songs),
                                   style: _playButtonStyle(),
-                                  icon: const KumonePlayAllIcon(size: 22),
-                                  label: const Text('播放全部'),
+                                  child: const KumoneCenteredPlayAllLabel(),
                                 ),
                               ),
                               if (context.read<AccountStore>().isLoggedIn) ...[

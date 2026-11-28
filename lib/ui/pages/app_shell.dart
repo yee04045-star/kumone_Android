@@ -343,7 +343,7 @@ class _AppShellState extends State<AppShell> {
         icon: i == 3 && creating ? CupertinoIcons.add : i == 3 && libraryRoot ? CupertinoIcons.gear_alt : _selectedIcon(i),
         iconBuilder: i == 3 && !libraryRoot && !creating ? (context, glyph) {
           final url = context.watch<AccountStore>().profile?.avatarUrl;
-          return Artwork(url: url, size: 26, radius: 13, circle: true, shadow: false);
+          return Artwork(url: url, size: 28, radius: 14, circle: true, shadow: false);
         } : null)],
     );
   }

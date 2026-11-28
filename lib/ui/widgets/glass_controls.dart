@@ -106,7 +106,14 @@ class KumoneGlassIconButton extends StatelessWidget {
       child: IconButton(
           tooltip: tooltip,
           onPressed: onPressed,
-          style: style?.copyWith(
+          padding: EdgeInsets.zero,
+          alignment: Alignment.center,
+          constraints: const BoxConstraints(),
+          style: (style ?? const ButtonStyle()).copyWith(
+              padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+              minimumSize: const WidgetStatePropertyAll(Size.zero),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              alignment: Alignment.center,
               backgroundColor:
                   const WidgetStatePropertyAll(Colors.transparent)),
           icon: fadeIn ? KumoneContentFade(child: icon) : icon)));
